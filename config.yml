@@ -397,13 +397,9 @@ production_factories:
         amount: 2
     recipes:
       - Diamond_XP_Bottle_0
-      - Diamond_XP_Bottle_0_Bulk
       - Diamond_XP_Bottle_1
-      - Diamond_XP_Bottle_1_Bulk
       - Diamond_XP_Bottle_2
-      - Diamond_XP_Bottle_2_Bulk
       - Diamond_XP_Bottle_3
-      - Diamond_XP_Bottle_3_Bulk
     repair_multiple: 1
     repair_inputs:
       Diamond:
@@ -536,25 +532,23 @@ production_factories:
     repair_inputs:
       Diamond:
         material: DIAMOND
-  Emerald_Cauldron:
-    name: Emerald Cauldron
+  Iron_Cauldron:
+    name: Iron Cauldron
     fuel:
       Charcoal:
         material: COAL
         durability: 1
     inputs:
-      Emerald:
-        material: EMERALD
+      Diamond:
+        material: IRON
         amount: 2
     recipes:
-      - Emerald_XP_Bottle_0
-      - Emerald_XP_Bottle_0_Bulk
-      - Emerald_XP_Bottle_1
-      - Emerald_XP_Bottle_1_Bulk
+      - Iron_XP_Bottle_0
+      - Iron_XP_Bottle_1
     repair_multiple: 1
     repair_inputs:
-      Emerald:
-        material: EMERALD
+      Iron:
+        material: IRON
   Gold_Axe_Smithy:
     name: Gold Axe Smithy
     fuel:
@@ -1162,13 +1156,9 @@ production_factories:
         amount: 64
     recipes:
       - Wood_XP_Bottle_0
-      - Wood_XP_Bottle_0_Bulk
       - Wood_XP_Bottle_1
-      - Wood_XP_Bottle_1_Bulk
       - Wood_XP_Bottle_2
-      - Wood_XP_Bottle_2_Bulk
       - Wood_XP_Bottle_3
-      - Wood_XP_Bottle_3_Bulk
     repair_multiple: 7
     repair_inputs:
       Stick:
@@ -1234,12 +1224,14 @@ production_recipes:
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
+        amount: 14
       Wheat:
         material: WHEAT
-        amount: 40
+        amount: 1280
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
+        amount: 14
   Baked_Potato:
     name: Baked Potato
     inputs:
@@ -1255,23 +1247,27 @@ production_recipes:
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
+        amount: 24
       Baked Potato:
         material: BAKED_POTATO
-        amount: 40
+        amount: 1280
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
+        amount: 24
   Wood_XP_Bottle_3:
     name: Brew XP Bottles  - 4
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
+        amount: 6
       Cookie:
         material: COOKIE
-        amount: 40
+        amount: 1280
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
+        amount: 6
   Brown_Wool_Lime:
     name: Dye Brown Wool Lime
     inputs:
@@ -1288,82 +1284,62 @@ production_recipes:
         material: WOOL
         amount: 64
         durability: 5
-  Emerald_XP_Bottle_0:
+  Iron_XP_Bottle_0:
     name: Brew XP Bottles  - 1
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
-        amount: 4
-      Red Rose:
-        material: RED_ROSE
-      Bread:
-        material: BREAD
-      Cactus:
-        material: CACTUS
-        amount: 3
-      Grilled Pork:
-        material: GRILLED_PORK
-      Red Mushroom:
-        material: RED_MUSHROOM
+        amount: 32
       Carrot:
         material: CARROT_ITEM
-        amount: 4
-      Melon Block:
-        material: MELON_BLOCK
-        amount: 3
+        amount: 128
+      Bread:
+        material: BREAD
+        amount: 64
+      Cactus:
+        material: CACTUS
+        amount: 384
       Cooked Beef:
         material: COOKED_BEEF
-      Nether Warts:
-        material: NETHER_WARTS
-      Grass:
-        material: GRASS
-        amount: 5
-      Rotten Flesh:
-        material: ROTTEN_FLESH
-      Spider Eye:
-        material: SPIDER_EYE
+        amount: 128
+      Cocoa:
+        material: INK_SACK
+        amount: 128
+      Pumpkin:
+        material: PUMPKIN
+        amount: 64
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
-        amount: 4
-  Emerald_XP_Bottle_1:
+        amount: 32
+  Iron_XP_Bottle_1:
     name: Brew XP Bottles  - 2
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
-        amount: 4
-      Yellow Flower:
-        material: YELLOW_FLOWER
-      Baked Potato:
-        material: BAKED_POTATO
-        amount: 4
+        amount: 32
+      Nether Warts:
+        material: NETHER_WARTS
+        amount: 128
+      Melon:
+        material: MELON_BLOCK
+        amount: 32
       Sugar Cane:
         material: SUGAR_CANE
-        amount: 3
-      Cooked Chicken:
-        material: COOKED_CHICKEN
-      Red Mushroom:
-        material: RED_MUSHROOM
+        amount: 192
       Cookie:
         material: COOKIE
-        amount: 4
-      Pumpkin:
-        material: PUMPKIN
-        amount: 3
-      Cooked Fish:
-        material: COOKED_FISH
-      Brown Mushroom:
-        material: BROWN_MUSHROOM
-      Vine:
-        material: VINE
-      Rotten Flesh:
-        material: ROTTEN_FLESH
-      Spider Eye:
-        material: SPIDER_EYE
+        amount: 256
+      Baked_Potato:
+        material: BAKED_POTATO
+        amount: 64
+      Grilled_Pork:
+        material: GRILLED_PORK
+        amount: 128
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
-        amount: 4
+        amount: 32
   Brown_Wool_Blue:
     name: Dye Brown Wool Blue
     inputs:
@@ -1411,22 +1387,38 @@ production_recipes:
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
-      Red Rose:
-        material: RED_ROSE
-      Bread:
-        material: BREAD
+        amount: 64
+      Carrot:
+        material: CARROT_ITEM
+        amount: 96
+      Melon:
+        material: MELON_BLOCK
+        amount: 32
       Cactus:
         material: CACTUS
-        amount: 3
-      Grilled Pork:
-        material: GRILLED_PORK
-      Red Mushroom:
-        material: RED_MUSHROOM
+        amount: 256
+      Red Rose:
+        material: RED_ROSE
+        amount: 8
       Rotten Flesh:
         material: ROTTEN_FLESH
+        amount: 64
+      Red Mushroom:
+        material: RED_MUSHROOM
+        amount: 32
+      Vine:
+        material: VINE
+        amount: 48
+      Bread:
+        material: BREAD
+        amount: 128
+      Grilled Pork:
+        material: GRILLED_PORK
+        amount: 128
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
+        amount: 64
   Black_Wool_Magenta:
     name: Dye Black Wool Magenta
     inputs:
@@ -1605,12 +1597,14 @@ production_recipes:
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
+        amount: 7
       Carrot:
-        material: CARROT_ITEM
-        amount: 40
+        material: NETHER_WARTS
+        amount: 1280
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
+        amount: 7
   Diamond_Hoe:
     name: Forge Diamond Hoe.
     inputs:
@@ -1684,53 +1678,6 @@ production_recipes:
         type: PROTECTION_PROJECTILE
         level: 4
         probability: 0.4
-  Emerald_XP_Bottle_1_Bulk:
-    name: Brew XP Bottles  - 2
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 256
-      Yellow Flower:
-        material: YELLOW_FLOWER
-        amount: 64
-      Baked Potato:
-        material: BAKED_POTATO
-        amount: 256
-      Sugar Cane:
-        material: SUGAR_CANE
-        amount: 192
-      Cooked Chicken:
-        material: COOKED_CHICKEN
-        amount: 64
-      Red Mushroom:
-        material: RED_MUSHROOM
-        amount: 64
-      Cookie:
-        material: COOKIE
-        amount: 256
-      Pumpkin:
-        material: PUMPKIN
-        amount: 192
-      Cooked Fish:
-        material: COOKED_FISH
-        amount: 64
-      Brown Mushroom:
-        material: BROWN_MUSHROOM
-        amount: 64
-      Vine:
-        material: VINE
-        amount: 64
-      Rotten Flesh:
-        material: ROTTEN_FLESH
-        amount: 64
-      Spider Eye:
-        material: SPIDER_EYE
-        amount: 64
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 256
   Brown_Wool_Orange:
     name: Dye Brown Wool Orange
     inputs:
@@ -2131,20 +2078,6 @@ production_recipes:
         material: WOOL
         amount: 64
         durability: 2
-  Wood_XP_Bottle_3_Bulk:
-    name: Brew XP Bottles  - 4
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 64
-      Cookie:
-        material: COOKIE
-        amount: 2560
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 64
   Iron_Helmet:
     name: Forge Iron Helmet.
     inputs:
@@ -2332,53 +2265,6 @@ production_recipes:
         material: WOOL
         amount: 64
         durability: 14
-  Emerald_XP_Bottle_0_Bulk:
-    name: Brew XP Bottles  - 1
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 256
-      Red Rose:
-        material: RED_ROSE
-        amount: 64
-      Bread:
-        material: BREAD
-        amount: 64
-      Cactus:
-        material: CACTUS
-        amount: 192
-      Grilled Pork:
-        material: GRILLED_PORK
-        amount: 64
-      Red Mushroom:
-        material: RED_MUSHROOM
-        amount: 64
-      Carrot:
-        material: CARROT_ITEM
-        amount: 256
-      Melon Block:
-        material: MELON_BLOCK
-        amount: 192
-      Cooked Beef:
-        material: COOKED_BEEF
-        amount: 64
-      Nether Warts:
-        material: NETHER_WARTS
-        amount: 64
-      Grass:
-        material: GRASS
-        amount: 320
-      Rotten Flesh:
-        material: ROTTEN_FLESH
-        amount: 64
-      Spider Eye:
-        material: SPIDER_EYE
-        amount: 64
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 256
   Iron_Chestplate:
     name: Forge Iron Chestplate.
     inputs:
@@ -2493,68 +2379,109 @@ production_recipes:
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
+        amount: 64
       Yellow Flower:
         material: YELLOW_FLOWER
+        amount: 16
       Baked Potato:
         material: BAKED_POTATO
-        amount: 4
+        amount: 128
       Sugar Cane:
         material: SUGAR_CANE
-        amount: 3
+        amount: 128
       Cooked Chicken:
         material: COOKED_CHICKEN
+        amount: 128
       Brown Mushroom:
         material: BROWN_MUSHROOM
+        amount: 64
       Rotten Flesh:
         material: ROTTEN_FLESH
+        amount: 64
+      Nether Warts:
+        material: NETHER_WARTS
+        amount: 64
+      Melon:
+        material: MELON_BLOCK
+        amount: 32
+      Vine:
+        material: VINE
+        amount: 64
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
+        amount: 64
   Diamond_XP_Bottle_2:
     name: Brew XP Bottles  - 3
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
+        amount: 64
       Red Rose:
         material: RED_ROSE
-      Carrot:
-        material: CARROT_ITEM
-        amount: 4
-      Melon Block:
-        material: MELON_BLOCK
-        amount: 3
-      Cooked Beef:
-        material: COOKED_BEEF
-      Nether Warts:
-        material: NETHER_WARTS
-        amount: 5
+        amount: 16
+      Wheat:
+        material: WHEAT
+        amount: 512
+      Pumpkin:
+        material: PUMPKIN
+        amount: 128
+      Cocoa:
+        material: INK_SACK
+        amount: 32
+      Cactus:
+        material: CACTUS
+        amount: 256
       Spider Eye:
         material: SPIDER_EYE
+        amount: 64
+      Grass:
+        material: GRASS
+        amount: 128
+      Cooked Fish:
+        material: COOKED_FISH
+        amount: 16
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
+        amount: 64
   Diamond_XP_Bottle_3:
     name: Brew XP Bottles  - 4
     inputs:
       Glass Bottle:
         material: GLASS_BOTTLE
+        amount: 64
       Yellow Flower:
         material: YELLOW_FLOWER
+        amount: 16
       Cookie:
         material: COOKIE
-        amount: 4
+        amount: 512
+      Cooked_Beef:
+        material: COOKED_BEEF
+        amount: 128
+      Nether Warts:
+        material: NETHER_WARTS
+        amount: 128
       Pumpkin:
         material: PUMPKIN
-        amount: 3
-      Cooked Fish:
-        material: COOKED_FISH
-      Brown Mushroom:
-        material: BROWN_MUSHROOM
+        amount: 128
+      Sugar Cane:
+        material: SUGAR_CANE
+        amount: 192
       Spider Eye:
         material: SPIDER_EYE
+        amount: 64
+      Brown Mushroom
+        material: BROWN_MUSHROOM
+        amount: 64
+      Grass:
+        material: GRASS
+        amount: 128
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
+        amount: 64
   Gray_Wool_Brown:
     name: Dye Gray Wool Brown
     inputs:
@@ -2587,35 +2514,6 @@ production_recipes:
         material: WOOL
         amount: 64
         durability: 2
-  Diamond_XP_Bottle_2_Bulk:
-    name: Brew XP Bottles  - 3
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 64
-      Red Rose:
-        material: RED_ROSE
-        amount: 64
-      Carrot:
-        material: CARROT_ITEM
-        amount: 256
-      Melon Block:
-        material: MELON_BLOCK
-        amount: 192
-      Cooked Beef:
-        material: COOKED_BEEF
-        amount: 64
-      Nether Warts:
-        material: NETHER_WARTS
-        amount: 320
-      Spider Eye:
-        material: SPIDER_EYE
-        amount: 64
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 64
   Iron_Spade:
     name: Forge Iron Spade.
     inputs:
@@ -2658,20 +2556,6 @@ production_recipes:
         material: WOOL
         amount: 64
         durability: 8
-  Wood_XP_Bottle_0_Bulk:
-    name: Brew XP Bottles  - 1
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 64
-      Wheat:
-        material: WHEAT
-        amount: 2560
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 64
   Black_Wool_Gray:
     name: Dye Black Wool Gray
     inputs:
@@ -2688,49 +2572,6 @@ production_recipes:
         material: WOOL
         amount: 64
         durability: 7
-  Diamond_XP_Bottle_3_Bulk:
-    name: Brew XP Bottles  - 4
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 64
-      Yellow Flower:
-        material: YELLOW_FLOWER
-        amount: 64
-      Cookie:
-        material: COOKIE
-        amount: 256
-      Pumpkin:
-        material: PUMPKIN
-        amount: 192
-      Cooked Fish:
-        material: COOKED_FISH
-        amount: 64
-      Brown Mushroom:
-        material: BROWN_MUSHROOM
-        amount: 64
-      Spider Eye:
-        material: SPIDER_EYE
-        amount: 64
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 64
-  Wood_XP_Bottle_2_Bulk:
-    name: Brew XP Bottles  - 3
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 64
-      Baked Potato:
-        material: BAKED_POTATO
-        amount: 2560
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 64
   White_Wool_Cyan:
     name: Dye White Wool Cyan
     inputs:
@@ -3031,35 +2872,6 @@ production_recipes:
         material: WOOL
         amount: 64
         durability: 3
-  Diamond_XP_Bottle_1_Bulk:
-    name: Brew XP Bottles  - 2
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 64
-      Yellow Flower:
-        material: YELLOW_FLOWER
-        amount: 64
-      Baked Potato:
-        material: BAKED_POTATO
-        amount: 256
-      Sugar Cane:
-        material: SUGAR_CANE
-        amount: 192
-      Cooked Chicken:
-        material: COOKED_CHICKEN
-        amount: 64
-      Brown Mushroom:
-        material: BROWN_MUSHROOM
-        amount: 64
-      Rotten Flesh:
-        material: ROTTEN_FLESH
-        amount: 64
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 64
   White_Wool_Brown:
     name: Dye White Wool Brown
     inputs:
@@ -3106,35 +2918,6 @@ production_recipes:
         material: WOOL
         amount: 64
         durability: 1
-  Diamond_XP_Bottle_0_Bulk:
-    name: Brew XP Bottles  - 1
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 64
-      Red Rose:
-        material: RED_ROSE
-        amount: 64
-      Bread:
-        material: BREAD
-        amount: 64
-      Cactus:
-        material: CACTUS
-        amount: 192
-      Grilled Pork:
-        material: GRILLED_PORK
-        amount: 64
-      Red Mushroom:
-        material: RED_MUSHROOM
-        amount: 64
-      Rotten Flesh:
-        material: ROTTEN_FLESH
-        amount: 64
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 64
   Iron_Sword:
     name: Forge Iron Sword.
     inputs:
@@ -3840,20 +3623,6 @@ production_recipes:
         material: COAL
         amount: 320
         durability: 1
-  Wood_XP_Bottle_1_Bulk:
-    name: Brew XP Bottles  - 2
-    production_time: 128
-    inputs:
-      Glass Bottle:
-        material: GLASS_BOTTLE
-        amount: 64
-      Carrot:
-        material: CARROT_ITEM
-        amount: 2560
-    outputs:
-      Exp Bottle:
-        material: EXP_BOTTLE
-        amount: 64
   Diamond_Axe:
     name: Forge Diamond Axe.
     inputs:
