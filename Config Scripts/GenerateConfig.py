@@ -186,7 +186,7 @@ def createFactorieAndRecipes():
     cauldronInputs['Wood']=[]
     cauldronInputs['Wood'].append(([('Glass Bottle',64),('Wheat',1280)],64))
     cauldronInputs['Wood'].append(([('Glass Bottle',20),('Nether Wart',1280)],20))
-    cauldronInputs['Wood'].append(([('Glass Bottle',20),('Baked Potato',1280)],20))
+    cauldronInputs['Wood'].append(([('Glass Bottle',7),('Baked Potato',1280)],7))
     cauldronInputs['Wood'].append(([('Glass Bottle',16),('Cookie',1280)],16))
     cauldronInputs['Wood'].append(([('Glass Bottle',28),('Carrot',1280)],28))
     cauldronInputs['Wood'].append(([('Glass Bottle',64),('Cookie',1280)],64))
