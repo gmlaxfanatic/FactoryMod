@@ -25,7 +25,6 @@ import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.Manager;
-import com.github.igotyou.FactoryMod.interfaces.Recipe;
 import com.github.igotyou.FactoryMod.properties.ProductionProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
@@ -33,6 +32,7 @@ import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 //original file:
 /**
@@ -334,5 +334,17 @@ public class ProductionManager implements Manager
 	{
 		return FactoryModPlugin.PRODUCTION_SAVES_FILE;
 	}
-
+	
+	public List<ProductionFactory> getFactoriesByRecipe(ProductionRecipe recipe)
+	{
+		List<ProductionFactory> factoriesByRecipe=new LinkedList<ProductionFactory>();
+		for(ProductionFactory productionFactory:producers)
+		{
+			if(productionFactory.getRecipes().contains(recipe))
+			{
+				factoriesByRecipe.add(productionFactory);
+			}
+		}
+		return factoriesByRecipe;
+	}
 }

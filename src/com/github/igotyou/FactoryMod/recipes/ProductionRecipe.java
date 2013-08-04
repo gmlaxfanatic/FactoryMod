@@ -1,11 +1,9 @@
 package com.github.igotyou.FactoryMod.recipes;
 
-import java.util.HashMap;
-import java.util.Random;
+import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.enchantments.Enchantment;
 
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
@@ -14,6 +12,7 @@ import org.bukkit.inventory.Inventory;
 
 public class ProductionRecipe implements Recipe
 {
+	private FactoryModPlugin plugin;
 	private String title;
 	private String recipeName;
 	private int productionTime;
@@ -24,10 +23,12 @@ public class ProductionRecipe implements Recipe
 	private List<ProductionRecipe> outputRecipes;
 	private List<ProbabilisticEnchantment> enchantments;
 	private boolean useOnce;
+	private double recipeScaling;
 	
-	public ProductionRecipe(String title,String recipeName,int productionTime,ItemList<NamedItemStack> inputs,ItemList<NamedItemStack> upgrades,
-		ItemList<NamedItemStack> outputs,List<ProbabilisticEnchantment> enchantments,boolean useOnce, ItemList<NamedItemStack> repairs)
+	public ProductionRecipe(FactoryModPlugin plugin, String title,String recipeName,int productionTime,ItemList<NamedItemStack> inputs,ItemList<NamedItemStack> upgrades,
+		ItemList<NamedItemStack> outputs,List<ProbabilisticEnchantment> enchantments,boolean useOnce, ItemList<NamedItemStack> repairs, double recipeScaling)
 	{
+		this.plugin=plugin;
 		this.title=title;
 		this.recipeName = recipeName;
 		this.productionTime = productionTime;
@@ -38,11 +39,12 @@ public class ProductionRecipe implements Recipe
 		this.enchantments=enchantments;
 		this.useOnce=useOnce;
 		this.repairs=repairs;
+		this.recipeScaling=recipeScaling;
 	}
 	
-	public ProductionRecipe(String title,String recipeName,int productionTime,ItemList<NamedItemStack> repairs)
+	public ProductionRecipe(FactoryModPlugin plugin,String title,String recipeName,int productionTime,ItemList<NamedItemStack> repairs)
 	{
-		this(title,recipeName,productionTime,new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ArrayList<ProbabilisticEnchantment>(),false,repairs);
+		this(plugin,title,recipeName,productionTime,new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ArrayList<ProbabilisticEnchantment>(),false,repairs,0);
 	}
 	
 	public boolean hasMaterials(Inventory inventory)
@@ -66,7 +68,14 @@ public class ProductionRecipe implements Recipe
 	
 	public ItemList<NamedItemStack> getOutputs() 
 	{
-		return outputs;
+		if(recipeScaling==0)
+		{
+			return outputs;
+		}
+		else
+		{
+			return outputs.getMultiple(Math.pow(plugin.getManager().getProductionManager().getFactoriesByRecipe(this).size(),recipeScaling));
+		}
 	}
 	
 	public ItemList<NamedItemStack> getRepairs()

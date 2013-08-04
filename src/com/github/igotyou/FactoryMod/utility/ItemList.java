@@ -270,13 +270,13 @@ public class ItemList<E extends NamedItemStack> extends ArrayList<E> {
 		}				
 		return materialsToRemove == 0;
 	}
-	public ItemList<NamedItemStack> getMultiple(int multiplier)
+	public ItemList<NamedItemStack> getMultiple(double multiplier)
 	{
 		ItemList<NamedItemStack> multipliedItemList=new ItemList<NamedItemStack>();
 		for (NamedItemStack itemStack:this)
 		{
 			NamedItemStack itemStackClone=itemStack.clone();
-			itemStackClone.setAmount(itemStack.getAmount()*multiplier);
+			itemStackClone.setAmount((int) Math.round(itemStack.getAmount()*multiplier));
 			multipliedItemList.add(itemStackClone);
 		}
 		return multipliedItemList;

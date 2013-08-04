@@ -193,9 +193,11 @@ public class FactoryModPlugin extends JavaPlugin
 			ItemList<NamedItemStack> outputs = getItems(configSection.getConfigurationSection("outputs"));
 			//Enchantments of the recipe, empty of there are no inputs
 			List<ProbabilisticEnchantment> enchantments=getEnchantments(configSection.getConfigurationSection("enchantments"));
+			//Amount this recipe scales with the number of factories the recipe is present in, scales with power law
+			double recipeScaling=configSection.getDouble("recipe_scaling",0.0);
 			//Whether this recipe can only be used once
 			boolean useOnce = configSection.getBoolean("use_once");
-			ProductionRecipe recipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,useOnce,new ItemList<NamedItemStack>());
+			ProductionRecipe recipe = new ProductionRecipe(this,title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,useOnce,new ItemList<NamedItemStack>(),recipeScaling);
 			productionRecipes.put(title,recipe);
 			//Store the titles of the recipes that this should point to
 			ArrayList <String> currentOutputRecipes=new ArrayList<String>();
@@ -243,7 +245,7 @@ public class FactoryModPlugin extends JavaPlugin
 			}
 			int repair=configSection.getInt("repair_multiple",0);
 			//Create repair recipe
-			productionRecipes.put(title+"REPAIR",new ProductionRecipe(title+"REPAIR","Repair Factory",1,repairs));
+			productionRecipes.put(title+"REPAIR",new ProductionRecipe(this,title+"REPAIR","Repair Factory",1,repairs));
 			factoryRecipes.add(productionRecipes.get(title+"REPAIR"));
 			ProductionProperties productionProperty = new ProductionProperties(inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
 			productionProperties.put(title, productionProperty);
@@ -358,5 +360,10 @@ public class FactoryModPlugin extends JavaPlugin
 
 	public PrintingPressProperties getPrintingPressProperties() {
 		return printingPressProperties;
+	}
+	
+	public  FactoryModManager getManager()
+	{
+		return manager;
 	}
 }

@@ -240,6 +240,8 @@ public class ProductionFactory extends BaseFactory
 			response+=".";
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,response));
 		}
+		//[Operates at XX% efficiency due to shared resources at: Location1, Location 2, Location 3, ...]
+		
 		return responses;
 	}
 	
