@@ -240,8 +240,32 @@ public class ProductionFactory extends BaseFactory
 			response+=".";
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,response));
 		}
-		//[Operates at XX% efficiency due to shared resources at: Location1, Location 2, Location 3, ...]
-		
+		//[Operates at XX% efficiency due to interference from: Location1, Location 2, Location 3, ...]
+		if(currentRecipe.getRecipeScaling()!=0.0)
+		{
+			String response;
+			List<ProductionFactory> factories=FactoryModPlugin.manager.getProductionManager().getFactoriesByRecipe(currentRecipe);
+			String factoryList="";
+			int numberFactories=0;
+			for(ProductionFactory factory:factories)
+			{
+				if(factory.isWhole()&&!factory.getCenterLocation().equals(this.getCenterLocation()))
+				{
+					numberFactories++;
+					Location location = factory.getCenterLocation();
+					factoryList+=" ("+(int) location.getX()+", "+(int) location.getY()+", "+(int)location.getZ()+")";
+				}
+			}
+			if(numberFactories==0)
+			{
+				response="Operates at 100% efficiency with no interference";
+			}
+			else
+			{
+				response="Operates at "+(int) (100*currentRecipe.getRecipeScaling(factories.size()+1))+"% efficiency due to interference from:"+factoryList;
+			}
+			responses.add(new InteractionResponse(InteractionResult.SUCCESS,response));
+		}
 		return responses;
 	}
 	

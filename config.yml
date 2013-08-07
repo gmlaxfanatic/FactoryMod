@@ -75,7 +75,7 @@ general:
   central_block: WORKBENCH
   save_cycle: 15
   return_build_materials: false
-  citadel_enabled: true
+  citadel_enabled: false
   factory_interaction_material: STICK
   disable_experience: true
 production_general:
@@ -178,6 +178,24 @@ crafting:
         Double Stone Slab:
           material: DOUBLE_STEP
 production_factories:
+  XP_Generator:
+    name: XP Generator
+    fuel:
+      Charcoal:
+        material: COAL
+        durability: 1
+        fuel_time: 189000
+    inputs:
+      Exp Bottle:
+        material: EXP_BOTTLE
+        amount: 640
+    recipes:
+      - Generate_XP
+    repair_multiple: 256
+    repair_inputs:
+      Exp Bottle:
+        material: EXP_BOTTLE
+        amount: 1
   Bakery:
     name: Bakery
     fuel:
@@ -1746,6 +1764,15 @@ production_factories:
       Stick:
         material: STICK
 production_recipes:
+  Generate_XP:
+    name: Generate XP
+    production_time: 60
+    inputs:
+    outputs:
+      Exp Bottle:
+        material: EXP_BOTTLE
+        amount: 448
+    recipe_scaling: 1.0
   Wood_XP_Bottle_0:
     name: Brew XP Bottles  - 1
     inputs:

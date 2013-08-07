@@ -12,7 +12,6 @@ import org.bukkit.inventory.Inventory;
 
 public class ProductionRecipe implements Recipe
 {
-	private FactoryModPlugin plugin;
 	private String title;
 	private String recipeName;
 	private int productionTime;
@@ -25,10 +24,9 @@ public class ProductionRecipe implements Recipe
 	private boolean useOnce;
 	private double recipeScaling;
 	
-	public ProductionRecipe(FactoryModPlugin plugin, String title,String recipeName,int productionTime,ItemList<NamedItemStack> inputs,ItemList<NamedItemStack> upgrades,
+	public ProductionRecipe(String title,String recipeName,int productionTime,ItemList<NamedItemStack> inputs,ItemList<NamedItemStack> upgrades,
 		ItemList<NamedItemStack> outputs,List<ProbabilisticEnchantment> enchantments,boolean useOnce, ItemList<NamedItemStack> repairs, double recipeScaling)
 	{
-		this.plugin=plugin;
 		this.title=title;
 		this.recipeName = recipeName;
 		this.productionTime = productionTime;
@@ -42,9 +40,9 @@ public class ProductionRecipe implements Recipe
 		this.recipeScaling=recipeScaling;
 	}
 	
-	public ProductionRecipe(FactoryModPlugin plugin,String title,String recipeName,int productionTime,ItemList<NamedItemStack> repairs)
+	public ProductionRecipe(String title,String recipeName,int productionTime,ItemList<NamedItemStack> repairs)
 	{
-		this(plugin,title,recipeName,productionTime,new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ArrayList<ProbabilisticEnchantment>(),false,repairs,0);
+		this(title,recipeName,productionTime,new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ArrayList<ProbabilisticEnchantment>(),false,repairs,0);
 	}
 	
 	public boolean hasMaterials(Inventory inventory)
@@ -74,8 +72,20 @@ public class ProductionRecipe implements Recipe
 		}
 		else
 		{
-			return outputs.getMultiple(Math.pow(plugin.getManager().getProductionManager().getFactoriesByRecipe(this).size(),recipeScaling));
+			return outputs.getMultiple(getRecipeScaling());
 		}
+	}
+
+	public double getRecipeScaling()
+	{
+		return getRecipeScaling(FactoryModPlugin.manager.getProductionManager().getFactoriesByRecipe(this).size());
+	}
+	
+	public double getRecipeScaling(int numberFactories)
+	{
+		FactoryModPlugin.sendConsoleMessage("number factories: "+numberFactories+". recipe Scaling: "+recipeScaling+". Power: "+Math.pow(numberFactories,recipeScaling));
+		
+		return 1.0/Math.pow(numberFactories,recipeScaling);
 	}
 	
 	public ItemList<NamedItemStack> getRepairs()
