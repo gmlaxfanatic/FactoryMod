@@ -24,15 +24,16 @@ import org.bukkit.inventory.Inventory;
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
-import com.github.igotyou.FactoryMod.interfaces.Manager;
-import com.github.igotyou.FactoryMod.interfaces.Recipe;
+import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.properties.ProductionProperties;
+import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.Iterator;
+import org.bukkit.configuration.ConfigurationSection;
 
 //original file:
 /**
@@ -50,16 +51,18 @@ import java.util.Iterator;
 *
 */
 
-public class ProductionManager implements Manager
+public class ProductionManager implements FactoryManager
 {
+	public  Map<String, ProductionProperties> productionProperties=new HashMap<String, ProductionProperties>();
+	public  Map<String,ProductionRecipe> productionRecipes=new HashMap<String,ProductionRecipe>();
 	private FactoryModPlugin plugin;
-	private List<ProductionFactory> producers;
+	private List<ProductionFactory> productionFactories=new ArrayList<ProductionFactory>();;
 	private long repairTime;
 	
 	public ProductionManager(FactoryModPlugin plugin)
 	{
 		this.plugin = plugin;
-		producers = new ArrayList<ProductionFactory>();
+		initConfig(plugin.getConfig().getConfigurationSection("production"));
 		//Set maintenance clock to 0
 		updateFactorys();
 	}
@@ -71,7 +74,7 @@ public class ProductionManager implements Manager
 		repairTime=System.currentTimeMillis();
 		FileOutputStream fileOutputStream = new FileOutputStream(file);
 		BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
-		for (ProductionFactory production : producers)
+		for (ProductionFactory production : productionFactories)
 		{
 			//order: subFactoryType world recipe1,recipe2 central_x central_y central_z inventory_x inventory_y inventory_z power_x power_y power_z active productionTimer energyTimer current_Recipe_number 
 			
@@ -155,19 +158,19 @@ public class ProductionManager implements Manager
 			int currentRecipeNumber = Integer.parseInt(parts[15]);
 			double currentRepair = Double.parseDouble(parts[16]);
 			long timeDisrepair  =  Long.parseLong(parts[17]);
-			if(FactoryModPlugin.productionProperties.containsKey(subFactoryType))
+			if(productionProperties.containsKey(subFactoryType))
 			{
 				Set<ProductionRecipe> recipes=new HashSet<ProductionRecipe>();
 				
 				// TODO: Give default recipes for subfactory type
-				ProductionProperties properties = FactoryModPlugin.productionProperties.get(subFactoryType);
+				ProductionProperties properties = productionProperties.get(subFactoryType);
 				recipes.addAll(properties.getRecipes());
 				
 				for(String name:recipeNames)
 				{
-					if(FactoryModPlugin.productionRecipes.containsKey(name))
+					if(productionRecipes.containsKey(name))
 					{
-						recipes.add(FactoryModPlugin.productionRecipes.get(name));
+						recipes.add(productionRecipes.get(name));
 					}
 				}
 
@@ -177,7 +180,69 @@ public class ProductionManager implements Manager
 		}
 		fileInputStream.close();
 	}
-
+	
+	/*
+	 * Imports settings, recipes and factories from config
+	 */
+	public void initConfig(ConfigurationSection productionConfiguration)
+	{
+		//Import recipes from config.yml
+		ConfigurationSection recipeConfiguration=productionConfiguration.getConfigurationSection("recipes");
+		//Temporary Storage array to store where recipes should point to each other
+		HashMap<ProductionRecipe,ArrayList> outputRecipes=new HashMap<ProductionRecipe,ArrayList>();
+		Iterator<String> recipeTitles=recipeConfiguration.getKeys(false).iterator();
+		while (recipeTitles.hasNext())
+		{
+			//Section header in recipe file, also serves as unique identifier for the recipe
+			//All spaces are replaced with udnerscores so they don't disrupt saving format
+			//There should be a check for uniqueness of this identifier...
+			String title=recipeTitles.next();
+			ConfigurationSection configSection=recipeConfiguration.getConfigurationSection(title);
+			title=title.replaceAll(" ","_");
+			//Display name of the recipe, Deafult of "Default Name"
+			String recipeName = configSection.getString("name","Default Name");
+			//Production time of the recipe, default of 1
+			int productionTime=configSection.getInt("production_time",2);
+			//Inputs of the recipe, empty of there are no inputs
+			ItemList<NamedItemStack> inputs = FactoryModPlugin.getItems(configSection.getConfigurationSection("inputs"));
+			//Inputs of the recipe, empty of there are no inputs
+			ItemList<NamedItemStack> upgrades = FactoryModPlugin.getItems(configSection.getConfigurationSection("upgrades"));
+			//Outputs of the recipe, empty of there are no inputs
+			ItemList<NamedItemStack> outputs = FactoryModPlugin.getItems(configSection.getConfigurationSection("outputs"));
+			//Enchantments of the recipe, empty of there are no inputs
+			List<ProbabilisticEnchantment> enchantments=FactoryModPlugin.getEnchantments(configSection.getConfigurationSection("enchantments"));
+			//Whether this recipe can only be used once
+			boolean useOnce = configSection.getBoolean("use_once");
+			ProductionRecipe recipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,useOnce,new ItemList<NamedItemStack>());
+			productionRecipes.put(title,recipe);
+			//Store the titles of the recipes that this should point to
+			ArrayList <String> currentOutputRecipes=new ArrayList<String>();
+			currentOutputRecipes.addAll(configSection.getStringList("output_recipes"));
+			outputRecipes.put(recipe,currentOutputRecipes);
+		}
+		//Once ProductionRecipe objects have been created correctly insert different pointers
+		Iterator<ProductionRecipe> recipeIterator=outputRecipes.keySet().iterator();
+		while (recipeIterator.hasNext())
+		{
+			ProductionRecipe recipe=recipeIterator.next();
+			Iterator<String> outputIterator=outputRecipes.get(recipe).iterator();
+			while(outputIterator.hasNext())
+			{
+				recipe.addOutputRecipe(productionRecipes.get(outputIterator.next()));
+			}
+		}
+		
+		//Import factories
+		ConfigurationSection factoryConfiguration=productionConfiguration.getConfigurationSection("factories");
+		Iterator<String> factoryTitles=factoryConfiguration.getKeys(false).iterator();
+		while(factoryTitles.hasNext())
+		{
+			String title=factoryTitles.next();
+			ProductionProperties newProductionProperties = ProductionProperties.fromConfig(title, factoryConfiguration.getConfigurationSection(title));
+			productionProperties.put(title, newProductionProperties);
+		}	
+	}
+	
 	public void updateFactorys() 
 	{
 		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable()
@@ -185,19 +250,19 @@ public class ProductionManager implements Manager
 			@Override
 			public void run()
 			{
-				for (ProductionFactory production: producers)
+				for (ProductionFactory production: productionFactories)
 				{
 					production.update();
 				}
 			}
-		}, 0L, FactoryModPlugin.PRODUCER_UPDATE_CYCLE);
+		}, 0L, FactoryModPlugin.UPDATE_CYCLE);
 	}
 
 	public InteractionResponse createFactory(Location factoryLocation, Location inventoryLocation, Location powerSourceLocation) 
 	{
 		if (!factoryExistsAt(factoryLocation))
 		{
-			HashMap<String, ProductionProperties> properties = plugin.productionProperties;
+			Map<String, ProductionProperties> properties = productionProperties;
 			Block inventoryBlock = inventoryLocation.getBlock();
 			Chest chest = (Chest) inventoryBlock.getState();
 			Inventory chestInventory = chest.getInventory();
@@ -229,7 +294,7 @@ public class ProductionManager implements Manager
 	{
 		if (!factoryExistsAt(factoryLocation))
 		{
-			HashMap<String, ProductionProperties> properties = plugin.productionProperties;
+			Map<String, ProductionProperties> properties = productionProperties;
 			Block inventoryBlock = inventoryLocation.getBlock();
 			Chest chest = (Chest) inventoryBlock.getState();
 			Inventory chestInventory = chest.getInventory();
@@ -267,7 +332,7 @@ public class ProductionManager implements Manager
 		if (production.getCenterLocation().getBlock().getType().equals(Material.WORKBENCH) && (!factoryExistsAt(production.getCenterLocation()))
 				|| !factoryExistsAt(production.getInventoryLocation()) || !factoryExistsAt(production.getPowerSourceLocation()))
 		{
-			producers.add(production);
+			productionFactories.add(production);
 			return new InteractionResponse(InteractionResult.SUCCESS, "");
 		}
 		else
@@ -278,7 +343,7 @@ public class ProductionManager implements Manager
 
 	public ProductionFactory getFactory(Location factoryLocation) 
 	{
-		for (ProductionFactory production : producers)
+		for (ProductionFactory production : productionFactories)
 		{
 			if (production.getCenterLocation().equals(factoryLocation) || production.getInventoryLocation().equals(factoryLocation)
 					|| production.getPowerSourceLocation().equals(factoryLocation))
@@ -309,17 +374,17 @@ public class ProductionManager implements Manager
 
 	public void removeFactory(Factory factory) 
 	{
-		producers.remove((ProductionFactory)factory);
+		productionFactories.remove((ProductionFactory)factory);
 	}
 	
 	public void updateRepair(long time)
 	{
-		for (ProductionFactory production: producers)
+		for (ProductionFactory production: productionFactories)
 		{
 			production.updateRepair(time/((double)FactoryModPlugin.REPAIR_PERIOD));
 		}
 		long currentTime=System.currentTimeMillis();
-		Iterator<ProductionFactory> itr=producers.iterator();
+		Iterator<ProductionFactory> itr=productionFactories.iterator();
 		while(itr.hasNext())
 		{
 			ProductionFactory producer=itr.next();
@@ -334,5 +399,12 @@ public class ProductionManager implements Manager
 	{
 		return FactoryModPlugin.PRODUCTION_SAVES_FILE;
 	}
-
+	
+	/*
+	 * Returns of the ProductionProperites for a particular factory
+	 */
+	public ProductionProperties getProperties(String title)
+	{
+		return productionProperties.get(title);
+	}
 }

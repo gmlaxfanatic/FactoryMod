@@ -14,7 +14,6 @@ import org.bukkit.material.Lever;
 import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.FactoryObject;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
 import com.github.igotyou.FactoryMod.listeners.RedstoneListener;
