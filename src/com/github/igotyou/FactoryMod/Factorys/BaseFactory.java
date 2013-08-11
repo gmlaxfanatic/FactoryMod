@@ -112,7 +112,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 	}
 	
 	public boolean checkHasMaterials() {
-		return true;
+		return getAllInputs().allIn(getInventory());
 	}
 
 	/**
@@ -174,7 +174,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 						//[Requires the following: Amount Name, Amount Name.]
 						//[Requires one of the following: Amount Name, Amount Name.]
 						
-						ItemList<NamedItemStack> needAll=getAllInputs();
+						ItemList<NamedItemStack> needAll=new ItemList<NamedItemStack>();
 						needAll.addAll(getAllInputs().getDifference(getInventory()));
 						if(!needAll.isEmpty())
 						{
