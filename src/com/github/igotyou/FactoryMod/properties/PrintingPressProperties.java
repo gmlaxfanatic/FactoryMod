@@ -104,22 +104,22 @@ public class PrintingPressProperties implements Properties{
 
 
 	public static PrintingPressProperties fromConfig(FactoryModPlugin plugin, ConfigurationSection configPrintingPresses) {
-		ItemList<NamedItemStack> ppFuel=plugin.getItems(configPrintingPresses.getConfigurationSection("fuel"));
+		ItemList<NamedItemStack> ppFuel=ItemList.fromConfig(configPrintingPresses.getConfigurationSection("fuel"));
 		if(ppFuel.isEmpty())
 		{
 			ppFuel=new ItemList<NamedItemStack>();
 			ppFuel.add(new NamedItemStack(Material.getMaterial("COAL"),1,(short)1,"Charcoal"));
 		}
 		ConfigurationSection costs = configPrintingPresses.getConfigurationSection("costs");
-		ItemList<NamedItemStack> ppConstructionCost=plugin.getItems(costs.getConfigurationSection("construction"));
-		ItemList<NamedItemStack> ppRepairCost=plugin.getItems(costs.getConfigurationSection("repair"));
-		ItemList<NamedItemStack> ppPlateCost=plugin.getItems(costs.getConfigurationSection("plates"));
-		ItemList<NamedItemStack> ppBindingCost=plugin.getItems(costs.getConfigurationSection("binding"));
-		ItemList<NamedItemStack> ppPageCost=plugin.getItems(costs.getConfigurationSection("page_lot"));
+		ItemList<NamedItemStack> ppConstructionCost=ItemList.fromConfig(costs.getConfigurationSection("construction"));
+		ItemList<NamedItemStack> ppRepairCost=ItemList.fromConfig(costs.getConfigurationSection("repair"));
+		ItemList<NamedItemStack> ppPlateCost=ItemList.fromConfig(costs.getConfigurationSection("plates"));
+		ItemList<NamedItemStack> ppBindingCost=ItemList.fromConfig(costs.getConfigurationSection("binding"));
+		ItemList<NamedItemStack> ppPageCost=ItemList.fromConfig(costs.getConfigurationSection("page_lot"));
 		int pagesPerLot = costs.getInt("pages_per_lot",16); 
-		ItemList<NamedItemStack> ppPamphletCost=plugin.getItems(costs.getConfigurationSection("pamphlet_lot"));
+		ItemList<NamedItemStack> ppPamphletCost=ItemList.fromConfig(costs.getConfigurationSection("pamphlet_lot"));
 		int pamphletsPerLot = costs.getInt("pamphlets_per_lot",24);
-		ItemList<NamedItemStack> ppSecurityCost=plugin.getItems(costs.getConfigurationSection("security_lot"));
+		ItemList<NamedItemStack> ppSecurityCost=ItemList.fromConfig(costs.getConfigurationSection("security_lot"));
 		int securityNotesPerLot = costs.getInt("security_notes_per_lot",24);
 		int ppEnergyTime = configPrintingPresses.getInt("fuel_time", 10);
 		int ppRepair = costs.getInt("repair_multiple",1);

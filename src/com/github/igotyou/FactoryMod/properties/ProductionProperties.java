@@ -72,15 +72,15 @@ public class ProductionProperties implements Properties
 		String factoryName=factoryConfiguration.getString("name","Default Name");
 		//Uses overpowered getItems method for consistency, should always return a list of size=1
 		//If no fuel is found, default to charcoal
-		ItemList<NamedItemStack> fuel=FactoryModPlugin.getItems(factoryConfiguration.getConfigurationSection("fuel"));
+		ItemList<NamedItemStack> fuel=ItemList.fromConfig(factoryConfiguration.getConfigurationSection("fuel"));
 		if(fuel.isEmpty())
 		{
 			fuel=new ItemList<NamedItemStack>();
 			fuel.add(new NamedItemStack(Material.getMaterial("COAL"),1,(short)1,"Charcoal"));
 		}
 		int fuelTime=factoryConfiguration.getInt("fuel_time",2);
-		ItemList<NamedItemStack> inputs=FactoryModPlugin.getItems(factoryConfiguration.getConfigurationSection("inputs"));
-		ItemList<NamedItemStack> repairs=FactoryModPlugin.getItems(factoryConfiguration.getConfigurationSection("repair_inputs"));
+		ItemList<NamedItemStack> inputs=ItemList.fromConfig(factoryConfiguration.getConfigurationSection("inputs"));
+		ItemList<NamedItemStack> repairs=ItemList.fromConfig(factoryConfiguration.getConfigurationSection("repair_inputs"));
 		List<ProductionRecipe> factoryRecipes=new ArrayList<ProductionRecipe>();
 		Iterator<String> ouputRecipeIterator=factoryConfiguration.getStringList("recipes").iterator();
 		while (ouputRecipeIterator.hasNext())

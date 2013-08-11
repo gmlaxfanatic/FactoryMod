@@ -4,9 +4,7 @@
  */
 package com.github.igotyou.FactoryMod.utility;
 
-import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
-import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,15 +12,60 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
  * @author Brian Landry
  */
 public class ItemList<E extends NamedItemStack> extends ArrayList<E> {
+	
+	/*
+	 * Imports a list from the config
+	 */
+	public static ItemList<NamedItemStack> fromConfig(ConfigurationSection configItems)
+	{
+		ItemList<NamedItemStack> items=new ItemList<NamedItemStack>();
+		if(configItems!=null)
+		{
+			for(String commonName:configItems.getKeys(false))
+			{
+				
+				ConfigurationSection configItem= configItems.getConfigurationSection(commonName);
+				String materialName=configItem.getString("material");
+				Material material = Material.getMaterial(materialName);
+				//only proceeds if an acceptable material name was provided
+				if(material!=null)
+				{
+					int amount=configItem.getInt("amount",1);
+					short durability=(short)configItem.getInt("durability",0);
+					String displayName=configItem.getString("display_name");
+					String lore=configItem.getString("lore");
+					NamedItemStack namedItemStack= new NamedItemStack(material, amount, durability,commonName);
+					if(displayName!=null||lore!=null)
+					{
+						ItemMeta meta=namedItemStack.getItemMeta();
+						if (displayName!=null)
+							meta.setDisplayName(displayName);
+						if (lore!=null)
+						{
+							List<String> loreArray = new ArrayList<String>();
+							loreArray.add(lore);
+							meta.setLore(loreArray);
+						}
+						namedItemStack.setItemMeta(meta);
+					}
+					items.add(namedItemStack);
+				}
+			}
+		}
+		return items;
+	}
+	
 	public boolean exactlyIn(Inventory inventory)
 	{
 		boolean returnValue=true;

@@ -5,7 +5,7 @@
 package com.github.igotyou.FactoryMod.managers;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import static com.github.igotyou.FactoryMod.FactoryModPlugin.getItems;
+import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.Iterator;
 import java.util.List;
@@ -50,11 +50,11 @@ public class CraftingManager {
 			ConfigurationSection configSection=configCraftingEnable.getConfigurationSection(recipeName);
 			Recipe recipe;
 			List<String> shape=configSection.getStringList("shape");
-			NamedItemStack output=getItems(configSection.getConfigurationSection("output")).get(0);
+			NamedItemStack output=ItemList.fromConfig(configSection.getConfigurationSection("output")).get(0);
 			if(shape.isEmpty())
 			{
 				ShapelessRecipe shapelessRecipe=new ShapelessRecipe(output);
-				for (ItemStack input:getItems(configSection.getConfigurationSection("inputs")))
+				for (ItemStack input:ItemList.fromConfig(configSection.getConfigurationSection("inputs")))
 				{
 					shapelessRecipe.addIngredient(input.getAmount(),input.getType(),input.getDurability());
 				}
@@ -66,7 +66,7 @@ public class CraftingManager {
 				shapedRecipe.shape(shape.toArray(new String[shape.size()]));
 				for(String inputKey:configSection.getConfigurationSection("inputs").getKeys(false))
 				{
-					ItemStack input=getItems(configSection.getConfigurationSection("inputs."+inputKey)).get(0);
+					ItemStack input=ItemList.fromConfig(configSection.getConfigurationSection("inputs."+inputKey)).get(0);
 					shapedRecipe.setIngredient(inputKey.charAt(0),input.getType(),input.getDurability());
 				}
 				recipe=shapedRecipe;

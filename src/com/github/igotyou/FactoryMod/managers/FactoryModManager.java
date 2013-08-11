@@ -16,25 +16,13 @@ import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
-//original file:
-/**
- * MachinesManager.java
- * Purpose: Manages the initialization and updating of all managers.
- *
- * @author MrTwiggy
- * @version 0.1 1/14/13
- */
-//edited file:
-/**
- *  FactorysManager.java
- *  Purpose: Manages the initialization and updating of all managers.
- * @author igotyou
- *
- */
+
+
 public class FactoryModManager 
 {
 	List<Listener> listeners;
 	List<FactoryManager> factoryManagers;
+	CraftingManager craftingManager;
 	FactoryModPlugin plugin;
 	
 	/**
@@ -85,7 +73,7 @@ public class FactoryModManager
 	 */
 	private void initializeCraftingManager()
 	{
-		new CraftingManager(plugin);
+		craftingManager = new CraftingManager(plugin);
 	}
 	
 	/**
@@ -138,11 +126,11 @@ public class FactoryModManager
 	/**
 	 * Load file
 	 */
-	private static void load(FactoryManager managerInterface, File file) 
+	private static void load(FactoryManager factoryManager, File file) 
 	{
 		try
 		{
-			managerInterface.load(file);
+			factoryManager.load(file);
 		}
 		catch (FileNotFoundException exception)
 		{
@@ -155,7 +143,7 @@ public class FactoryModManager
 		
 		try
 		{
-			managerInterface.save(file);
+			factoryManager.save(file);
 		}
 		catch (IOException exception)
 		{

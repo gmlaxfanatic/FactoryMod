@@ -35,22 +35,6 @@ import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.Iterator;
 import org.bukkit.configuration.ConfigurationSection;
 
-//original file:
-/**
-* Manager.java
-* Purpose: Interface for Manager objects for basic manager functionality
-*
-* @author MrTwiggy
-* @version 0.1 1/08/13
-*/
-//edited version:
-/**
-* Manager.java	 
-* Purpose: Interface for Manager objects for basic manager functionality
-* @author igotyou
-*
-*/
-
 public class ProductionManager implements FactoryManager
 {
 	public  Map<String, ProductionProperties> productionProperties=new HashMap<String, ProductionProperties>();
@@ -204,13 +188,13 @@ public class ProductionManager implements FactoryManager
 			//Production time of the recipe, default of 1
 			int productionTime=configSection.getInt("production_time",2);
 			//Inputs of the recipe, empty of there are no inputs
-			ItemList<NamedItemStack> inputs = FactoryModPlugin.getItems(configSection.getConfigurationSection("inputs"));
+			ItemList<NamedItemStack> inputs = ItemList.fromConfig(configSection.getConfigurationSection("inputs"));
 			//Inputs of the recipe, empty of there are no inputs
-			ItemList<NamedItemStack> upgrades = FactoryModPlugin.getItems(configSection.getConfigurationSection("upgrades"));
+			ItemList<NamedItemStack> upgrades = ItemList.fromConfig(configSection.getConfigurationSection("upgrades"));
 			//Outputs of the recipe, empty of there are no inputs
-			ItemList<NamedItemStack> outputs = FactoryModPlugin.getItems(configSection.getConfigurationSection("outputs"));
+			ItemList<NamedItemStack> outputs = ItemList.fromConfig(configSection.getConfigurationSection("outputs"));
 			//Enchantments of the recipe, empty of there are no inputs
-			List<ProbabilisticEnchantment> enchantments=FactoryModPlugin.getEnchantments(configSection.getConfigurationSection("enchantments"));
+			List<ProbabilisticEnchantment> enchantments=ProbabilisticEnchantment.listFromConfig(configSection.getConfigurationSection("enchantments"));
 			//Whether this recipe can only be used once
 			boolean useOnce = configSection.getBoolean("use_once");
 			ProductionRecipe recipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,useOnce,new ItemList<NamedItemStack>());
