@@ -1,32 +1,15 @@
 package com.github.igotyou.FactoryMod;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.configuration.ConfigurationSection;
 
-import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryType;
-import com.github.igotyou.FactoryMod.interfaces.Properties;
 import com.github.igotyou.FactoryMod.listeners.FactoryModListener;
 import com.github.igotyou.FactoryMod.listeners.RedstoneListener;
 import com.github.igotyou.FactoryMod.managers.FactoryModManager;
-import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
-import com.github.igotyou.FactoryMod.properties.ProductionProperties;
-import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
-import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
-import com.github.igotyou.FactoryMod.utility.ItemList;
-import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
 
 
 public class FactoryModPlugin extends JavaPlugin
@@ -34,9 +17,7 @@ public class FactoryModPlugin extends JavaPlugin
 
 	public static FactoryModManager manager;
 	
-	public static final String VERSION = "v1.0"; //Current version of plugin
-	public static final String PLUGIN_NAME = "FactoryMod"; //Name of plugin
-	public static final String PLUGIN_PREFIX = PLUGIN_NAME + " " + VERSION + ": ";
+	public static final String PLUGIN_NAME = "[FactoryMod] "; //Name of plugin
 	public static final String PRODUCTION_SAVES_FILE = "productionSaves"; // The production saves file name
 	public static final int TICKS_PER_SECOND = 20; //The number of ticks per second
 	public static final String PRINTING_PRESSES_SAVE_FILE = "pressSaves";
@@ -124,7 +105,7 @@ public class FactoryModPlugin extends JavaPlugin
 	
 	public static void sendConsoleMessage(String message) 
 	{
-		Bukkit.getLogger().info(FactoryModPlugin.PLUGIN_PREFIX + message);	
+		Bukkit.getLogger().info(FactoryModPlugin.PLUGIN_NAME + message);	
 	}
 
 	

@@ -174,13 +174,11 @@ public class ProductionManager implements FactoryManager
 		ConfigurationSection recipeConfiguration=productionConfiguration.getConfigurationSection("recipes");
 		//Temporary Storage array to store where recipes should point to each other
 		HashMap<ProductionRecipe,ArrayList> outputRecipes=new HashMap<ProductionRecipe,ArrayList>();
-		Iterator<String> recipeTitles=recipeConfiguration.getKeys(false).iterator();
-		while (recipeTitles.hasNext())
+		for(String title:recipeConfiguration.getKeys(false))
 		{
 			//Section header in recipe file, also serves as unique identifier for the recipe
 			//All spaces are replaced with udnerscores so they don't disrupt saving format
 			//There should be a check for uniqueness of this identifier...
-			String title=recipeTitles.next();
 			ConfigurationSection configSection=recipeConfiguration.getConfigurationSection(title);
 			title=title.replaceAll(" ","_");
 			//Display name of the recipe, Deafult of "Default Name"
@@ -205,25 +203,23 @@ public class ProductionManager implements FactoryManager
 			outputRecipes.put(recipe,currentOutputRecipes);
 		}
 		//Once ProductionRecipe objects have been created correctly insert different pointers
-		Iterator<ProductionRecipe> recipeIterator=outputRecipes.keySet().iterator();
-		while (recipeIterator.hasNext())
+		for(ProductionRecipe recipe:outputRecipes.keySet())
 		{
-			ProductionRecipe recipe=recipeIterator.next();
 			Iterator<String> outputIterator=outputRecipes.get(recipe).iterator();
 			while(outputIterator.hasNext())
 			{
 				recipe.addOutputRecipe(productionRecipes.get(outputIterator.next()));
 			}
+			FactoryModPlugin.sendConsoleMessage("Added Recipe: "+recipe.getRecipeName());
 		}
 		
 		//Import factories
 		ConfigurationSection factoryConfiguration=productionConfiguration.getConfigurationSection("factories");
-		Iterator<String> factoryTitles=factoryConfiguration.getKeys(false).iterator();
-		while(factoryTitles.hasNext())
+		for(String title:factoryConfiguration.getKeys(false))
 		{
-			String title=factoryTitles.next();
-			ProductionProperties newProductionProperties = ProductionProperties.fromConfig(title, factoryConfiguration.getConfigurationSection(title));
+			ProductionProperties newProductionProperties = ProductionProperties.fromConfig(title, factoryConfiguration,this);
 			productionProperties.put(title, newProductionProperties);
+			FactoryModPlugin.sendConsoleMessage("Added Factory: "+newProductionProperties.getName());
 		}	
 	}
 	
@@ -390,5 +386,15 @@ public class ProductionManager implements FactoryManager
 	public ProductionProperties getProperties(String title)
 	{
 		return productionProperties.get(title);
+	}
+	
+	public ProductionRecipe getProductionRecipe(String identifier)
+	{
+		return productionRecipes.get(identifier);
+	}
+	
+	public  void addProductionRecipe(String title, ProductionRecipe productionRecipe)
+	{
+		productionRecipes.put(title,productionRecipe);
 	}
 }

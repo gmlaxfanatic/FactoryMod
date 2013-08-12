@@ -4,6 +4,7 @@ import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import java.util.List;
 
 import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.managers.ProductionManager;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
@@ -65,7 +66,7 @@ public class ProductionProperties implements Properties
 	/*
 	 * Parse a ProductionProperties from a ConfigurationSection
 	 */
-	public static ProductionProperties fromConfig(String title, ConfigurationSection factoriesConfiguration)
+	public static ProductionProperties fromConfig(String title, ConfigurationSection factoriesConfiguration, ProductionManager productionManager)
 	{
 		ConfigurationSection factoryConfiguration=factoriesConfiguration.getConfigurationSection(title);
 		title=title.replaceAll(" ","_");
@@ -82,15 +83,15 @@ public class ProductionProperties implements Properties
 		ItemList<NamedItemStack> inputs=ItemList.fromConfig(factoryConfiguration.getConfigurationSection("inputs"));
 		ItemList<NamedItemStack> repairs=ItemList.fromConfig(factoryConfiguration.getConfigurationSection("repair_inputs"));
 		List<ProductionRecipe> factoryRecipes=new ArrayList<ProductionRecipe>();
-		Iterator<String> ouputRecipeIterator=factoryConfiguration.getStringList("recipes").iterator();
-		while (ouputRecipeIterator.hasNext())
+		for(String outputRecipe:factoryConfiguration.getStringList("recipes"))
 		{
-			factoryRecipes.add(FactoryModPlugin.getManager().getProductionManager().productionRecipes.get(ouputRecipeIterator.next()));
+			factoryRecipes.add(productionManager.getProductionRecipe(outputRecipe));
 		}
 		int repair=factoryConfiguration.getInt("repair_multiple",0);
 		//Create repair recipe
-		FactoryModPlugin.getManager().getProductionManager().productionRecipes.put(title+"REPAIR",new ProductionRecipe(title+"REPAIR","Repair Factory",1,repairs));
-		factoryRecipes.add(FactoryModPlugin.getManager().getProductionManager().productionRecipes.get(title+"REPAIR"));
+		ProductionRecipe repairRecipe=new ProductionRecipe(title+"REPAIR","Repair Factory",1,repairs);
+		productionManager.addProductionRecipe(title+"REPAIR",repairRecipe);
+		factoryRecipes.add(repairRecipe);
 		return new ProductionProperties(inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
 	}
 }
