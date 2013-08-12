@@ -26,7 +26,6 @@ import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.properties.ProductionProperties;
-import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
@@ -172,46 +171,14 @@ public class ProductionManager implements FactoryManager
 	{
 		//Import recipes from config.yml
 		ConfigurationSection recipeConfiguration=productionConfiguration.getConfigurationSection("recipes");
-		//Temporary Storage array to store where recipes should point to each other
-		HashMap<ProductionRecipe,ArrayList> outputRecipes=new HashMap<ProductionRecipe,ArrayList>();
+		//Import recipes
+		
 		for(String title:recipeConfiguration.getKeys(false))
 		{
-			//Section header in recipe file, also serves as unique identifier for the recipe
 			//All spaces are replaced with udnerscores so they don't disrupt saving format
-			//There should be a check for uniqueness of this identifier...
-			ConfigurationSection configSection=recipeConfiguration.getConfigurationSection(title);
-			title=title.replaceAll(" ","_");
-			//Display name of the recipe, Deafult of "Default Name"
-			String recipeName = configSection.getString("name","Default Name");
-			//Production time of the recipe, default of 1
-			int productionTime=configSection.getInt("production_time",2);
-			//Inputs of the recipe, empty of there are no inputs
-			ItemList<NamedItemStack> inputs = ItemList.fromConfig(configSection.getConfigurationSection("inputs"));
-			//Inputs of the recipe, empty of there are no inputs
-			ItemList<NamedItemStack> upgrades = ItemList.fromConfig(configSection.getConfigurationSection("upgrades"));
-			//Outputs of the recipe, empty of there are no inputs
-			ItemList<NamedItemStack> outputs = ItemList.fromConfig(configSection.getConfigurationSection("outputs"));
-			//Enchantments of the recipe, empty of there are no inputs
-			List<ProbabilisticEnchantment> enchantments=ProbabilisticEnchantment.listFromConfig(configSection.getConfigurationSection("enchantments"));
-			//Whether this recipe can only be used once
-			boolean useOnce = configSection.getBoolean("use_once");
-			ProductionRecipe recipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,useOnce,new ItemList<NamedItemStack>());
-			productionRecipes.put(title,recipe);
-			//Store the titles of the recipes that this should point to
-			ArrayList <String> currentOutputRecipes=new ArrayList<String>();
-			currentOutputRecipes.addAll(configSection.getStringList("output_recipes"));
-			outputRecipes.put(recipe,currentOutputRecipes);
+			productionRecipes.put(title.replaceAll(" ","_"),ProductionRecipe.fromConfig(title.replaceAll(" ","_"), recipeConfiguration.getConfigurationSection(title)));
 		}
-		//Once ProductionRecipe objects have been created correctly insert different pointers
-		for(ProductionRecipe recipe:outputRecipes.keySet())
-		{
-			Iterator<String> outputIterator=outputRecipes.get(recipe).iterator();
-			while(outputIterator.hasNext())
-			{
-				recipe.addOutputRecipe(productionRecipes.get(outputIterator.next()));
-			}
-			FactoryModPlugin.sendConsoleMessage("Added Recipe: "+recipe.getRecipeName());
-		}
+		
 		
 		//Import factories
 		ConfigurationSection factoryConfiguration=productionConfiguration.getConfigurationSection("factories");
