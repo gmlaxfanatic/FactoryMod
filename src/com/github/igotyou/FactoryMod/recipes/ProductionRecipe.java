@@ -1,6 +1,6 @@
 package com.github.igotyou.FactoryMod.recipes;
 
-import com.github.igotyou.FactoryMod.FactoryModPlugin;
+import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,10 +22,21 @@ public class ProductionRecipe implements Recipe
 	private List<ProductionRecipe> outputRecipes;
 	private List<ProbabilisticEnchantment> enchantments;
 	private boolean useOnce;
-	private double recipeScaling;
+	private double scalingBase;
+	private double scalingExponent;
 	
-	public ProductionRecipe(String title,String recipeName,int productionTime,ItemList<NamedItemStack> inputs,ItemList<NamedItemStack> upgrades,
-		ItemList<NamedItemStack> outputs,List<ProbabilisticEnchantment> enchantments,boolean useOnce, ItemList<NamedItemStack> repairs, double recipeScaling)
+	public ProductionRecipe(
+		String title,
+		String recipeName,
+		int productionTime,
+		ItemList<NamedItemStack> inputs,
+		ItemList<NamedItemStack> upgrades,
+		ItemList<NamedItemStack> outputs,
+		List<ProbabilisticEnchantment> enchantments,
+		boolean useOnce,
+		ItemList<NamedItemStack> repairs,
+		double scalingBase,
+		double scalingExponent)
 	{
 		this.title=title;
 		this.recipeName = recipeName;
@@ -37,12 +48,15 @@ public class ProductionRecipe implements Recipe
 		this.enchantments=enchantments;
 		this.useOnce=useOnce;
 		this.repairs=repairs;
-		this.recipeScaling=recipeScaling;
+		this.scalingBase=scalingBase;
+		this.scalingExponent=scalingExponent;
 	}
 	
 	public ProductionRecipe(String title,String recipeName,int productionTime,ItemList<NamedItemStack> repairs)
 	{
-		this(title,recipeName,productionTime,new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ArrayList<ProbabilisticEnchantment>(),false,repairs,0);
+		this(title,recipeName,productionTime,new ItemList<NamedItemStack>(),
+			new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),
+			new ArrayList<ProbabilisticEnchantment>(),false,repairs,0,0);
 	}
 	
 	public boolean hasMaterials(Inventory inventory)
@@ -66,26 +80,39 @@ public class ProductionRecipe implements Recipe
 	
 	public ItemList<NamedItemStack> getOutputs() 
 	{
-		if(recipeScaling==0)
-		{
 			return outputs;
-		}
-		else
-		{
-			return outputs.getMultiple(getRecipeScaling());
-		}
-	}
-
-	public double getRecipeScaling()
-	{
-		return getRecipeScaling(FactoryModPlugin.manager.getProductionManager().getFactoriesByRecipe(this).size());
 	}
 	
-	public double getRecipeScaling(int numberFactories)
+	public boolean hasRecipeScaling()
 	{
-		FactoryModPlugin.sendConsoleMessage("number factories: "+numberFactories+". recipe Scaling: "+recipeScaling+". Power: "+Math.pow(numberFactories,recipeScaling));
+		return scalingBase==0;
+	}
 		
-		return 1.0/Math.pow(numberFactories,recipeScaling);
+	/*
+	 * Scaling takes into accoutn distance and number of factories by the
+	 * formula: 1/Π(scalingBase^(scalingExponent*worldBorderCorrection/factoryDistance)
+	 *	scalingBase>1
+	 */
+	public double getRecipeScaling(ProductionFactory producingFactory, List<ProductionFactory> factories)
+	{
+		if(scalingBase==0)
+		{
+			return 1;
+		}
+		
+		double scaling=1.0;
+		//Compensates for the world border restricting area factories can be by
+		//Formula needs to be created
+		double worldBorderCorrection=1;
+		for(ProductionFactory factory:factories)
+		{
+			if(factory!=producingFactory)
+			{
+				double distance=factory.getCenterLocation().distance(producingFactory.getCenterLocation());
+				scaling=scaling*1/Math.pow(scalingBase,(scalingExponent*worldBorderCorrection/distance));
+			}
+		}
+		return scaling;
 	}
 	
 	public ItemList<NamedItemStack> getRepairs()

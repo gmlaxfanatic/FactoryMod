@@ -194,11 +194,9 @@ public class ProductionManager implements FactoryManager
 			ItemList<NamedItemStack> outputs = ItemList.fromConfig(configSection.getConfigurationSection("outputs"));
 			//Enchantments of the recipe, empty of there are no inputs
 			List<ProbabilisticEnchantment> enchantments=ProbabilisticEnchantment.listFromConfig(configSection.getConfigurationSection("enchantments"));
-			//Amount this recipe scales with the number of factories the recipe is present in, scales with power law
-			double recipeScaling=configSection.getDouble("recipe_scaling",0.0);
 			//Whether this recipe can only be used once
 			boolean useOnce = configSection.getBoolean("use_once");
-			ProductionRecipe recipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,useOnce,new ItemList<NamedItemStack>(),recipeScaling);
+			ProductionRecipe recipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,useOnce,new ItemList<NamedItemStack>(),0,0);
 			productionRecipes.put(title,recipe);
 			//Store the titles of the recipes that this should point to
 			ArrayList <String> currentOutputRecipes=new ArrayList<String>();
