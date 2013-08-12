@@ -3,27 +3,19 @@ package com.github.igotyou.FactoryMod.listeners;
 import static com.untamedears.citadel.Utility.getReinforcement;
 import static com.untamedears.citadel.Utility.isReinforced;
 
-import java.util.List;
-
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.material.Attachable;
-import org.bukkit.material.Lever;
-import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.managers.FactoryModManager;
 import com.github.igotyou.FactoryMod.managers.ProductionManager;
-import com.github.igotyou.FactoryMod.utility.InteractionResponse;
-import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.untamedears.citadel.entity.PlayerReinforcement;
 
 public class RedstoneListener implements Listener {

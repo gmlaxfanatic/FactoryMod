@@ -11,34 +11,19 @@ import org.bukkit.Location;
 import org.bukkit.event.Listener;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
+import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryType;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
-import com.github.igotyou.FactoryMod.interfaces.Manager;
+import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
-//original file:
-/**
- * MachinesManager.java
- * Purpose: Manages the initialization and updating of all managers.
- *
- * @author MrTwiggy
- * @version 0.1 1/14/13
- */
-//edited file:
-/**
- *  FactorysManager.java
- *  Purpose: Manages the initialization and updating of all managers.
- * @author igotyou
- *
- */
+
+
 public class FactoryModManager 
 {
 	List<Listener> listeners;
-	List<Manager> managers;
-	
-	FactoryModPlugin plugin; //The plugin object
-	
-	public static FactoryModManager factoryMan;
-	
+	List<FactoryManager> factoryManagers;
+	CraftingManager craftingManager;
+	FactoryModPlugin plugin;
 	
 	/**
 	 * Constructor
@@ -46,8 +31,6 @@ public class FactoryModManager
 	public FactoryModManager(FactoryModPlugin plugin)
 	{
 		this.plugin = plugin;
-		FactoryModManager.factoryMan = this;
-		
 		initializeManagers();
 		loadManagers();
 		periodicSaving();
@@ -58,14 +41,12 @@ public class FactoryModManager
 	 */
 	private void initializeManagers()
 	{
-		managers = new ArrayList<Manager>();
+		factoryManagers = new ArrayList<FactoryManager>();
 		listeners = new ArrayList<Listener>();
 		
-		//if (FactoryModPlugin.PRODUCTION_ENEABLED)
-		//{
-			initializeProductionManager();
-			initializePrintingPressManager();
-		//}
+		initializeProductionManager();
+		initializePrintingPressManager();
+		initializeCraftingManager();
 	}
 	
 
@@ -74,9 +55,9 @@ public class FactoryModManager
 	 */
 	private void initializeProductionManager()
 	{
-		ProductionManager productionnMan = new ProductionManager(plugin);
+		ProductionManager productionManager = new ProductionManager(plugin);
+		factoryManagers.add(productionManager);
 		
-		managers.add(productionnMan);
 	}
 	/**
 	 * Initializes the Printing Press Manager
@@ -84,8 +65,15 @@ public class FactoryModManager
 	private void initializePrintingPressManager()
 	{
 		PrintingPressManager printingMan = new PrintingPressManager(plugin);
-		
-		managers.add(printingMan);
+		factoryManagers.add(printingMan);
+	}
+	
+	/**
+	 * Initializes the Crafting Manager
+	 */
+	private void initializeCraftingManager()
+	{
+		craftingManager = new CraftingManager(plugin);
 	}
 	
 	/**
@@ -101,7 +89,7 @@ public class FactoryModManager
 	 */
 	private void saveManagers()
 	{
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			save(manager, getSavesFile(manager.getSavesFileName()));
 		}
@@ -112,7 +100,7 @@ public class FactoryModManager
 	 */
 	private void loadManagers()
 	{
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			load(manager, getSavesFile(manager.getSavesFileName()));
 		}
@@ -122,9 +110,9 @@ public class FactoryModManager
 	 * Returns the appropriate manager depending on the given Manager Type
 	 */
 	@SuppressWarnings("rawtypes")
-	public Manager getManager(Class managerType)
+	public FactoryManager getManager(Class managerType)
 	{
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			if (managerType.isInstance(manager))
 			{
@@ -138,11 +126,11 @@ public class FactoryModManager
 	/**
 	 * Load file
 	 */
-	private static void load(Manager managerInterface, File file) 
+	private static void load(FactoryManager factoryManager, File file) 
 	{
 		try
 		{
-			managerInterface.load(file);
+			factoryManager.load(file);
 		}
 		catch (FileNotFoundException exception)
 		{
@@ -155,7 +143,7 @@ public class FactoryModManager
 		
 		try
 		{
-			managerInterface.save(file);
+			factoryManager.save(file);
 		}
 		catch (IOException exception)
 		{
@@ -166,7 +154,7 @@ public class FactoryModManager
 	/**
 	 * Save file
 	 */
-	private static void save(Manager manager, File file) 
+	private static void save(FactoryManager manager, File file) 
 	{	
 		try
 		{
@@ -225,7 +213,7 @@ public class FactoryModManager
 	 */
 	public boolean factoryExistsAt(Location location)
 	{
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.factoryExistsAt(location))
 			{
@@ -240,7 +228,7 @@ public class FactoryModManager
 	 */
 	public boolean factoryWholeAt(Location location)
 	{
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.factoryWholeAt(location))
 			{
@@ -253,7 +241,7 @@ public class FactoryModManager
 
 	public ProductionManager getProductionManager() 
 	{
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.getClass() == ProductionManager.class)
 			{
@@ -266,7 +254,7 @@ public class FactoryModManager
 	
 	public PrintingPressManager getPrintingPressManager() 
 	{
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.getClass() == PrintingPressManager.class)
 			{
@@ -278,7 +266,7 @@ public class FactoryModManager
 	}
 
 	public Factory getFactory(Location location) {
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.factoryExistsAt(location))
 			{
@@ -288,8 +276,8 @@ public class FactoryModManager
 		return null;
 	}
 
-	public Manager getManager(Location location) {
-		for (Manager manager : managers)
+	public FactoryManager getManager(Location location) {
+		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.factoryExistsAt(location))
 			{
@@ -302,7 +290,7 @@ public class FactoryModManager
 	public InteractionResponse createFactory(Location centralLocation,
 			Location inventoryLocation, Location powerLocation) {
 		InteractionResponse response = null;
-		for (Manager manager : managers)
+		for (FactoryManager manager : factoryManagers)
 		{
 			response = manager.createFactory(centralLocation, inventoryLocation, powerLocation);
 			if (response.getInteractionResult() == InteractionResult.SUCCESS)
@@ -311,5 +299,22 @@ public class FactoryModManager
 			}
 		}
 		return response;
+	}
+	
+	public FactoryManager getManager(FactoryType factoryType)
+	{
+		if(factoryType==FactoryType.PRODUCTION)
+		{
+			return getProductionManager();
+		}
+		if(factoryType==FactoryType.PRINTING_PRESS)
+		{
+			return getPrintingPressManager();
+		}
+		else
+		{
+			return null;
+		}
+			
 	}
 }

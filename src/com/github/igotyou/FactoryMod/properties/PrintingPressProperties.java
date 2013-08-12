@@ -1,16 +1,15 @@
 package com.github.igotyou.FactoryMod.properties;
 
-import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
+import com.github.igotyou.FactoryMod.interfaces.Properties;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 
-public class PrintingPressProperties {
+public class PrintingPressProperties implements Properties{
 
 	private ItemList<NamedItemStack> fuel;
 	private ItemList<NamedItemStack> constructionMaterials;
@@ -105,22 +104,22 @@ public class PrintingPressProperties {
 
 
 	public static PrintingPressProperties fromConfig(FactoryModPlugin plugin, ConfigurationSection configPrintingPresses) {
-		ItemList<NamedItemStack> ppFuel=plugin.getItems(configPrintingPresses.getConfigurationSection("fuel"));
+		ItemList<NamedItemStack> ppFuel=ItemList.fromConfig(configPrintingPresses.getConfigurationSection("fuel"));
 		if(ppFuel.isEmpty())
 		{
 			ppFuel=new ItemList<NamedItemStack>();
 			ppFuel.add(new NamedItemStack(Material.getMaterial("COAL"),1,(short)1,"Charcoal"));
 		}
 		ConfigurationSection costs = configPrintingPresses.getConfigurationSection("costs");
-		ItemList<NamedItemStack> ppConstructionCost=plugin.getItems(costs.getConfigurationSection("construction"));
-		ItemList<NamedItemStack> ppRepairCost=plugin.getItems(costs.getConfigurationSection("repair"));
-		ItemList<NamedItemStack> ppPlateCost=plugin.getItems(costs.getConfigurationSection("plates"));
-		ItemList<NamedItemStack> ppBindingCost=plugin.getItems(costs.getConfigurationSection("binding"));
-		ItemList<NamedItemStack> ppPageCost=plugin.getItems(costs.getConfigurationSection("page_lot"));
+		ItemList<NamedItemStack> ppConstructionCost=ItemList.fromConfig(costs.getConfigurationSection("construction"));
+		ItemList<NamedItemStack> ppRepairCost=ItemList.fromConfig(costs.getConfigurationSection("repair"));
+		ItemList<NamedItemStack> ppPlateCost=ItemList.fromConfig(costs.getConfigurationSection("plates"));
+		ItemList<NamedItemStack> ppBindingCost=ItemList.fromConfig(costs.getConfigurationSection("binding"));
+		ItemList<NamedItemStack> ppPageCost=ItemList.fromConfig(costs.getConfigurationSection("page_lot"));
 		int pagesPerLot = costs.getInt("pages_per_lot",16); 
-		ItemList<NamedItemStack> ppPamphletCost=plugin.getItems(costs.getConfigurationSection("pamphlet_lot"));
+		ItemList<NamedItemStack> ppPamphletCost=ItemList.fromConfig(costs.getConfigurationSection("pamphlet_lot"));
 		int pamphletsPerLot = costs.getInt("pamphlets_per_lot",24);
-		ItemList<NamedItemStack> ppSecurityCost=plugin.getItems(costs.getConfigurationSection("security_lot"));
+		ItemList<NamedItemStack> ppSecurityCost=ItemList.fromConfig(costs.getConfigurationSection("security_lot"));
 		int securityNotesPerLot = costs.getInt("security_notes_per_lot",24);
 		int ppEnergyTime = configPrintingPresses.getInt("fuel_time", 10);
 		int ppRepair = costs.getInt("repair_multiple",1);

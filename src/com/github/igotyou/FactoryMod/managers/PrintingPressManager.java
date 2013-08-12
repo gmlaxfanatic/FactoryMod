@@ -1,39 +1,29 @@
 package com.github.igotyou.FactoryMod.managers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.FactoryObject.FactoryType;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress.OperationMode;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
-import com.github.igotyou.FactoryMod.interfaces.Manager;
+import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
-import com.github.igotyou.FactoryMod.properties.ProductionProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
-import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.Iterator;
@@ -54,16 +44,18 @@ import java.util.Iterator;
 *
 */
 
-public class PrintingPressManager implements Manager
+public class PrintingPressManager implements FactoryManager
 {
 	private FactoryModPlugin plugin;
 	private List<PrintingPress> producers;
 	private long repairTime;
+	public PrintingPressProperties printingPressProperties;
 	
 	public PrintingPressManager(FactoryModPlugin plugin)
 	{
 		this.plugin = plugin;
 		producers = new ArrayList<PrintingPress>();
+		printingPressProperties = PrintingPressProperties.fromConfig(plugin, plugin.getConfig().getConfigurationSection("printing_presses"));
 		//Set maintenance clock to 0
 		updateFactorys();
 	}
@@ -162,7 +154,7 @@ public class PrintingPressManager implements Manager
 						active, productionTimer,
 						energyTimer, currentRepair, timeDisrepair,
 						mode,
-						plugin.getPrintingPressProperties(),
+						printingPressProperties,
 						containedPaper, containedBindings, containedSecurityMaterials,
 						processQueue, lockedResultCode);
 				addFactory(production);
@@ -185,13 +177,11 @@ public class PrintingPressManager implements Manager
 					production.update();
 				}
 			}
-		}, 0L, FactoryModPlugin.PRODUCER_UPDATE_CYCLE);
+		}, 0L, FactoryModPlugin.UPDATE_CYCLE);
 	}
 
 	public InteractionResponse createFactory(Location factoryLocation, Location inventoryLocation, Location powerSourceLocation) 
 	{
-	PrintingPressProperties printingPressProperties = plugin.getPrintingPressProperties();
-		
 		if (!factoryExistsAt(factoryLocation))
 		{
 			Block inventoryBlock = inventoryLocation.getBlock();
@@ -201,7 +191,7 @@ public class PrintingPressManager implements Manager
 			boolean hasMaterials = inputs.allIn(chestInventory);
 			if (hasMaterials)
 			{
-				PrintingPress production = new PrintingPress(factoryLocation, inventoryLocation, powerSourceLocation, false, plugin.getPrintingPressProperties());
+				PrintingPress production = new PrintingPress(factoryLocation, inventoryLocation, powerSourceLocation, false, printingPressProperties);
 				if (printingPressProperties.getConstructionMaterials().removeFrom(production.getInventory()))
 				{
 					addFactory(production);
@@ -286,5 +276,11 @@ public class PrintingPressManager implements Manager
 	{
 		return FactoryModPlugin.PRINTING_PRESSES_SAVE_FILE;
 	}
-
+	/*
+	 * Returns of PrintingPressProperites
+	 */
+	public PrintingPressProperties getProperties(String title)
+	{
+		return printingPressProperties;
+	}
 }

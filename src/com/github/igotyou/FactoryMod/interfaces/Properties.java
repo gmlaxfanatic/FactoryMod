@@ -1,9 +1,4 @@
 package com.github.igotyou.FactoryMod.interfaces;
-
-import com.github.igotyou.FactoryMod.utility.ItemList;
-import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-
-//original file:
 /**
  * Properties.java
  * Purpose: Interface for Properties objects for basic properties functionality
@@ -20,5 +15,4 @@ import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 */
 public interface Properties 
 {
-	public ItemList<NamedItemStack> getInputs() ;
 }
