@@ -1,13 +1,13 @@
 package com.github.igotyou.FactoryMod.recipes;
 
+
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
-import java.util.ArrayList;
-import java.util.List;
-
-
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.Inventory;
 
 public class ProductionRecipe implements Recipe
@@ -19,9 +19,7 @@ public class ProductionRecipe implements Recipe
 	private ItemList<NamedItemStack> upgrades;
 	private ItemList<NamedItemStack> outputs;
 	private ItemList<NamedItemStack> repairs;
-	private List<ProductionRecipe> outputRecipes;
 	private List<ProbabilisticEnchantment> enchantments;
-	private boolean useOnce;
 	private double scalingBase;
 	private double scalingExponent;
 	
@@ -33,7 +31,6 @@ public class ProductionRecipe implements Recipe
 		ItemList<NamedItemStack> upgrades,
 		ItemList<NamedItemStack> outputs,
 		List<ProbabilisticEnchantment> enchantments,
-		boolean useOnce,
 		ItemList<NamedItemStack> repairs,
 		double scalingBase,
 		double scalingExponent)
@@ -44,9 +41,7 @@ public class ProductionRecipe implements Recipe
 		this.inputs = inputs;
 		this.upgrades=upgrades;
 		this.outputs = outputs;
-		this.outputRecipes=new ArrayList<ProductionRecipe>();
 		this.enchantments=enchantments;
-		this.useOnce=useOnce;
 		this.repairs=repairs;
 		this.scalingBase=scalingBase;
 		this.scalingExponent=scalingExponent;
@@ -54,19 +49,14 @@ public class ProductionRecipe implements Recipe
 	
 	public ProductionRecipe(String title,String recipeName,int productionTime,ItemList<NamedItemStack> repairs)
 	{
-		this(title,recipeName,productionTime,new ItemList<NamedItemStack>(),
-			new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),
-			new ArrayList<ProbabilisticEnchantment>(),false,repairs,0,0);
+		this(title,recipeName,productionTime,new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ItemList<NamedItemStack>(),new ArrayList<ProbabilisticEnchantment>(),repairs,0,0);
 	}
 	
 	public boolean hasMaterials(Inventory inventory)
 	{
 		return inputs.allIn(inventory)&&upgrades.oneIn(inventory)&&repairs.allIn(inventory);
 	}
-	public void addOutputRecipe(ProductionRecipe outputRecipe)
-	{
-		this.outputRecipes.add(outputRecipe);
-	}
+
 
 	public ItemList<NamedItemStack> getInputs()
 	{
@@ -143,14 +133,23 @@ public class ProductionRecipe implements Recipe
 	{
 		return productionTime;
 	}
-
-	public List<ProductionRecipe> getOutputRecipes()
+	
+	public static ProductionRecipe fromConfig(String title, ConfigurationSection recipeConfig)
 	{
-		return outputRecipes;
-	}
-
-	public boolean getUseOnce()
-	{
-		return useOnce;
+		//Display name of the recipe, Deafult of "Default Name"
+		String recipeName = recipeConfig.getString("name","Default Name");
+		//Production time of the recipe, default of 1
+		int productionTime=recipeConfig.getInt("production_time",2);
+		//Inputs of the recipe, empty of there are no inputs
+		ItemList<NamedItemStack> inputs = ItemList.fromConfig(recipeConfig.getConfigurationSection("inputs"));
+		//Inputs of the recipe, empty of there are no inputs
+		ItemList<NamedItemStack> upgrades = ItemList.fromConfig(recipeConfig.getConfigurationSection("upgrades"));
+		//Outputs of the recipe, empty of there are no inputs
+		ItemList<NamedItemStack> outputs = ItemList.fromConfig(recipeConfig.getConfigurationSection("outputs"));
+		//Enchantments of the recipe, empty of there are no inputs
+		List<ProbabilisticEnchantment> enchantments=ProbabilisticEnchantment.listFromConfig(recipeConfig.getConfigurationSection("enchantments"));
+		//Whether this recipe can only be used once
+		ProductionRecipe productionRecipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,new ItemList<NamedItemStack>(),0,0);
+		return productionRecipe;
 	}
 }

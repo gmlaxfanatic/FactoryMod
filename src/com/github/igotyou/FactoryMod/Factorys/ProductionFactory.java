@@ -208,22 +208,6 @@ public class ProductionFactory extends BaseFactory
 			int percentRepaired=(int) (( (double) amountRepaired)/getProductionFactoryProperties().getRepair()*100);
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Will repair "+String.valueOf(percentRepaired)+"% of the factory with "+currentRecipe.getRepairs().getMultiple(amountRepaired).toString()+"."));
 		}
-		if(getProductionFactoryProperties().getRepair()!=0)
-		if(!currentRecipe.getOutputRecipes().isEmpty())
-		{
-			List<ProductionRecipe> outputRecipes=currentRecipe.getOutputRecipes();
-			String response="Makes available: ";
-			for(int i=0;i<outputRecipes.size();i++)
-			{
-				response+=outputRecipes.get(i).getRecipeName();
-				if(i<outputRecipes.size()-1)
-				{
-					response+=", ";
-				}
-			}
-			response+=".";
-			responses.add(new InteractionResponse(InteractionResult.SUCCESS,response));
-		}
 		//[Operates at XX% efficiency due to interference from: Location1, Location 2, Location 3, ...]
 		if(currentRecipe.getRecipeScaling()!=0.0)
 		{
@@ -256,22 +240,6 @@ public class ProductionFactory extends BaseFactory
 	protected void recipeFinished() {
 		//Remove upgrade and replace it with its upgraded form
 		currentRecipe.getUpgrades().removeOneFrom(getInventory()).putIn(getInventory(),currentRecipe.getEnchantments());
-		//Adds new recipes to the factory
-
-		for (int i = 0; i < currentRecipe.getOutputRecipes().size();i++)
-		{
-			if(!recipes.contains(currentRecipe.getOutputRecipes().get(i)))
-			{
-				recipes.add(currentRecipe.getOutputRecipes().get(i));
-			}
-		}
-		
-		//Remove currentRecipe if it only is meant to be used once
-		if(currentRecipe.getUseOnce())
-		{
-			recipes.remove(currentRecipe);
-			setRecipeToNumber(0);
-		}
 	}
 
 	@Override
