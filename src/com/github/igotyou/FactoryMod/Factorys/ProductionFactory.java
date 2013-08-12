@@ -209,7 +209,7 @@ public class ProductionFactory extends BaseFactory
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Will repair "+String.valueOf(percentRepaired)+"% of the factory with "+currentRecipe.getRepairs().getMultiple(amountRepaired).toString()+"."));
 		}
 		//[Operates at XX% efficiency due to interference from: Location1, Location 2, Location 3, ...]
-		if(currentRecipe.getRecipeScaling()!=0.0)
+		if(currentRecipe.hasRecipeScaling())
 		{
 			String response;
 			List<ProductionFactory> factories=FactoryModPlugin.manager.getProductionManager().getFactoriesByRecipe(currentRecipe);
@@ -230,7 +230,8 @@ public class ProductionFactory extends BaseFactory
 			}
 			else
 			{
-				response="Operates at "+(int) (100*currentRecipe.getRecipeScaling(factories.size()+1))+"% efficiency due to interference from:"+factoryList;
+				//response="Operates at "+(int) (100*currentRecipe.getRecipeScaling(factories.size()+1))+"% efficiency due to interference from:"+factoryList;
+				response=null;
 			}
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,response));
 		}
@@ -249,7 +250,7 @@ public class ProductionFactory extends BaseFactory
 
 	@Override
 	public ItemList<NamedItemStack> getOutputs() {
-		return currentRecipe.getOutputs();
+		return currentRecipe.getOutputs(this);
 	}
 
 	@Override

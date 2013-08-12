@@ -1,6 +1,7 @@
 package com.github.igotyou.FactoryMod.recipes;
 
 
+import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
@@ -68,9 +69,16 @@ public class ProductionRecipe implements Recipe
 		return upgrades;
 	}
 	
-	public ItemList<NamedItemStack> getOutputs() 
+	public ItemList<NamedItemStack> getOutputs(ProductionFactory productionFactory) 
 	{
+		if(hasRecipeScaling())
+		{
+			return outputs.getMultiple(getRecipeScaling(productionFactory));
+		}
+		else
+		{
 			return outputs;
+		}
 	}
 	
 	public boolean hasRecipeScaling()
@@ -83,26 +91,27 @@ public class ProductionRecipe implements Recipe
 	 * formula: 1/Π(scalingBase^(scalingExponent*worldBorderCorrection/factoryDistance)
 	 *	scalingBase>1
 	 */
-	public double getRecipeScaling(ProductionFactory producingFactory, List<ProductionFactory> factories)
+	public double getRecipeScaling(ProductionFactory producingFactory)
 	{
+		List<ProductionFactory> otherFactories=FactoryModPlugin.getManager().getProductionManager().getFactoriesByRecipe(this);
 		if(scalingBase==0)
 		{
 			return 1;
 		}
 		
-		double scaling=1.0;
+		double outputScaling=1.0;
 		//Compensates for the world border restricting area factories can be by
 		//Formula needs to be created
 		double worldBorderCorrection=1;
-		for(ProductionFactory factory:factories)
+		for(ProductionFactory factory:otherFactories)
 		{
 			if(factory!=producingFactory)
 			{
 				double distance=factory.getCenterLocation().distance(producingFactory.getCenterLocation());
-				scaling=scaling*1/Math.pow(scalingBase,(scalingExponent*worldBorderCorrection/distance));
+				outputScaling=outputScaling*1/Math.pow(scalingBase,(scalingExponent*worldBorderCorrection/distance));
 			}
 		}
-		return scaling;
+		return outputScaling;
 	}
 	
 	public ItemList<NamedItemStack> getRepairs()
@@ -148,8 +157,10 @@ public class ProductionRecipe implements Recipe
 		ItemList<NamedItemStack> outputs = ItemList.fromConfig(recipeConfig.getConfigurationSection("outputs"));
 		//Enchantments of the recipe, empty of there are no inputs
 		List<ProbabilisticEnchantment> enchantments=ProbabilisticEnchantment.listFromConfig(recipeConfig.getConfigurationSection("enchantments"));
-		//Whether this recipe can only be used once
-		ProductionRecipe productionRecipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,new ItemList<NamedItemStack>(),0,0);
+		//Get location/#based Scaling
+		double scalingBase = recipeConfig.getDouble("scaling_base",0.0);
+		double scalingExponent = recipeConfig.getDouble("scaling_exponent",0.0);
+		ProductionRecipe productionRecipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,new ItemList<NamedItemStack>(),scalingBase,scalingExponent);
 		return productionRecipe;
 	}
 }
