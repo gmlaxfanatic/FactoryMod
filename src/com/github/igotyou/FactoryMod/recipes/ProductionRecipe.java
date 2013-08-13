@@ -21,8 +21,8 @@ public class ProductionRecipe implements Recipe
 	private ItemList<NamedItemStack> outputs;
 	private ItemList<NamedItemStack> repairs;
 	private List<ProbabilisticEnchantment> enchantments;
-	private double scalingBase;
-	private double scalingExponent;
+	private double locationScaling;
+	private double numberScaling;
 	
 	public ProductionRecipe(
 		String title,
@@ -33,8 +33,8 @@ public class ProductionRecipe implements Recipe
 		ItemList<NamedItemStack> outputs,
 		List<ProbabilisticEnchantment> enchantments,
 		ItemList<NamedItemStack> repairs,
-		double scalingBase,
-		double scalingExponent)
+		double locationScaling,
+		double numberScaling)
 	{
 		this.title=title;
 		this.recipeName = recipeName;
@@ -44,8 +44,8 @@ public class ProductionRecipe implements Recipe
 		this.outputs = outputs;
 		this.enchantments=enchantments;
 		this.repairs=repairs;
-		this.scalingBase=scalingBase;
-		this.scalingExponent=scalingExponent;
+		this.locationScaling=locationScaling;
+		this.numberScaling=numberScaling;
 	}
 	
 	public ProductionRecipe(String title,String recipeName,int productionTime,ItemList<NamedItemStack> repairs)
@@ -83,23 +83,35 @@ public class ProductionRecipe implements Recipe
 	
 	public boolean hasRecipeScaling()
 	{
-		return scalingBase==0;
+		return locationScaling==0;
 	}
 		
 	/*
-	 * Scaling takes into accoutn distance and number of factories by the
-	 * formula: 1/Π(scalingBase^(scalingExponent*worldBorderCorrection/factoryDistance)
-	 *	scalingBase>1
+	 * Scaling takes into account distance and number of factories by the
+	 * formula: (1/sum(e^(r/w)/l))^n where:
+	 * w is the worldBoarderCorrection, this number is 1 for factories at
+	 * the center of the world and decreases as you approach the edge.
+	 * It is calculated by taking the surface integral of the distance
+	 * cost formula over the playable area and dividing it by the surface
+	 * integral of the distance cost formula when take at the origin.
+	 * e is the base of the natural logarithm
+	 * r is the distance between two factories
+	 * l is locationScaling/ln(2) where:
+	 *	locationScaling is the distance at which a neighboring
+	 *	factory cuts production by 1/2
+	 * n is ln(1/20)/ln(numberScaling/2) where:
+	 *	numberScaling is the number of factories at distance
+	 *	locationScaling that is takes to cut production to 1/20
 	 */
 	public double getRecipeScaling(ProductionFactory producingFactory)
 	{
 		List<ProductionFactory> otherFactories=FactoryModPlugin.getManager().getProductionManager().getFactoriesByRecipe(this);
-		if(scalingBase==0)
+		if(locationScaling==0)
 		{
 			return 1;
 		}
 		
-		double outputScaling=1.0;
+		double sum=0;
 		//Compensates for the world border restricting area factories can be by
 		//Formula needs to be created
 		double worldBorderCorrection=1;
@@ -108,10 +120,17 @@ public class ProductionRecipe implements Recipe
 			if(factory!=producingFactory)
 			{
 				double distance=factory.getCenterLocation().distance(producingFactory.getCenterLocation());
-				outputScaling=outputScaling*1/Math.pow(scalingBase,(scalingExponent*worldBorderCorrection/distance));
+				sum+=Math.exp((distance/worldBorderCorrection)/(locationScaling/Math.log(2)));
 			}
 		}
-		return outputScaling;
+		if(sum==0)
+		{
+			return 1;
+		}
+		else
+		{
+			return Math.pow(1/sum,(Math.log(1/20)/Math.log(1/2*numberScaling)));
+		}
 	}
 	
 	public ItemList<NamedItemStack> getRepairs()
@@ -158,9 +177,9 @@ public class ProductionRecipe implements Recipe
 		//Enchantments of the recipe, empty of there are no inputs
 		List<ProbabilisticEnchantment> enchantments=ProbabilisticEnchantment.listFromConfig(recipeConfig.getConfigurationSection("enchantments"));
 		//Get location/#based Scaling
-		double scalingBase = recipeConfig.getDouble("scaling_base",0.0);
-		double scalingExponent = recipeConfig.getDouble("scaling_exponent",0.0);
-		ProductionRecipe productionRecipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,new ItemList<NamedItemStack>(),scalingBase,scalingExponent);
+		double locationScaling = recipeConfig.getDouble("location_scaling",0.0);
+		double numberScaling = recipeConfig.getDouble("number_scaling",0.0);
+		ProductionRecipe productionRecipe = new ProductionRecipe(title,recipeName,productionTime,inputs,upgrades,outputs,enchantments,new ItemList<NamedItemStack>(),locationScaling, numberScaling);
 		return productionRecipe;
 	}
 }
