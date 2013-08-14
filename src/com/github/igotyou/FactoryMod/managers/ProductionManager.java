@@ -37,8 +37,8 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class ProductionManager implements FactoryManager
 {
-	public  Map<String, ProductionProperties> productionProperties=new HashMap<String, ProductionProperties>();
-	public  Map<String,ProductionRecipe> productionRecipes=new HashMap<String,ProductionRecipe>();
+	public  Map<String, ProductionProperties> productionProperties;
+	public  Map<String,ProductionRecipe> productionRecipes;
 	private FactoryModPlugin plugin;
 	private List<ProductionFactory> productionFactories=new ArrayList<ProductionFactory>();;
 	private long repairTime;
@@ -171,24 +171,9 @@ public class ProductionManager implements FactoryManager
 	public void initConfig(ConfigurationSection productionConfiguration)
 	{
 		//Import recipes from config.yml
-		ConfigurationSection recipeConfiguration=productionConfiguration.getConfigurationSection("recipes");
-		//Import recipes
-		
-		for(String title:recipeConfiguration.getKeys(false))
-		{
-			//All spaces are replaced with udnerscores so they don't disrupt saving format
-			productionRecipes.put(title.replaceAll(" ","_"),ProductionRecipe.fromConfig(title.replaceAll(" ","_"), recipeConfiguration.getConfigurationSection(title)));
-		}
-		
-		
-		//Import factories
-		ConfigurationSection factoryConfiguration=productionConfiguration.getConfigurationSection("factories");
-		for(String title:factoryConfiguration.getKeys(false))
-		{
-			ProductionProperties newProductionProperties = ProductionProperties.fromConfig(title, factoryConfiguration,this);
-			productionProperties.put(title, newProductionProperties);
-			FactoryModPlugin.sendConsoleMessage("Added Factory: "+newProductionProperties.getName());
-		}	
+		productionRecipes=ProductionRecipe.recipesFromConfig(productionConfiguration.getConfigurationSection("recipes"));
+		//Import factory properties
+		productionProperties=ProductionProperties.productionPropertiesFromConfig(productionConfiguration.getConfigurationSection("factories"), this);
 	}
 	
 	public void updateFactorys() 
@@ -365,14 +350,17 @@ public class ProductionManager implements FactoryManager
 	{
 		productionRecipes.put(title,productionRecipe);
 	}
-	public List<ProductionFactory> getFactoriesByRecipe(ProductionRecipe recipe)
+	public Set<ProductionFactory> getScalledFactories(List<ProductionRecipe> scalledRecipes)
 	{
-		List<ProductionFactory> factoriesByRecipe=new LinkedList<ProductionFactory>();
+		Set<ProductionFactory> factoriesByRecipe=new HashSet<ProductionFactory>();
 		for(ProductionFactory productionFactory:productionFactories)
 		{
-			if(productionFactory.getRecipes().contains(recipe))
+			for(ProductionRecipe scalledRecipe:scalledRecipes)
 			{
-				factoriesByRecipe.add(productionFactory);
+				if(productionFactory.getRecipes().contains(scalledRecipe))
+				{
+					factoriesByRecipe.add(productionFactory);
+				}
 			}
 		}
 		return factoriesByRecipe;

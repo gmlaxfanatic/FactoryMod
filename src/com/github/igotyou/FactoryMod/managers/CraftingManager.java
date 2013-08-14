@@ -32,10 +32,9 @@ public class CraftingManager {
 	
 	private void initConfig(ConfigurationSection craftingConfiguration)
 	{
-		Iterator<String> disabledRecipes=craftingConfiguration.getStringList("disable").iterator();
-		while(disabledRecipes.hasNext())
+		for(String disabledRecipe:craftingConfiguration.getStringList("disable"))
 		{
-			ItemStack recipeItemStack = new ItemStack(Material.getMaterial(disabledRecipes.next()));
+			ItemStack recipeItemStack = new ItemStack(Material.getMaterial(disabledRecipe));
 			List<Recipe> tempList = plugin.getServer().getRecipesFor(recipeItemStack);
 			for (int itterator = 0; itterator < tempList.size(); itterator ++)
 			{

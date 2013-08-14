@@ -130,6 +130,9 @@ public class FactoryObject
 	 */
 	public void updateProperties()
 	{
+		FactoryModPlugin.getManager();
+		FactoryModPlugin.getManager().getManager(factoryType);
+		FactoryModPlugin.getManager().getManager(factoryType).getProperties(subFactoryType);
 		factoryProperties = FactoryModPlugin.getManager().getManager(factoryType).getProperties(subFactoryType);
 		
 	}

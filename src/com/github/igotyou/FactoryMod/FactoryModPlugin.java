@@ -41,6 +41,7 @@ public class FactoryModPlugin extends JavaPlugin
 		initConfig();
 		//create the main manager
 		manager = new FactoryModManager(this);
+		manager.loadManagers();
 		//register the events(this should be moved...)
 		registerEvents();
 	}

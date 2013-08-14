@@ -12,7 +12,9 @@ import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResu
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class ProductionFactory extends BaseFactory
 {
@@ -212,26 +214,28 @@ public class ProductionFactory extends BaseFactory
 		if(currentRecipe.hasRecipeScaling())
 		{
 			String response;
-			List<ProductionFactory> factories=FactoryModPlugin.manager.getProductionManager().getFactoriesByRecipe(currentRecipe);
-			String factoryList="";
-			int numberFactories=0;
-			for(ProductionFactory factory:factories)
+			Set<ProductionFactory> scalledRecipeFactories=FactoryModPlugin.manager.getProductionManager().getScalledFactories(currentRecipe.getScalledRecipes());
+			List<ProductionFactory> interferingFactories=new LinkedList<ProductionFactory>();
+			for(ProductionFactory scalledRecipeFactory:scalledRecipeFactories)
 			{
-				if(factory.isWhole()&&!factory.getCenterLocation().equals(this.getCenterLocation()))
+				if(scalledRecipeFactory.isWhole()&&scalledRecipeFactory!=this)
 				{
-					numberFactories++;
-					Location location = factory.getCenterLocation();
-					factoryList+=" ("+(int) location.getX()+", "+(int) location.getY()+", "+(int)location.getZ()+")";
+					interferingFactories.add(scalledRecipeFactory);
 				}
 			}
-			if(numberFactories==0)
+			if(interferingFactories.size()==0)
 			{
 				response="Operates at 100% efficiency with no interference";
 			}
 			else
 			{
-				//response="Operates at "+(int) (100*currentRecipe.getRecipeScaling(factories.size()+1))+"% efficiency due to interference from:"+factoryList;
-				response=null;
+				String factoryList="";
+				for(ProductionFactory inteferingFactory:interferingFactories)
+				{
+					factoryList+=String.valueOf(this.getCenterLocation().distance(inteferingFactory.getCenterLocation()));
+					factoryList+=inteferingFactory!=interferingFactories.get(interferingFactories.size()-1) ? ", " : "";
+				}
+				response="Operates at "+(int) (100*currentRecipe.getRecipeScaling(this)) + " efficiency due to interference from at the following distances:"+factoryList;
 			}
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,response));
 		}

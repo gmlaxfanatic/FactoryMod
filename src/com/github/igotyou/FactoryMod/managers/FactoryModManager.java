@@ -32,7 +32,6 @@ public class FactoryModManager
 	{
 		this.plugin = plugin;
 		initializeManagers();
-		loadManagers();
 		periodicSaving();
 	}
 	
@@ -98,7 +97,7 @@ public class FactoryModManager
 	/**
 	 * Loads all managers
 	 */
-	private void loadManagers()
+	public void loadManagers()
 	{
 		for (FactoryManager manager : factoryManagers)
 		{

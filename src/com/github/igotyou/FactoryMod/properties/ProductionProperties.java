@@ -9,7 +9,9 @@ import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -66,9 +68,18 @@ public class ProductionProperties implements Properties
 	/*
 	 * Parse a ProductionProperties from a ConfigurationSection
 	 */
-	public static ProductionProperties fromConfig(String title, ConfigurationSection factoriesConfiguration, ProductionManager productionManager)
+	public static Map<String, ProductionProperties> productionPropertiesFromConfig(ConfigurationSection factoriesConfiguration, ProductionManager productionManager)
 	{
-		ConfigurationSection factoryConfiguration=factoriesConfiguration.getConfigurationSection(title);
+		Map<String, ProductionProperties> productionProperties=new HashMap<String, ProductionProperties>();
+		for(String title:factoriesConfiguration.getKeys(false))
+		{
+			productionProperties.put(title, ProductionProperties.productionPropertyFromConfig(title, factoriesConfiguration.getConfigurationSection(title),productionManager));
+		}
+		return productionProperties;
+	}
+	
+	private static ProductionProperties productionPropertyFromConfig(String title, ConfigurationSection factoryConfiguration, ProductionManager productionManager)
+	{
 		title=title.replaceAll(" ","_");
 		String factoryName=factoryConfiguration.getString("name","Default Name");
 		//Uses overpowered getItems method for consistency, should always return a list of size=1
