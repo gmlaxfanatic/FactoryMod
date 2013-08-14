@@ -172,6 +172,7 @@ public class ProductionManager implements FactoryManager
 	{
 		//Import recipes from config.yml
 		productionRecipes=ProductionRecipe.recipesFromConfig(productionConfiguration.getConfigurationSection("recipes"));
+		ProductionRecipe.loadAllScaledRecipes(productionRecipes);
 		//Import factory properties
 		productionProperties=ProductionProperties.productionPropertiesFromConfig(productionConfiguration.getConfigurationSection("factories"), this);
 	}
@@ -350,14 +351,14 @@ public class ProductionManager implements FactoryManager
 	{
 		productionRecipes.put(title,productionRecipe);
 	}
-	public Set<ProductionFactory> getScalledFactories(List<ProductionRecipe> scalledRecipes)
+	public Set<ProductionFactory> getScaledFactories(List<ProductionRecipe> scaledRecipes)
 	{
 		Set<ProductionFactory> factoriesByRecipe=new HashSet<ProductionFactory>();
 		for(ProductionFactory productionFactory:productionFactories)
 		{
-			for(ProductionRecipe scalledRecipe:scalledRecipes)
+			for(ProductionRecipe scaledRecipe:scaledRecipes)
 			{
-				if(productionFactory.getRecipes().contains(scalledRecipe))
+				if(productionFactory.getRecipes().contains(scaledRecipe))
 				{
 					factoriesByRecipe.add(productionFactory);
 				}

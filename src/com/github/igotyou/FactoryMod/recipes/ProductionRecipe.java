@@ -28,8 +28,8 @@ public class ProductionRecipe implements Recipe
 	private List<ProbabilisticEnchantment> enchantments;
 	private double distanceScaling;
 	private double numberScaling;
-	private List<String> scalledRecipeTitles;
-	private List<ProductionRecipe> scalledRecipes;
+	private List<String> scaledRecipeTitles;
+	private List<ProductionRecipe> scaledRecipes;
 	
 	public ProductionRecipe(
 		String title,
@@ -42,7 +42,7 @@ public class ProductionRecipe implements Recipe
 		ItemList<NamedItemStack> repairs,
 		double distanceScaling,
 		double numberScaling,
-		List<String> scalledRecipesStrings)
+		List<String> scaledRecipeTitles)
 	{
 		this.title=title;
 		this.recipeName = recipeName;
@@ -54,7 +54,7 @@ public class ProductionRecipe implements Recipe
 		this.repairs=repairs;
 		this.distanceScaling=distanceScaling;
 		this.numberScaling=numberScaling;
-		this.scalledRecipeTitles=scalledRecipesStrings;
+		this.scaledRecipeTitles=scaledRecipeTitles;
 	}
 	
 	public ProductionRecipe(
@@ -104,7 +104,7 @@ public class ProductionRecipe implements Recipe
 	
 	public boolean hasRecipeScaling()
 	{
-		return distanceScaling==0;
+		return !scaledRecipes.isEmpty()||distanceScaling==0;
 	}
 		
 	/*
@@ -126,7 +126,7 @@ public class ProductionRecipe implements Recipe
 	 */
 	public double getRecipeScaling(ProductionFactory producingFactory)
 	{
-		Set<ProductionFactory> otherFactories=FactoryModPlugin.getManager().getProductionManager().getScalledFactories(scalledRecipes);
+		Set<ProductionFactory> otherFactories=FactoryModPlugin.getManager().getProductionManager().getScaledFactories(scaledRecipes);
 		if(distanceScaling==0)
 		{
 			return 1;
@@ -150,7 +150,7 @@ public class ProductionRecipe implements Recipe
 		}
 		else
 		{
-			return Math.pow(1/sum,(Math.log(1/20)/Math.log(1/2*numberScaling)));
+			return Math.pow(1.0/sum,(Math.log(1.0/20.0)/Math.log(1.0/2*numberScaling)));
 		}
 	}
 	
@@ -183,14 +183,14 @@ public class ProductionRecipe implements Recipe
 		return productionTime;
 	}
 	
-	private List<String> getScalledRecipeTitles()
+	private List<String> getScaledRecipeTitles()
 	{
-		return scalledRecipeTitles;
+		return scaledRecipeTitles;
 	}
 	
-	public List<ProductionRecipe> getScalledRecipes()
+	public List<ProductionRecipe> getscaledRecipes()
 	{
-		return scalledRecipes;
+		return scaledRecipes;
 	}
 	
 	public static Map<String,ProductionRecipe> recipesFromConfig(ConfigurationSection recipeConfig)
@@ -221,27 +221,28 @@ public class ProductionRecipe implements Recipe
 		//Get location/#based Scaling
 		double distanceScaling = recipeConfig.getDouble("distance_scaling",0.0);
 		double numberScaling = recipeConfig.getDouble("number_scaling",0.0);
-		List<String> scalledRecipes = recipeConfig.getStringList("scalledRecipes");
+		List<String> scaledRecipes = recipeConfig.getStringList("scaled_recipes");
 		return new ProductionRecipe(title,
 			recipeName,productionTime,inputs,upgrades,outputs,
 			enchantments,new ItemList<NamedItemStack>(),
-			distanceScaling, numberScaling, scalledRecipes);
+			distanceScaling, numberScaling, scaledRecipes);
 	}
 	
-	public static void loadAllScalledRecipes(Map<String,ProductionRecipe> productionRecipes)
+	public static void loadAllScaledRecipes(Map<String,ProductionRecipe> productionRecipes)
 	{
 		for(Entry<String,ProductionRecipe> entry:productionRecipes.entrySet())
 		{
-			entry.getValue().loadScalledRecipes(productionRecipes);
+			entry.getValue().loadScaledRecipes(productionRecipes);
 		}
 	}
 	
-	private void loadScalledRecipes(Map<String,ProductionRecipe> productionRecipes)
+	private void loadScaledRecipes(Map<String,ProductionRecipe> productionRecipes)
 	{
-		List<ProductionRecipe> scalledRecipes=new LinkedList<ProductionRecipe>();
-		for(String title:scalledRecipeTitles)
+		FactoryModPlugin.sendConsoleMessage(title);
+		scaledRecipes=new LinkedList<ProductionRecipe>();
+		for(String title:scaledRecipeTitles)
 		{
-			scalledRecipes.add(productionRecipes.get(title));
+			scaledRecipes.add(productionRecipes.get(title));
 		}
 	}
 	

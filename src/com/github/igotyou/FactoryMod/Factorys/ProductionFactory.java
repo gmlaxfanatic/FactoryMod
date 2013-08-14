@@ -214,13 +214,13 @@ public class ProductionFactory extends BaseFactory
 		if(currentRecipe.hasRecipeScaling())
 		{
 			String response;
-			Set<ProductionFactory> scalledRecipeFactories=FactoryModPlugin.manager.getProductionManager().getScalledFactories(currentRecipe.getScalledRecipes());
+			Set<ProductionFactory> scaledRecipeFactories=FactoryModPlugin.manager.getProductionManager().getScaledFactories(currentRecipe.getscaledRecipes());
 			List<ProductionFactory> interferingFactories=new LinkedList<ProductionFactory>();
-			for(ProductionFactory scalledRecipeFactory:scalledRecipeFactories)
+			for(ProductionFactory scaledRecipeFactory:scaledRecipeFactories)
 			{
-				if(scalledRecipeFactory.isWhole()&&scalledRecipeFactory!=this)
+				if(scaledRecipeFactory.isWhole()&&scaledRecipeFactory!=this)
 				{
-					interferingFactories.add(scalledRecipeFactory);
+					interferingFactories.add(scaledRecipeFactory);
 				}
 			}
 			if(interferingFactories.size()==0)
@@ -232,10 +232,10 @@ public class ProductionFactory extends BaseFactory
 				String factoryList="";
 				for(ProductionFactory inteferingFactory:interferingFactories)
 				{
-					factoryList+=String.valueOf(this.getCenterLocation().distance(inteferingFactory.getCenterLocation()));
+					factoryList+=String.valueOf((int) this.getCenterLocation().distance(inteferingFactory.getCenterLocation()));
 					factoryList+=inteferingFactory!=interferingFactories.get(interferingFactories.size()-1) ? ", " : "";
 				}
-				response="Operates at "+(int) (100*currentRecipe.getRecipeScaling(this)) + " efficiency due to interference from at the following distances:"+factoryList;
+				response="Operates at "+Math.round(100*currentRecipe.getRecipeScaling(this)) + "% efficiency: "+factoryList;
 			}
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,response));
 		}
