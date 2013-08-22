@@ -2,13 +2,15 @@ package com.github.igotyou.FactoryMod.Factorys;
 
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
+import com.github.igotyou.FactoryMod.interfaces.Factory;
 import org.bukkit.Location;
-import org.bukkit.block.Chest;
-import org.bukkit.block.Furnace;
-import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.utility.Offset;
+import com.github.igotyou.FactoryMod.utility.Structure;
+import com.github.igotyou.FactoryMod.utility.Structure.Orientation;
+import java.util.List;
+import org.bukkit.entity.Player;
 
 //original file:
 /**
@@ -25,158 +27,60 @@ import com.github.igotyou.FactoryMod.interfaces.Properties;
  * @author igotyou
  *
  */
-public class FactoryObject
-{
+public class FactoryObject implements Factory {
 	//the diffrent factory types, NOTE: these are not the sub-factory types, these are the main types.
-	public enum FactoryType
+	public enum FactoryCatorgory
 	{
 		PRODUCTION,
 		PRINTING_PRESS
 	}
 	
 	
-	protected Location factoryLocation; // Current location of factory center
-	protected Location factoryInventoryLocation; //Current location of factory inventory(normmaly a chest)
-	protected Location factoryPowerSourceLocation;//Current location of factory power source(normmaly a furnace)
+	
+	protected Location location;//Anchor position of the factory structure
+	protected Orientation orientation;//describes oritentation of the factory structure
+	protected Structure structure;//The block structure of the factory
+	protected List<Offset> interactionPoints;
 	protected boolean active; // Whether factory is currently active
-	protected Inventory factoryInventory; // The inventory of the factory
-	protected Inventory factoryPowerInventory;//The inventory of the power source.
-	protected FactoryType factoryType; // The type this factory is
-	protected String subFactoryType;//the SUBfactory type(the ones loaded from the config file)
+	protected FactoryCatorgory factoryCatorgory; // The type this factory is
+	protected String factoryType;//the SUBfactory type(the ones loaded from the config file)
 	protected Properties factoryProperties; // The properties of this factory type and tier
-	protected boolean upgraded; // Whether the tier has recently upgraded
 	
 	/**
 	 * Constructor
 	 */
-	public FactoryObject(Location factoryLocation, Location factoryInventoryLocation, Location factoryPowerSource,
-			FactoryType factoryType, String subFactoryType)
+	public FactoryObject(Location location,
+		Structure structure,
+		Orientation orientation,
+		List<Offset> interactionPoints,
+		boolean active,
+		FactoryCatorgory factoryType,
+		String subFactoryType)
 	{
-		this.factoryLocation = factoryLocation;
-		this.factoryInventoryLocation = factoryInventoryLocation;
-		this.factoryPowerSourceLocation = factoryPowerSource;
-		this.active = false;
-		this.factoryType = factoryType;
-		this.subFactoryType = subFactoryType;
-		this.upgraded = false;
-		if (this.isWhole())
-		{
-			initializeInventory();
-		}
+		this.location=location;
+		this.structure=structure;
+		this.orientation=orientation;
+		this.interactionPoints=interactionPoints;
+		this.active = active;
+		this.factoryCatorgory = factoryType;
+		this.factoryType = subFactoryType;
 		updateProperties();
 	}
 
-	/**
-	 * Constructor
-	 */
-	public FactoryObject(Location factoryLocation, Location factoryInventoryLocation, Location factoryPowerSource,
-			boolean active, FactoryType factoryType, String subFactoryType)
-	{
-		this.factoryLocation = factoryLocation;
-		this.factoryInventoryLocation = factoryInventoryLocation;
-		this.factoryPowerSourceLocation = factoryPowerSource;
-		this.active = active;
-		this.factoryType = factoryType;
-		this.subFactoryType = subFactoryType;
-		this.upgraded = false;
-		if (this.isWhole())
-		{
-			initializeInventory();
-		}
-		updateProperties();
-	}
-	
-	/**
-	 * Constructor
-	 */
-	public FactoryObject(Location factoryLocation, Location factoryInventoryLocation, Location factoryPowerSource,
-			boolean active, int tierLevel, FactoryType factoryType, Inventory factoryInventory,
-			String subFactoryType)
-	{
-		this.factoryLocation = factoryLocation;
-		this.factoryInventoryLocation = factoryInventoryLocation;
-		this.factoryPowerSourceLocation = factoryPowerSource;
-		this.active = active;
-		this.factoryType = factoryType;
-		this.subFactoryType = subFactoryType;
-		this.factoryInventory = factoryInventory;
-		updateProperties();
-	}
-
-	/**
-	 * Initializes the inventory for this factory
-	 */
-	//Due to non-destructable factories this will not have been called on reconstructed factories
-	//however I am unable to find a use for this method in the current code, so it doesn't
-	//seem to be an issue right now, maybe  the calls in the constructor should be gotten rid of
-	//all methods that get the inventory reinitialize the contents.
-	public void initializeInventory()
-	{
-		switch(factoryType)
-		{
-		case PRODUCTION:
-			Chest chestBlock = (Chest)factoryInventoryLocation.getBlock().getState();
-			factoryInventory = chestBlock.getInventory();
-			Furnace furnaceBlock = (Furnace)factoryPowerSourceLocation.getBlock().getState();
-			factoryPowerInventory = furnaceBlock.getInventory();
-			break;
-		default:
-			break;
-		}
-	}
-	
 	/**
 	 * Updates the current properties for the factory.
 	 */
 	public void updateProperties()
 	{
-		FactoryModPlugin.getManager();
-		FactoryModPlugin.getManager().getManager(factoryType);
-		FactoryModPlugin.getManager().getManager(factoryType).getProperties(subFactoryType);
-		factoryProperties = FactoryModPlugin.getManager().getManager(factoryType).getProperties(subFactoryType);
-		
-	}
-	
-	/**
-	 * Returns the user-friendly name for this factory type
-	 */
-	public String factoryName()
-	{
-		switch (factoryType)
-		{
-		case PRODUCTION:
-			return "Production";
-		default: 
-			return null;
-		}
-	}
-
-	/**
-	 * returns the factory Inventory(normally a chest), updates the inventory variable aswell.
-	 */
-	public Inventory getInventory()
-	{
-		Chest chestBlock = (Chest)factoryInventoryLocation.getBlock().getState();
-		factoryInventory = chestBlock.getInventory();
-		return factoryInventory;
-	}
-
-	/**
-	 * Returns the power Source inventory, updates it aswell.
-	 */
-	public Inventory getPowerSourceInventory()
-	{
-		Furnace furnaceBlock = (Furnace)factoryPowerSourceLocation.getBlock().getState();
-		factoryPowerInventory = furnaceBlock.getInventory();
-		return factoryPowerInventory;
+		factoryProperties = FactoryModPlugin.getManager().getManager(factoryCatorgory).getProperties(factoryType);
 	}
 	
 	/**
 	 * Returns the sub-factory type of the factory. 
 	 */
-	public String getSubFactoryType()
+	public String getFactoryType()
 	{
-		return subFactoryType;
+		return factoryType;
 	}
 	
 	
@@ -193,19 +97,34 @@ public class FactoryObject
 	 */
 	public boolean isWhole()
 	{
-	//Check if power source exists
-	if(factoryPowerSourceLocation.getBlock().getType().getId()== 61 || factoryPowerSourceLocation.getBlock().getType().getId()== 62)
-	{
-		//Check inventory location
-		if(factoryInventoryLocation.getBlock().getType().getId()== 54) 	
-		{
-			//Check Interaction block location
-			if(factoryLocation.getBlock().getType().getId()==FactoryModPlugin.CENTRAL_BLOCK_MATERIAL.getId())
-			{
-				return true;
-			}
-		}
+		return structure.exists(location, orientation);
 	}
-	return false;
+	public Location getLocation() {
+		return location;
+	}
+	public Structure getStructure()
+	{
+		return structure;
+	}
+	
+	public Orientation getOrientation() {
+		return orientation;
+	}
+	public boolean exists() {
+		return structure.exists(location, orientation);
+	}
+	public List<Offset> getInteractionPoints() {
+		return interactionPoints;
+	}
+	/*
+	 * gets the index of the interaction point at the location
+	 * returns -1 if no intearction point exists at that location
+	 */
+	public int getInteractionPointIndex(Location location) {
+		return structure.getInteractionPoint(this, location);
+	}
+	
+	public void interactionResponse(Player player, int interactionPoint) {
+		
 	}
 }

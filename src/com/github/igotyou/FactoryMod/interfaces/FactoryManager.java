@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.bukkit.Location;
 
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 //original file:
 /**
@@ -49,12 +51,12 @@ public interface FactoryManager
 /**
 * Creates a machine from an existing machine data object
 */
-	public InteractionResponse addFactory(Factory factory);
+	public InteractionResponse addFactory(BaseFactoryInterface factory);
 
 /**
 * Returns the machine (if any exists) at the given location from this manager
 */
-	public Factory getFactory(Location factoryLocation);
+	public BaseFactoryInterface factoryAtLocation(Location factoryLocation);
 
 /**
 * Returns whether a machine exists at the given location
@@ -69,7 +71,7 @@ public interface FactoryManager
 /**
 * Removes the given machine from the object list
 */
-	public void removeFactory(Factory factory);
+	public void removeFactory(BaseFactoryInterface factory);
 
 /**
 * Returns the saves file name for this manager
@@ -80,4 +82,8 @@ public interface FactoryManager
  * Returns the properties of a particular factory
  */
 	public Properties getProperties(String title);
+/*
+ * Response of these factories to an interaction event
+ */
+	public void playerInteractionReponse(Player player, Block block);
 }

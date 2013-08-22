@@ -1,55 +1,30 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package com.github.igotyou.FactoryMod.interfaces;
 
+import com.github.igotyou.FactoryMod.utility.Structure;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
-import com.github.igotyou.FactoryMod.utility.InteractionResponse;
-import java.util.List;
-//original file:
 /**
- * Machine.java
- * Purpose: An interface for machines to implement with basic functionality
  *
- * @author MrTwiggy
- * @version 0.1 1/14/13
+ * @author Brian
  */
-//edited version:
-/**
-* Factory.java	 
-* Purpose: An interface for factorys to implement with basic functionality
-* @author igotyou
-*/
-public interface Factory
-{
-	/**
-	 * Updates the machine
-	 */
-	public void update();
+public interface Factory {
+		
+	public Location getLocation();
 	
-	public void destroy(Location destroyLocation);
+	public Structure getStructure();
 	
-	/**
-	 * Powers on the machine
-	 */
-	public void powerOn();
+	public Structure.Orientation getOrientation();
+
+	public boolean exists();
 	
-	/**
-	 * Powers off the machine
-	 */
-	public void powerOff();
+	public boolean isWhole();
 	
-	/**
-	 * Toggles the current power state and returns interaction response
-	 */
-	public List<InteractionResponse> togglePower();
-	public List<InteractionResponse> getChestResponse();
-	public List<InteractionResponse> getCentralBlockResponse();
+	public int getInteractionPointIndex(Location location);
 	
-	/**
-	 * Returns the location of the machine
-	 */
-	public Location getCenterLocation();
-	
-	public Location getInventoryLocation();
-	
-	public Location getPowerSourceLocation();
+	public void interactionResponse(Player player, int i);
 }

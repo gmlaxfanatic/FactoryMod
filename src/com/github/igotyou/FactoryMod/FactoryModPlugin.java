@@ -24,7 +24,7 @@ public class FactoryModPlugin extends JavaPlugin
 	
 	public static int UPDATE_CYCLE;
 	public static int SAVE_CYCLE;
-	public static Material CENTRAL_BLOCK_MATERIAL;
+	//public static Material CENTRAL_BLOCK_MATERIAL;
 	public static boolean RETURN_BUILD_MATERIALS;
 	public static boolean CITADEL_ENABLED;
 	public static Material FACTORY_INTERACTION_MATERIAL;
@@ -41,7 +41,7 @@ public class FactoryModPlugin extends JavaPlugin
 		initConfig();
 		//create the main manager
 		manager = new FactoryModManager(this);
-		manager.loadManagers();
+		manager.loadFactoryManagers();
 		//register the events(this should be moved...)
 		registerEvents();
 	}
@@ -80,7 +80,7 @@ public class FactoryModPlugin extends JavaPlugin
 		//how often should the managers save?
 		SAVE_CYCLE = generalConfiguration.getInt("save_cycle",15)*60*20;
 		//what's the material of the center block of factorys?
-		CENTRAL_BLOCK_MATERIAL = Material.getMaterial(generalConfiguration.getString("central_block"));
+		//CENTRAL_BLOCK_MATERIAL = Material.getMaterial(generalConfiguration.getString("central_block"));
 		//Return the build materials upon destruction of factory.
 		RETURN_BUILD_MATERIALS = generalConfiguration.getBoolean("return_build_materials",false);
 		//is citadel enabled?

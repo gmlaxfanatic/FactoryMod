@@ -6,8 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -16,10 +14,11 @@ import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress.OperationMode;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
-import com.github.igotyou.FactoryMod.interfaces.Factory;
+import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -44,17 +43,14 @@ import java.util.Iterator;
 *
 */
 
-public class PrintingPressManager implements FactoryManager
+public class PrintingPressManager  extends BaseFactoryManager implements FactoryManager
 {
-	private FactoryModPlugin plugin;
-	private List<PrintingPress> producers;
 	private long repairTime;
 	public PrintingPressProperties printingPressProperties;
 	
-	public PrintingPressManager(FactoryModPlugin plugin)
+	public PrintingPressManager (FactoryModPlugin plugin)
 	{
-		this.plugin = plugin;
-		producers = new ArrayList<PrintingPress>();
+		super(plugin);
 		printingPressProperties = PrintingPressProperties.fromConfig(plugin, plugin.getConfig().getConfigurationSection("printing_presses"));
 		//Set maintenance clock to 0
 		updateFactorys();
@@ -69,14 +65,15 @@ public class PrintingPressManager implements FactoryManager
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
 		int version = 1;
 		oos.writeInt(version);
-		oos.writeInt(producers.size());
-		for (PrintingPress production : producers)
+		oos.writeInt(factories.size());
+		for (BaseFactory baseFactory : factories)
 		{
 			//order: subFactoryType world recipe1,recipe2 central_x central_y central_z inventory_x inventory_y inventory_z power_x power_y power_z active productionTimer energyTimer current_Recipe_number 
+			PrintingPress printingPress=(PrintingPress) baseFactory;
 			
-			Location centerlocation = production.getCenterLocation();
-			Location inventoryLocation = production.getInventoryLocation();
-			Location powerLocation = production.getPowerSourceLocation();
+			Location centerlocation = printingPress.getCenterLocation();
+			Location inventoryLocation = printingPress.getInventoryLocation();
+			Location powerLocation = printingPress.getPowerSourceLocation();
 			
 			oos.writeUTF(centerlocation.getWorld().getName());
 			
@@ -92,19 +89,19 @@ public class PrintingPressManager implements FactoryManager
 			oos.writeInt(powerLocation.getBlockY());
 			oos.writeInt(powerLocation.getBlockZ());
 			
-			oos.writeBoolean(production.getActive());
-			oos.writeInt(production.getMode().getId());
-			oos.writeInt(production.getProductionTimer());
-			oos.writeInt(production.getEnergyTimer());
-			oos.writeDouble(production.getCurrentRepair());
-			oos.writeLong(production.getTimeDisrepair());
+			oos.writeBoolean(printingPress.getActive());
+			oos.writeInt(printingPress.getMode().getId());
+			oos.writeInt(printingPress.getProductionTimer());
+			oos.writeInt(printingPress.getEnergyTimer());
+			oos.writeDouble(printingPress.getCurrentRepair());
+			oos.writeLong(printingPress.getTimeDisrepair());
 
-			oos.writeInt(production.getContainedPaper());
-			oos.writeInt(production.getContainedBindings());
-			oos.writeInt(production.getContainedSecurityMaterials());
-			oos.writeInt(production.getLockedResultCode());
+			oos.writeInt(printingPress.getContainedPaper());
+			oos.writeInt(printingPress.getContainedBindings());
+			oos.writeInt(printingPress.getContainedSecurityMaterials());
+			oos.writeInt(printingPress.getLockedResultCode());
 			
-			int[] processQueue = production.getProcessQueue();
+			int[] processQueue = printingPress.getProcessQueue();
 			oos.writeInt(processQueue.length);
 			for (int entry : processQueue) {
 				oos.writeInt(entry);
@@ -150,7 +147,7 @@ public class PrintingPressManager implements FactoryManager
 					processQueue[j] = ois.readInt();
 				}
 
-				PrintingPress production = new PrintingPress(centerLocation, inventoryLocation, powerLocation,
+				PrintingPress production = new PrintingPress(inventoryLocation, powerLocation,
 						active, productionTimer,
 						energyTimer, currentRepair, timeDisrepair,
 						mode,
@@ -163,21 +160,6 @@ public class PrintingPressManager implements FactoryManager
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public void updateFactorys() 
-	{
-		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				for (PrintingPress production: producers)
-				{
-					production.update();
-				}
-			}
-		}, 0L, FactoryModPlugin.UPDATE_CYCLE);
 	}
 
 	public InteractionResponse createFactory(Location factoryLocation, Location inventoryLocation, Location powerSourceLocation) 
@@ -202,76 +184,12 @@ public class PrintingPressManager implements FactoryManager
 		}
 		return new InteractionResponse(InteractionResult.FAILURE, "There is already a " + printingPressProperties.getName() + " there!");
 	}
-
-	public InteractionResponse addFactory(Factory factory) 
+	
+	public PrintingPress factoryAtLocation(Location factoryLocation) 
 	{
-		PrintingPress production = (PrintingPress) factory;
-		if (production.getCenterLocation().getBlock().getType().equals(FactoryModPlugin.CENTRAL_BLOCK_MATERIAL) && (!factoryExistsAt(production.getCenterLocation()))
-				|| !factoryExistsAt(production.getInventoryLocation()) || !factoryExistsAt(production.getPowerSourceLocation()))
-		{
-			producers.add(production);
-			return new InteractionResponse(InteractionResult.SUCCESS, "");
-		}
-		else
-		{
-			return new InteractionResponse(InteractionResult.FAILURE, "");
-		}
+		return (PrintingPress) super.factoryAtLocation(factoryLocation);
 	}
 
-	public PrintingPress getFactory(Location factoryLocation) 
-	{
-		for (PrintingPress production : producers)
-		{
-			if (production.getCenterLocation().equals(factoryLocation) || production.getInventoryLocation().equals(factoryLocation)
-					|| production.getPowerSourceLocation().equals(factoryLocation))
-				return production;
-		}
-		return null;
-	}
-	
-	public boolean factoryExistsAt(Location factoryLocation) 
-	{
-		boolean returnValue = false;
-		if (getFactory(factoryLocation) != null)
-		{
-			returnValue = true;
-		}
-		return returnValue;
-	}
-	
-	public boolean factoryWholeAt(Location factoryLocation) 
-	{
-		boolean returnValue = false;
-		if (getFactory(factoryLocation) != null)
-		{
-			returnValue = getFactory(factoryLocation).isWhole();
-		}
-		return returnValue;
-	}
-
-	public void removeFactory(Factory factory) 
-	{
-		producers.remove((ProductionFactory)factory);
-	}
-	
-	public void updateRepair(long time)
-	{
-		for (PrintingPress production: producers)
-		{
-			production.updateRepair(time/((double)FactoryModPlugin.REPAIR_PERIOD));
-		}
-		long currentTime=System.currentTimeMillis();
-		Iterator<PrintingPress> itr=producers.iterator();
-		while(itr.hasNext())
-		{
-			PrintingPress producer=itr.next();
-			if(currentTime>(producer.getTimeDisrepair()+FactoryModPlugin.DISREPAIR_PERIOD))
-			{
-				itr.remove();
-			}
-		}
-	}
-	
 	public String getSavesFileName() 
 	{
 		return FactoryModPlugin.PRINTING_PRESSES_SAVE_FILE;

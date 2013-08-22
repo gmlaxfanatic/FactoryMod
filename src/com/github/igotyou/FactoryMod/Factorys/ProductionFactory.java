@@ -4,6 +4,7 @@ import org.bukkit.Location;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
+import com.github.igotyou.FactoryMod.managers.ProductionManager;
 import com.github.igotyou.FactoryMod.properties.ProductionProperties;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
@@ -11,27 +12,29 @@ import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
+import com.github.igotyou.FactoryMod.utility.Structure;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import org.bukkit.inventory.Inventory;
 
 public class ProductionFactory extends BaseFactory
 {
 
 	private ProductionRecipe currentRecipe = null;//the recipe that is currently selected
 	private ProductionProperties productionFactoryProperties;//the properties of the production factory
-	public static final FactoryType FACTORY_TYPE = FactoryType.PRODUCTION;//the factory's type
+	public static final FactoryCatorgory FACTORY_TYPE = FactoryCatorgory.PRODUCTION;//the factory's type
+	public static Structure productionStructure;
 	private List<ProductionRecipe> recipes;
 	private int currentRecipeNumber = 0;//the array index of the current recipe
 	
 	/**
 	 * Constructor
 	 */
-	public ProductionFactory (Location factoryLocation, Location factoryInventoryLocation, Location factoryPowerSource
-			, String subFactoryType)
+	public ProductionFactory (Location location, Structure.Orientation orientation, String subFactoryType)
 	{
-		super(factoryLocation, factoryInventoryLocation, factoryPowerSource, ProductionFactory.FACTORY_TYPE, subFactoryType);
+		super(location, productionStructure, orientation, false, ProductionFactory.FACTORY_TYPE, subFactoryType);
 		this.productionFactoryProperties = (ProductionProperties) factoryProperties;
 		this.recipes=new ArrayList<ProductionRecipe> (productionFactoryProperties.getRecipes());
 		this.setRecipeToNumber(0);
@@ -40,11 +43,11 @@ public class ProductionFactory extends BaseFactory
 	/**
 	 * Constructor
 	 */
-	public ProductionFactory (Location factoryLocation, Location factoryInventoryLocation, Location factoryPowerSource,
-			String subFactoryType, boolean active, int currentProductionTimer, int currentEnergyTimer,  List<ProductionRecipe> recipes,
+	public ProductionFactory (Location location, Structure.Orientation orientation,
+			String factoryType, boolean active, int currentProductionTimer, int currentEnergyTimer,  List<ProductionRecipe> recipes,
 			int currentRecipeNumber,double currentMaintenance,long timeDisrepair)
 	{
-		super(factoryLocation, factoryInventoryLocation, factoryPowerSource, ProductionFactory.FACTORY_TYPE, active, subFactoryType, currentProductionTimer, currentEnergyTimer, currentMaintenance, timeDisrepair);
+		super(location, productionStructure, orientation, active, ProductionFactory.FACTORY_TYPE, factoryType, currentProductionTimer, currentEnergyTimer, currentMaintenance, timeDisrepair);
 		this.productionFactoryProperties = (ProductionProperties) factoryProperties;
 		this.recipes=recipes;
 		this.setRecipeToNumber(currentRecipeNumber);
@@ -214,7 +217,7 @@ public class ProductionFactory extends BaseFactory
 		if(currentRecipe.hasRecipeScaling())
 		{
 			String response;
-			Set<ProductionFactory> scaledRecipeFactories=FactoryModPlugin.manager.getProductionManager().getScaledFactories(currentRecipe.getscaledRecipes());
+			Set<ProductionFactory> scaledRecipeFactories=((ProductionManager)FactoryModPlugin.manager.getManager(ProductionManager.class)).getScaledFactories(currentRecipe.getscaledRecipes());
 			List<ProductionFactory> interferingFactories=new LinkedList<ProductionFactory>();
 			for(ProductionFactory scaledRecipeFactory:scaledRecipeFactories)
 			{
@@ -280,5 +283,12 @@ public class ProductionFactory extends BaseFactory
 	@Override
 	public int getMaxRepair() {
 		return productionFactoryProperties.getRepair();
+	}
+	
+	/*
+	 * returns the inventory of a potential produciton factory at this location
+	 */
+	public static Inventory getConstructionInventory(Location location) {
+		return null;
 	}
 }

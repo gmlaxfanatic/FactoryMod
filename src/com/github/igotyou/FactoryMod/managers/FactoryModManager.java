@@ -11,11 +11,11 @@ import org.bukkit.Location;
 import org.bukkit.event.Listener;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryType;
-import com.github.igotyou.FactoryMod.interfaces.Factory;
+import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCatorgory;
+import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
-import com.github.igotyou.FactoryMod.utility.InteractionResponse;
-import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 
 public class FactoryModManager 
@@ -80,13 +80,19 @@ public class FactoryModManager
 	 */
 	public void onDisable()
 	{
-		saveManagers();
+		saveFactoryManagers();
 	}
-	
+	/**
+	 * Returns the BaseFactoryInterface Saves file
+	 */
+	public File getSavesFile(String fileName)
+	{
+		return new File(plugin.getDataFolder(), fileName + ".txt");
+	}
 	/**
 	 * Saves all managers
 	 */
-	private void saveManagers()
+	private void saveFactoryManagers()
 	{
 		for (FactoryManager manager : factoryManagers)
 		{
@@ -97,7 +103,7 @@ public class FactoryModManager
 	/**
 	 * Loads all managers
 	 */
-	public void loadManagers()
+	public void loadFactoryManagers()
 	{
 		for (FactoryManager manager : factoryManagers)
 		{
@@ -105,23 +111,6 @@ public class FactoryModManager
 		}
 	}
 	
-	/**
-	 * Returns the appropriate manager depending on the given Manager Type
-	 */
-	@SuppressWarnings("rawtypes")
-	public FactoryManager getManager(Class managerType)
-	{
-		for (FactoryManager manager : factoryManagers)
-		{
-			if (managerType.isInstance(manager))
-			{
-				return manager;
-			}
-		}
-		
-		return null;
-	}
-		
 	/**
 	 * Load file
 	 */
@@ -193,20 +182,12 @@ public class FactoryModManager
 			public void run()
 			{
 				FactoryModPlugin.sendConsoleMessage("Saving Factory data...");
-				saveManagers();
+				saveFactoryManagers();
 			}
 		}, (FactoryModPlugin.SAVE_CYCLE), 
 		FactoryModPlugin.SAVE_CYCLE);
 	}
 	
-	/**
-	 * Returns the Factory Saves file
-	 */
-	public File getSavesFile(String fileName)
-	{
-		return new File(plugin.getDataFolder(), fileName + ".txt");
-	}
-
 	/**
 	 * Returns whether a factory exists at given location in any manager
 	 */
@@ -236,57 +217,28 @@ public class FactoryModManager
 		}	
 		return false;
 	}	
-	
 
-	public ProductionManager getProductionManager() 
-	{
-		for (FactoryManager manager : factoryManagers)
-		{
-			if (manager.getClass() == ProductionManager.class)
-			{
-				return (ProductionManager) manager;
-			}
-		}
-		
-		return null;
-	}
-	
-	public PrintingPressManager getPrintingPressManager() 
-	{
-		for (FactoryManager manager : factoryManagers)
-		{
-			if (manager.getClass() == PrintingPressManager.class)
-			{
-				return (PrintingPressManager) manager;
-			}
-		}
-		
-		return null;
-	}
-
-	public Factory getFactory(Location location) {
+	public BaseFactoryInterface getFactory(Location location) {
 		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.factoryExistsAt(location))
 			{
-				return manager.getFactory(location);
+				return manager.factoryAtLocation(location);
 			}
 		}	
 		return null;
 	}
-
-	public FactoryManager getManager(Location location) {
-		for (FactoryManager manager : factoryManagers)
+	/*
+	 * Removes a factory at the given location if it exists
+	 */
+	public void remove(BaseFactoryInterface factory) {
+		for (FactoryManager factoryManager : factoryManagers)
 		{
-			if (manager.factoryExistsAt(location))
-			{
-				return manager;
-			}
+			factoryManager.removeFactory(factory);
 		}	
-		return null;
 	}
 
-	public InteractionResponse createFactory(Location centralLocation,
+	/*public InteractionResponse createFactory(Location centralLocation,
 			Location inventoryLocation, Location powerLocation) {
 		InteractionResponse response = null;
 		for (FactoryManager manager : factoryManagers)
@@ -298,22 +250,53 @@ public class FactoryModManager
 			}
 		}
 		return response;
+	}*/
+	
+	public FactoryManager getManager(FactoryCatorgory factoryType)
+	{
+		Class managerClass=null;
+		if(factoryType==FactoryCatorgory.PRODUCTION)
+		{
+			managerClass = PrintingPressManager.class;
+		}
+		if(factoryType==FactoryCatorgory.PRINTING_PRESS)
+		{
+			managerClass = ProductionManager.class;
+		}
+		for (FactoryManager manager : factoryManagers)
+		{
+			if (manager.getClass() == PrintingPressManager.class)
+			{
+				return (PrintingPressManager) manager;
+			}
+		}
+		return null;			
 	}
 	
-	public FactoryManager getManager(FactoryType factoryType)
+	/**
+	 * Returns the appropriate manager depending on the given Manager Type
+	 */
+	@SuppressWarnings("rawtypes")
+	public FactoryManager getManager(Class managerType)
 	{
-		if(factoryType==FactoryType.PRODUCTION)
+		for (FactoryManager manager : factoryManagers)
 		{
-			return getProductionManager();
+			if (managerType.isInstance(manager))
+			{
+				return manager;
+			}
 		}
-		if(factoryType==FactoryType.PRINTING_PRESS)
-		{
-			return getPrintingPressManager();
+		
+		return null;
+	}
+	
+	/*
+	 * Handles response to playerInteractionEvent
+	 */
+	
+	public void playerInteractionReponse(Player player, Block block) {
+		for(FactoryManager factoryManager:factoryManagers) {
+			factoryManager.playerInteractionReponse(player, block);
 		}
-		else
-		{
-			return null;
-		}
-			
 	}
 }

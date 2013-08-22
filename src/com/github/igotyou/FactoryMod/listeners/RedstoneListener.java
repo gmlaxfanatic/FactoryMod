@@ -101,7 +101,7 @@ public class RedstoneListener implements Listener {
 					//Is the factory a production factory?
 					if (productionMan.factoryExistsAt(block.getLocation()))
 					{
-						ProductionFactory factory = (ProductionFactory) productionMan.getFactory(block.getLocation());
+						ProductionFactory factory = (ProductionFactory) productionMan.factoryAtLocation(block.getLocation());
 						
 						Block lever = factory.findActivationLever();
 						if (lever == null) {

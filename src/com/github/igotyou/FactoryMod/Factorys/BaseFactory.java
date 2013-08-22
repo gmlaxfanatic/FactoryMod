@@ -17,56 +17,59 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.interfaces.Factory;
+import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
+import com.github.igotyou.FactoryMod.utility.Offset;
+import com.github.igotyou.FactoryMod.utility.Structure;
+import java.util.Arrays;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 
-public abstract class BaseFactory extends FactoryObject implements Factory {
+public abstract class BaseFactory extends FactoryObject implements BaseFactoryInterface {
 	public static final BlockFace[] REDSTONE_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
-
 	protected int currentProductionTimer = 0;//The "production timer", which trachs for how long the factory has been producing the selected recipe
 	protected int currentEnergyTimer = 0;//Time since last energy consumption(if there's no lag, it's in seconds)
 	protected double currentRepair;
 	protected long timeDisrepair;//The time at which the factory went into disrepair
-
-	public BaseFactory(Location factoryLocation,
-			Location factoryInventoryLocation, Location factoryPowerSource,
-			boolean active, FactoryType factoryType, String subFactoryType) {
-		super(factoryLocation, factoryInventoryLocation, factoryPowerSource, active,
-				factoryType, subFactoryType);
-		this.currentRepair = 0.0;
-		this.timeDisrepair=3155692597470L;
-	}
-
-	public BaseFactory(Location factoryLocation,
-			Location factoryInventoryLocation, Location factoryPowerSource,
-			boolean active, int tierLevel, FactoryType factoryType,
-			Inventory factoryInventory, String subFactoryType) {
-		super(factoryLocation, factoryInventoryLocation, factoryPowerSource, active,
-				tierLevel, factoryType, factoryInventory, subFactoryType);
-		this.currentRepair = 0.0;
-		this.timeDisrepair=3155692597470L;
-	}
-
-	public BaseFactory(Location factoryLocation,
-			Location factoryInventoryLocation, Location factoryPowerSource,
-			FactoryType factoryType, String subFactoryType) {
-		super(factoryLocation, factoryInventoryLocation, factoryPowerSource,
-				factoryType, subFactoryType);
+	
+	public BaseFactory(Location location,
+		Structure structure,
+		Structure.Orientation orientation,
+		boolean active,
+		FactoryCatorgory factoryType,
+		String subFactoryType) {
+		super(location,
+			structure,
+			orientation,
+			Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0)),
+			active,
+			factoryType,
+			subFactoryType);
 		this.currentRepair=0.0;
 		this.timeDisrepair=3155692597470L;//Year 2070, default starting value
 	}
 	
-	public BaseFactory(Location factoryLocation,
-			Location factoryInventoryLocation, Location factoryPowerSource,
-			FactoryType factoryType, boolean active, String subFactoryType,
-			int currentProductionTimer, int currentEnergyTimer,
-			double currentMaintenance, long timeDisrepair) {
-		super(factoryLocation, factoryInventoryLocation, factoryPowerSource,
-				factoryType, subFactoryType);
+	public BaseFactory(Location location,
+		Structure structure,
+		Structure.Orientation orientation,
+		boolean active,
+		FactoryCatorgory factoryType,
+		String subFactoryType,
+		int currentProductionTimer,
+		int currentEnergyTimer,	
+		double currentMaintenance,
+		long timeDisrepair) {
+		super(location,
+			structure,
+			orientation,
+			Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0)),
+			active,
+			factoryType,
+			subFactoryType);
 		this.active = active;
 		this.currentEnergyTimer = currentEnergyTimer;
 		this.currentProductionTimer = currentProductionTimer;
@@ -78,7 +81,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 		Block lever = findActivationLever();
 		if (lever != null) {
 			setLever(lever, state);
-			shotGunUpdate(factoryPowerSourceLocation.getBlock());
+			shotGunUpdate(getPowerSourceLocation().getBlock());
 		}
 	}
 
@@ -94,12 +97,12 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 			}
 			
 			//lots of code to make the furnace turn off, without loosing contents.
-			Furnace furnace = (Furnace) factoryPowerSourceLocation.getBlock().getState();
+			Furnace furnace = (Furnace) getPowerSourceLocation().getBlock().getState();
 			byte data = furnace.getData().getData();
 			ItemStack[] oldContents = furnace.getInventory().getContents();
 			furnace.getInventory().clear();
-			factoryPowerSourceLocation.getBlock().setType(Material.FURNACE);
-			furnace = (Furnace) factoryPowerSourceLocation.getBlock().getState();
+			getPowerSourceLocation().getBlock().setType(Material.FURNACE);
+			furnace = (Furnace) getPowerSourceLocation().getBlock().getState();
 			furnace.setRawData(data);
 			furnace.update();
 			furnace.getInventory().setContents(oldContents);
@@ -129,12 +132,12 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 		}
 		
 		//lots of code to make the furnace light up, without loosing contents.
-		Furnace furnace = (Furnace) factoryPowerSourceLocation.getBlock().getState();
+		Furnace furnace = (Furnace) getPowerSourceLocation().getBlock().getState();
 		byte data = furnace.getData().getData();
 		ItemStack[] oldContents = furnace.getInventory().getContents();
 		furnace.getInventory().clear();
-		factoryPowerSourceLocation.getBlock().setType(Material.BURNING_FURNACE);
-		furnace = (Furnace) factoryPowerSourceLocation.getBlock().getState();
+		getPowerSourceLocation().getBlock().setType(Material.BURNING_FURNACE);
+		furnace = (Furnace) getPowerSourceLocation().getBlock().getState();
 		furnace.setRawData(data);
 		furnace.update();
 		furnace.getInventory().setContents(oldContents);
@@ -399,7 +402,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 	 */
 	public Location getCenterLocation() 
 	{
-		return factoryLocation;
+		return structure.getLocationOfOffset(location, interactionPoints.get(0));
 	}
 
 	/**
@@ -407,7 +410,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 	 */
 	public Location getInventoryLocation() 
 	{
-		return factoryInventoryLocation;
+		return structure.getLocationOfOffset(location, interactionPoints.get(1));
 	}
 
 	/**
@@ -415,7 +418,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 	 */
 	public Location getPowerSourceLocation() 
 	{
-		return factoryPowerSourceLocation;
+		return structure.getLocationOfOffset(location, interactionPoints.get(2));
 	}
 	
 	/**
@@ -511,4 +514,34 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 	public List<InteractionResponse> getCentralBlockResponse() {
 		return new ArrayList<InteractionResponse>();
 	}
+	
+	/**
+	 * returns the factory Inventory(normally a chest), updates the inventory variable as well.
+	 */
+	public Inventory getInventory()
+	{
+		return ((InventoryHolder)getInventoryLocation().getBlock().getState()).getInventory();
+	}
+
+	/**
+	 * Returns the power Source inventory
+	 */
+	public Inventory getPowerSourceInventory()
+	{
+		return ((InventoryHolder)getPowerSourceLocation().getBlock().getState()).getInventory();
+	}
+	
+	public void interactionResponse(Player player, int interactionPoint) {
+		switch (interactionPoint) {
+			case -1: break;
+			case 0: InteractionResponse.messagePlayerResults(player, getChestResponse());
+				break;
+			case 1: InteractionResponse.messagePlayerResults(player, getCentralBlockResponse());
+				break;
+			case 2: InteractionResponse.messagePlayerResults(player, togglePower());
+				break;
+		}
+	}
+	
+	
 }

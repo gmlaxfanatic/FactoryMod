@@ -23,7 +23,7 @@ import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
-import com.github.igotyou.FactoryMod.interfaces.Factory;
+import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.properties.ProductionProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import org.bukkit.configuration.ConfigurationSection;
 
-public class ProductionManager implements FactoryManager
+public class ProductionManager  extends BaseFactoryManager implements FactoryManager
 {
 	public  Map<String, ProductionProperties> productionProperties;
 	public  Map<String,ProductionRecipe> productionRecipes;
@@ -45,7 +45,7 @@ public class ProductionManager implements FactoryManager
 	
 	public ProductionManager(FactoryModPlugin plugin)
 	{
-		this.plugin = plugin;
+		super(plugin);
 		initConfig(plugin.getConfig().getConfigurationSection("production"));
 		//Set maintenance clock to 0
 		updateFactorys();
@@ -68,7 +68,7 @@ public class ProductionManager implements FactoryManager
 			
 			
 			
-			bufferedWriter.append(production.getSubFactoryType());
+			bufferedWriter.append(production.getFactoryType());
 			bufferedWriter.append(" ");
 			
 			List<ProductionRecipe> recipes=production.getRecipes();
@@ -158,7 +158,7 @@ public class ProductionManager implements FactoryManager
 					}
 				}
 
-				ProductionFactory production = new ProductionFactory(centerLocation, inventoryLocation, powerLocation, subFactoryType, active, productionTimer, energyTimer, new ArrayList<ProductionRecipe>(recipes), currentRecipeNumber, currentRepair,timeDisrepair);
+				ProductionFactory production = new ProductionFactory(null,null, subFactoryType, active, productionTimer, energyTimer, new ArrayList<ProductionRecipe>(recipes), currentRecipeNumber, currentRepair,timeDisrepair);
 				addFactory(production);
 			}
 		}
@@ -177,41 +177,24 @@ public class ProductionManager implements FactoryManager
 		productionProperties=ProductionProperties.productionPropertiesFromConfig(productionConfiguration.getConfigurationSection("factories"), this);
 	}
 	
-	public void updateFactorys() 
+	public InteractionResponse createFactory(Location location) 
 	{
-		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				for (ProductionFactory production: productionFactories)
-				{
-					production.update();
-				}
-			}
-		}, 0L, FactoryModPlugin.UPDATE_CYCLE);
-	}
-
-	public InteractionResponse createFactory(Location factoryLocation, Location inventoryLocation, Location powerSourceLocation) 
-	{
-		if (!factoryExistsAt(factoryLocation))
+		if (!factoryExistsAt(location))
 		{
 			Map<String, ProductionProperties> properties = productionProperties;
-			Block inventoryBlock = inventoryLocation.getBlock();
-			Chest chest = (Chest) inventoryBlock.getState();
-			Inventory chestInventory = chest.getInventory();
+			Inventory inventory = ProductionFactory.getConstructionInventory(location);
 			String subFactoryType = null;
 			for (Map.Entry<String, ProductionProperties> entry : properties.entrySet())
 			{
 				ItemList<NamedItemStack> inputs = entry.getValue().getInputs();
-				if(inputs.exactlyIn(chestInventory))
+				if(inputs.exactlyIn(inventory))
 				{
 					subFactoryType = entry.getKey();
 				}
 			}
 			if (subFactoryType != null)
 			{
-				ProductionFactory production = new ProductionFactory(factoryLocation, inventoryLocation, powerSourceLocation,subFactoryType);
+				ProductionFactory production = new ProductionFactory(location, null, subFactoryType);
 				if (properties.get(subFactoryType).getInputs().allIn(production.getInventory()))
 				{
 					addFactory(production);
@@ -223,112 +206,8 @@ public class ProductionManager implements FactoryManager
 		}
 		return new InteractionResponse(InteractionResult.FAILURE, "There is already a factory there!");
 	}
-	
-	public InteractionResponse createFactory(Location factoryLocation, Location inventoryLocation, Location powerSourceLocation, int productionTimer, int energyTimer) 
-	{
-		if (!factoryExistsAt(factoryLocation))
-		{
-			Map<String, ProductionProperties> properties = productionProperties;
-			Block inventoryBlock = inventoryLocation.getBlock();
-			Chest chest = (Chest) inventoryBlock.getState();
-			Inventory chestInventory = chest.getInventory();
-			String subFactoryType = null;
-			boolean hasMaterials = true;
-			for (Map.Entry<String, ProductionProperties> entry : properties.entrySet())
-			{
-				ItemList<NamedItemStack> inputs = entry.getValue().getInputs();
-				if(!inputs.allIn(chestInventory))
-				{
-					hasMaterials = false;
-				}
-				if (hasMaterials == true)
-				{
-					subFactoryType = entry.getKey();
-				}
-			}
-			if (hasMaterials && subFactoryType != null)
-			{
-				ProductionFactory production = new ProductionFactory(factoryLocation, inventoryLocation, powerSourceLocation,subFactoryType);
-				if (properties.get(subFactoryType).getInputs().removeFrom(production.getInventory()))
-				{
-					addFactory(production);
-					return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + subFactoryType + " production factory");
-				}
-			}
-			return new InteractionResponse(InteractionResult.FAILURE, "Not enough materials in chest!");
-		}
-		return new InteractionResponse(InteractionResult.FAILURE, "There is already a factory there!");
-	}
 
-	public InteractionResponse addFactory(Factory factory) 
-	{
-		ProductionFactory production = (ProductionFactory) factory;
-		if (production.getCenterLocation().getBlock().getType().equals(Material.WORKBENCH) && (!factoryExistsAt(production.getCenterLocation()))
-				|| !factoryExistsAt(production.getInventoryLocation()) || !factoryExistsAt(production.getPowerSourceLocation()))
-		{
-			productionFactories.add(production);
-			return new InteractionResponse(InteractionResult.SUCCESS, "");
-		}
-		else
-		{
-			return new InteractionResponse(InteractionResult.FAILURE, "");
-		}
-	}
-
-	public ProductionFactory getFactory(Location factoryLocation) 
-	{
-		for (ProductionFactory production : productionFactories)
-		{
-			if (production.getCenterLocation().equals(factoryLocation) || production.getInventoryLocation().equals(factoryLocation)
-					|| production.getPowerSourceLocation().equals(factoryLocation))
-				return production;
-		}
-		return null;
-	}
-	
-	public boolean factoryExistsAt(Location factoryLocation) 
-	{
-		boolean returnValue = false;
-		if (getFactory(factoryLocation) != null)
-		{
-			returnValue = true;
-		}
-		return returnValue;
-	}
-	
-	public boolean factoryWholeAt(Location factoryLocation) 
-	{
-		boolean returnValue = false;
-		if (getFactory(factoryLocation) != null)
-		{
-			returnValue = getFactory(factoryLocation).isWhole();
-		}
-		return returnValue;
-	}
-
-	public void removeFactory(Factory factory) 
-	{
-		productionFactories.remove((ProductionFactory)factory);
-	}
-	
-	public void updateRepair(long time)
-	{
-		for (ProductionFactory production: productionFactories)
-		{
-			production.updateRepair(time/((double)FactoryModPlugin.REPAIR_PERIOD));
-		}
-		long currentTime=System.currentTimeMillis();
-		Iterator<ProductionFactory> itr=productionFactories.iterator();
-		while(itr.hasNext())
-		{
-			ProductionFactory producer=itr.next();
-			if(currentTime>(producer.getTimeDisrepair()+FactoryModPlugin.DISREPAIR_PERIOD))
-			{
-				itr.remove();
-			}
-		}
-	}
-	
+	@Override
 	public String getSavesFileName() 
 	{
 		return FactoryModPlugin.PRODUCTION_SAVES_FILE;
@@ -366,4 +245,5 @@ public class ProductionManager implements FactoryManager
 		}
 		return factoriesByRecipe;
 	}
+
 }

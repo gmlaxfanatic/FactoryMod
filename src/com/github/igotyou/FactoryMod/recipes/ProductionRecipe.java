@@ -4,6 +4,7 @@ package com.github.igotyou.FactoryMod.recipes;
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
+import com.github.igotyou.FactoryMod.managers.ProductionManager;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.ArrayList;
@@ -126,7 +127,7 @@ public class ProductionRecipe implements Recipe
 	 */
 	public double getRecipeScaling(ProductionFactory producingFactory)
 	{
-		Set<ProductionFactory> otherFactories=FactoryModPlugin.getManager().getProductionManager().getScaledFactories(scaledRecipes);
+		Set<ProductionFactory> otherFactories=((ProductionManager)FactoryModPlugin.manager.getManager(ProductionManager.class)).getScaledFactories(scaledRecipes);
 		if(distanceScaling==0)
 		{
 			return 1;

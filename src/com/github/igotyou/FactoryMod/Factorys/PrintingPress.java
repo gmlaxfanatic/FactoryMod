@@ -19,6 +19,8 @@ import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.PrettyLore;
+import com.github.igotyou.FactoryMod.utility.Structure;
+import com.github.igotyou.FactoryMod.utility.Structure.Orientation;
 
 public class PrintingPress extends BaseFactory {
 	
@@ -35,11 +37,8 @@ public class PrintingPress extends BaseFactory {
 	private int processQueueOffset;
 	private int lockedResultCode;
 
-	public PrintingPress(Location factoryLocation,
-			Location factoryInventoryLocation, Location factoryPowerSource,
-			boolean active, PrintingPressProperties printingPressProperties) {
-		super(factoryLocation, factoryInventoryLocation, factoryPowerSource, active,
-				FactoryType.PRINTING_PRESS, "press");
+	public PrintingPress(Location location, Orientation orientation, boolean active, PrintingPressProperties printingPressProperties) {
+		super(location, orientation, active, FactoryCatorgory.PRINTING_PRESS, "press");
 		this.mode = OperationMode.REPAIR;
 		this.printingPressProperties = printingPressProperties;
 		this.containedPaper = 0;
@@ -50,16 +49,15 @@ public class PrintingPress extends BaseFactory {
 		this.lockedResultCode = 0;
 	}
 
-	public PrintingPress(Location factoryLocation,
-			Location factoryInventoryLocation, Location factoryPowerSource,
+	public PrintingPress(Location location, Orientation orientation,
 			boolean active,
 			int currentProductionTimer, int currentEnergyTimer,
 			double currentMaintenance, long timeDisrepair, OperationMode mode,
 			PrintingPressProperties printingPressProperties,
 			int containedPaper, int containedBindings, int containedSecurityMaterials,
 			int[] processQueue, int lockedResultCode) {
-		super(factoryLocation, factoryInventoryLocation, factoryPowerSource,
-				FactoryType.PRINTING_PRESS, active, "Printing Press", currentProductionTimer,
+		super(location, orientation, active,
+				FactoryCatorgory.PRINTING_PRESS, "Printing Press", currentProductionTimer,
 				currentEnergyTimer, currentMaintenance, timeDisrepair);
 		this.mode = mode;
 		this.active = active;
