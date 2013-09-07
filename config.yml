@@ -1936,9 +1936,9 @@ production_recipes:
       Glass Bottle:
         material: GLASS_BOTTLE
         amount: 24
-      Wheat:
-        material: WHEAT
-        amount: 1280
+      Hay Bale:
+        material: HAY_BLOCK
+        amount: 143
     outputs:
       Exp Bottle:
         material: EXP_BOTTLE
