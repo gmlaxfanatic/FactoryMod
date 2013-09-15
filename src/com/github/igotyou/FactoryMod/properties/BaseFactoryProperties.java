@@ -9,6 +9,7 @@ import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.Material;
@@ -18,15 +19,14 @@ import org.bukkit.Material;
  * @author Brian
  */
 public class BaseFactoryProperties {
-	public static Structure structure=FactoryModPlugin.getManager().getStructureManager().getStructure("BaseFactory");;
-	public static List<Offset> interactionPoints;
+	public static Structure structure=FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory");;
+	public static List<Offset> interactionPoints = Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0));
 	protected ItemList<NamedItemStack> fuel;
 	protected int repair;
 	private int energyTime;
 	private String name;
 		
 	public BaseFactoryProperties(ItemList<NamedItemStack>  fuel, int repair, int energyTime, String name) {
-		this.structure=FactoryModPlugin.getManager().getStructureManager().getStructure("BaseFactory");
 		this.fuel=fuel;
 		this.repair=repair;
 		this.energyTime=energyTime;

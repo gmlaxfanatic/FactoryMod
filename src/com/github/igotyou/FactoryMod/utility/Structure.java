@@ -114,7 +114,18 @@ public class Structure {
 	 * Should add materials of comparable blocks ie lit furnance
 	 */
 	public Set<Material> materialsOfOffsets(List<Offset> offsets) {
-		return null;
+		Set<Material> materials = new HashSet();
+		for(Offset offset:offsets) {
+			if(validOffset(offset)) {
+				materials.add(Material.getMaterial(blocks[offset.x][offset.y][offset.z]));
+			}
+		}
+		return materials;
+	}
+	
+	private boolean validOffset(Offset offset) {
+		return offset.x<blocks.length && offset.y<blocks[0].length && offset.z<blocks[0][0].length
+			&& offset.x>=0 && offset.y>=0 && offset.z>=0;
 	}
 	
 	public Set<Material> getMaterials(){
@@ -140,11 +151,11 @@ public class Structure {
 	 * Parses a Minecraft schematic file to a structure object
 	 */
 	
-	public static Structure parseSchematic(String filename)
+	public static Structure parseSchematic(File file)
 	{
 		try
 		{
-			NBTInputStream stream = new NBTInputStream(new FileInputStream(new File(filename)));
+			NBTInputStream stream = new NBTInputStream(new FileInputStream(file));
 			CompoundTag schematicTag = (CompoundTag) stream.readTag();
 			Map<String, Tag> tags = schematicTag.getValue();
 			short w = ((ShortTag)tags.get("Width")).getValue();

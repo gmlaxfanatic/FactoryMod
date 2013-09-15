@@ -28,7 +28,8 @@ public class StructureManager {
 	 */
 	private Map<String,Structure> importStructures(String directory) {
 		Map<String,Structure> structures = new HashMap<String,Structure>();
-		File[] files = new File(directory).listFiles();
+		plugin.saveResource(directory+"/production.schematic", true);
+		/*File[] files = (new File(plugin.getDataFolder(),directory)).listFiles();
 		for (File file : files) {
 		    if (file.isFile() && file.getName().endsWith(".schematic")) {
 			try { 
@@ -38,7 +39,8 @@ public class StructureManager {
 				e.printStackTrace();
 			}
 		    }
-		}
+		}*/
+		structures.put("ItemFactory",Structure.parseSchematic(new File(plugin.getDataFolder(),directory+"/production.schematic")));
 		return structures;
 	}
 	/*

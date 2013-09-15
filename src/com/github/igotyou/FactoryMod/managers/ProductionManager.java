@@ -49,6 +49,8 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 		super(plugin);
 		initConfig(plugin.getConfig().getConfigurationSection("production"));
 		for(ProductionProperties productionProperties:allProductionProperties.values()) {
+			productionProperties.getName();
+			interactionMaterials.clear();
 			interactionMaterials.addAll(productionProperties.getInteractionMaterials());
 		}
 		//Set maintenance clock to 0

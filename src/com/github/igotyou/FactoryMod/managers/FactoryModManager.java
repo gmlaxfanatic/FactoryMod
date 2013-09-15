@@ -40,23 +40,22 @@ public class FactoryModManager
 	 */
 	public FactoryModManager(FactoryModPlugin plugin)
 	{
-		this.plugin = plugin;
-		initializeManagers();
-		periodicSaving();
+		this.plugin = plugin;		
 	}
 	
 	/**
 	 * Initializes the necassary managers for enabled factorys
 	 */
-	private void initializeManagers()
+	public void initializeManagers()
 	{
 		factoryManagers = new ArrayList<FactoryManager>();
 		listeners = new ArrayList<Listener>();
 		
 		initializeStructureManager();
+		initializeCraftingManager();
 		initializeProductionManager();
 		initializePrintingPressManager();
-		initializeCraftingManager();
+		periodicSaving();
 	}
 	
 
