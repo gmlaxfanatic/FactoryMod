@@ -7,20 +7,23 @@ package com.github.igotyou.FactoryMod.managers;
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
+import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.properties.BaseFactoryProperties;
+import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
-import static com.untamedears.citadel.Utility.getReinforcement;
-import static com.untamedears.citadel.Utility.isReinforced;
-import com.untamedears.citadel.entity.PlayerReinforcement;
+import com.github.igotyou.FactoryMod.utility.Offset;
+import com.github.igotyou.FactoryMod.utility.Structure;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -30,11 +33,20 @@ public class BaseFactoryManager {
 	
 	protected FactoryModPlugin plugin;
 	protected List<BaseFactory> factories;
+	protected Set<Material> interactionMaterials;
+	protected long repairTime;
+	/*
+	 * For efficiency in factory creation Each unique structure points to a creation point
+	 * used by that structure, which in turn points to the properites which use those offsets
+	 */
+	
+	protected Map<Structure,Map<Offset,Properties>> structures=new HashMap<Structure,Map<Offset,Properties>>();
 	
 	public BaseFactoryManager(FactoryModPlugin plugin)
 	{
 		this.plugin=plugin;
 		factories = new ArrayList<BaseFactory>();
+		interactionMaterials=new HashSet<Material>();
 	}
 	
 	public void updateFactorys() 
@@ -57,11 +69,15 @@ public class BaseFactoryManager {
 		for (BaseFactory baseFactory : factories)
 		{
 			
-			if(baseFactory.getStructure().locationContainedInStructure(baseFactory.getLocation(),baseFactory.getOrientation(),factoryLocation)) {
+			if(baseFactory.getStructure().locationContainedInStructure(baseFactory.getAnchor(),factoryLocation)) {
 				return baseFactory;
 			}
 		}
 		return null;
+	}
+	
+	public boolean factoryExistsAt(Location location) {
+		return factoryAtLocation(location)!=null;
 	}
 	public boolean factoryWholeAt(Location factoryLocation) 
 	{
@@ -107,74 +123,40 @@ public class BaseFactoryManager {
 	 * Get the material types possible for  
 	 */
 	public Set<Material> factoryInteractionMaterials() {
-		Set<Material> materials=new HashSet<Material>();
-		for(BaseFactory baseFactory:factories) {
-			materials.addAll(baseFactory.getStructure().materialsOfOffsets(baseFactory.getInteractionPoints()));
-		}
-		return materials;
+		return interactionMaterials;
 	}
 	
-	public InteractionResponse createFactory(Location location){
-		return new InteractionResponse(InteractionResult.FAILURE,"");
-	}
-
 	/*
-	 * Handles response to playerInteractEvent
+	 * Atempt to create a factory given the location as the creation point 
 	 */
-	
-	public void playerInteractionReponse(Player player, Block block) {
-		//Checks if material is one of the interaction materials for the given factories
-		if (factoryInteractionMaterials().contains(block.getType()))
-		{
-			BaseFactoryInterface baseFactory = factoryAtLocation(block.getLocation());
-			//is there a baseFactory at the block location?
-			if (baseFactory!=null)
-			{
-				int interactionPointIndex = baseFactory.getInteractionPointIndex(block.getLocation());
-				//If this is an interaction point?
-				if(interactionPointIndex!=-1) {
-					//if the baseFactory has all its blocks
-					if(baseFactory.isWhole())
-					{
-						//if the player is allowed to interact with that block.
-						if ((!FactoryModPlugin.CITADEL_ENABLED || FactoryModPlugin.CITADEL_ENABLED && !isReinforced(block)) || 
-								(((PlayerReinforcement) getReinforcement(block)).isAccessible(player)))
-						{
-							//Send baseFactory response
-							baseFactory.interactionResponse(player,interactionPointIndex);
-						}
-						//if the player does NOT have acssess to the block that was block
-						else
-						{
-							//return a error message
-							InteractionResponse.messagePlayerResult(player, new InteractionResponse(InteractionResponse.InteractionResult.FAILURE,"You do not have permission to use this factory!" ));
+	public InteractionResponse createFactory(Location location){
+		InteractionResponse response = new InteractionResponse(InteractionResult.IGNORE,"Not a viable structure");
+		for(Structure structure:structures.keySet()) {
+			for(Entry<Offset,Properties> entry:structures.get(structure).entrySet()) {
+				Set<Anchor> potentialAnchors = entry.getKey().getPotentialAnchors(location);
+				for(Anchor potentialAnchor:potentialAnchors) {
+					if(structure.exists(potentialAnchor)) {
+						response = createFactory(entry.getValue(), potentialAnchor);
+						if(response != null && response.getInteractionResult()==InteractionResult.SUCCESS) {
+							return response;
 						}
 					}
-					else
-					{
-						InteractionResponse.messagePlayerResult(player, new InteractionResponse(InteractionResponse.InteractionResult.FAILURE,"Factory blocks are misplaced!" ));
-					}
-
-
-					//if no baseFactory exists at the block location
-				}
-			}
-			else
-			{
-				//if the player is allowed to interact with that block.
-				if ((!FactoryModPlugin.CITADEL_ENABLED || FactoryModPlugin.CITADEL_ENABLED && !isReinforced(block)) || 
-						(((PlayerReinforcement) getReinforcement(block)).isAccessible(player)))
-				{
-					InteractionResponse.messagePlayerResult(player, createFactory(block.getLocation()));
-				}
-				//if the player does NOT have acssess to the block that was block
-				else
-				{
-					//return a error message
-					InteractionResponse.messagePlayerResult(player, new InteractionResponse(InteractionResponse.InteractionResult.FAILURE,"You do not have permission to use this factory!" ));
 				}
 			}
 		}
+		
+		return response;
 	}
-
+	
+	public InteractionResponse createFactory(Properties properties, Anchor anchor) {
+		return null;
+	}
+	
+	public Set<Material> getInteractionMaterials() {
+		return BaseFactoryProperties.structure.materialsOfOffsets(BaseFactoryProperties.interactionPoints);
+	}
+	
+	public Set<Material> getMaterials() {
+		return BaseFactoryProperties.structure.getMaterials();
+	}
 }

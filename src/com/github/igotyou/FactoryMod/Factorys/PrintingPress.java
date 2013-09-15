@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -14,13 +13,12 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
+import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.PrettyLore;
-import com.github.igotyou.FactoryMod.utility.Structure;
-import com.github.igotyou.FactoryMod.utility.Structure.Orientation;
 
 public class PrintingPress extends BaseFactory {
 	
@@ -37,8 +35,8 @@ public class PrintingPress extends BaseFactory {
 	private int processQueueOffset;
 	private int lockedResultCode;
 
-	public PrintingPress(Location location, Orientation orientation, boolean active, PrintingPressProperties printingPressProperties) {
-		super(location, orientation, active, FactoryCatorgory.PRINTING_PRESS, "press");
+	public PrintingPress(Anchor anchor, boolean active, PrintingPressProperties printingPressProperties) {
+		super(anchor, printingPressProperties.getStructure(), active, FactoryCategory.PRINTING_PRESS, printingPressProperties);
 		this.mode = OperationMode.REPAIR;
 		this.printingPressProperties = printingPressProperties;
 		this.containedPaper = 0;
@@ -49,15 +47,15 @@ public class PrintingPress extends BaseFactory {
 		this.lockedResultCode = 0;
 	}
 
-	public PrintingPress(Location location, Orientation orientation,
+	public PrintingPress(Anchor anchor,
 			boolean active,
 			int currentProductionTimer, int currentEnergyTimer,
 			double currentMaintenance, long timeDisrepair, OperationMode mode,
 			PrintingPressProperties printingPressProperties,
 			int containedPaper, int containedBindings, int containedSecurityMaterials,
 			int[] processQueue, int lockedResultCode) {
-		super(location, orientation, active,
-				FactoryCatorgory.PRINTING_PRESS, "Printing Press", currentProductionTimer,
+		super(anchor, printingPressProperties.getStructure(), active,
+				FactoryCategory.PRINTING_PRESS, printingPressProperties, currentProductionTimer,
 				currentEnergyTimer, currentMaintenance, timeDisrepair);
 		this.mode = mode;
 		this.active = active;

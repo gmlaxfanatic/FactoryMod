@@ -9,7 +9,7 @@ import com.github.igotyou.FactoryMod.interfaces.Properties;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 
-public class PrintingPressProperties implements Properties{
+public class PrintingPressProperties extends BaseFactoryProperties implements Properties{
 
 	private ItemList<NamedItemStack> fuel;
 	private ItemList<NamedItemStack> constructionMaterials;
@@ -23,7 +23,7 @@ public class PrintingPressProperties implements Properties{
 	private int securityNotesPerLot;
 	private int energyTime;
 	private String name;
-	private int maxRepair;
+	private int repair;
 	private ItemList<NamedItemStack> repairMaterials;
 	private int pageLead;
 	private int setPlateTime;
@@ -51,10 +51,7 @@ public class PrintingPressProperties implements Properties{
 			int pageLead, int setPlateTime, int repairTime
 			)
 	{
-		this.fuel = fuel;
-		this.energyTime = energyTime;
-		this.name = name;
-		this.maxRepair=repair;
+		super(fuel, repair, energyTime, name);
 		this.constructionMaterials = constructionMaterials;
 		this.repairMaterials = repairMaterials;
 		this.plateMaterials = plateMaterials;
@@ -134,7 +131,7 @@ public class PrintingPressProperties implements Properties{
 
 	public int getMaxRepair()
 	{
-		return maxRepair;
+		return repair;
 	}
 	
 	public int getPagesPerLot() {

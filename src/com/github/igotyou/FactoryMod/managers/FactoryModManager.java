@@ -11,9 +11,18 @@ import org.bukkit.Location;
 import org.bukkit.event.Listener;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCatorgory;
+import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCategory;
 import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
+import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
+import com.github.igotyou.FactoryMod.utility.InteractionResponse;
+import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
+import static com.untamedears.citadel.Utility.getReinforcement;
+import static com.untamedears.citadel.Utility.isReinforced;
+import com.untamedears.citadel.entity.PlayerReinforcement;
+import java.util.HashSet;
+import java.util.Set;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -23,6 +32,7 @@ public class FactoryModManager
 	List<Listener> listeners;
 	List<FactoryManager> factoryManagers;
 	CraftingManager craftingManager;
+	StructureManager structureManager;
 	FactoryModPlugin plugin;
 	
 	/**
@@ -43,6 +53,7 @@ public class FactoryModManager
 		factoryManagers = new ArrayList<FactoryManager>();
 		listeners = new ArrayList<Listener>();
 		
+		initializeStructureManager();
 		initializeProductionManager();
 		initializePrintingPressManager();
 		initializeCraftingManager();
@@ -50,7 +61,15 @@ public class FactoryModManager
 	
 
 	/**
-	 * Initializes the Ore Gin Manager
+	 * Initializes the Production Manager
+	 */
+	private void initializeStructureManager()
+	{
+		structureManager = new StructureManager(plugin);
+	}
+	
+	/**
+	 * Initializes the Production Manager
 	 */
 	private void initializeProductionManager()
 	{
@@ -172,6 +191,10 @@ public class FactoryModManager
 		}
 	}
 	
+	public StructureManager getStructureManager() {
+		return structureManager;
+	}
+	
 	/**
 	 * Save Factories to file every SAVE_CYCLE minutes.
 	 */
@@ -237,29 +260,15 @@ public class FactoryModManager
 			factoryManager.removeFactory(factory);
 		}	
 	}
-
-	/*public InteractionResponse createFactory(Location centralLocation,
-			Location inventoryLocation, Location powerLocation) {
-		InteractionResponse response = null;
-		for (FactoryManager manager : factoryManagers)
-		{
-			response = manager.createFactory(centralLocation, inventoryLocation, powerLocation);
-			if (response.getInteractionResult() == InteractionResult.SUCCESS)
-			{
-				return response;
-			}
-		}
-		return response;
-	}*/
 	
-	public FactoryManager getManager(FactoryCatorgory factoryType)
+	public FactoryManager getManager(FactoryCategory factoryType)
 	{
 		Class managerClass=null;
-		if(factoryType==FactoryCatorgory.PRODUCTION)
+		if(factoryType==FactoryCategory.PRODUCTION)
 		{
 			managerClass = PrintingPressManager.class;
 		}
-		if(factoryType==FactoryCatorgory.PRINTING_PRESS)
+		if(factoryType==FactoryCategory.PRINTING_PRESS)
 		{
 			managerClass = ProductionManager.class;
 		}
@@ -295,8 +304,66 @@ public class FactoryModManager
 	 */
 	
 	public void playerInteractionReponse(Player player, Block block) {
+		//Check which managers contain relevant interaction blocks
+		Set<FactoryManager> possibleManagers=new HashSet();
 		for(FactoryManager factoryManager:factoryManagers) {
-			factoryManager.playerInteractionReponse(player, block);
+			if(factoryManager.getInteractionMaterials().contains(block.getType())) {
+				possibleManagers.add(factoryManager);
+			}
 		}
+		if(possibleManagers.isEmpty()) {
+			return;
+		}
+		//Check that the player is able ot interact with the block
+		if ((FactoryModPlugin.CITADEL_ENABLED && isReinforced(block)) && !(((PlayerReinforcement) getReinforcement(block)).isAccessible(player))) {
+			InteractionResponse.messagePlayerResult(player, new InteractionResponse(InteractionResponse.InteractionResult.FAILURE,"You do not have permission to use this factory!" ));
+			return;
+		}
+		//Check if a factory exists at the location and have it respond
+		Factory factory = factoryAtLocation(block.getLocation());
+		if(factory!=null) {
+			factory.interactionResponse(player, block.getLocation());
+		}
+		else {
+			for(FactoryManager factoryManager:possibleManagers) {
+				//Atempt to create a factory given the location as the creation point 
+				InteractionResponse response = factoryManager.createFactory(block.getLocation());
+				if(response.getInteractionResult()==InteractionResult.SUCCESS) {
+					InteractionResponse.messagePlayerResult(player, response);
+					break;
+				}
+			}
+		}
+	}
+	
+	/*
+	 * Get a factory at the given location
+	 */
+	public Factory factoryAtLocation(Location factoryLocation) 
+	{
+		for (FactoryManager manager : factoryManagers)
+		{
+			return manager.factoryAtLocation(factoryLocation);
+		}
+		return null;
+	}
+	/*
+	 * Checks if Materail is part of any factory
+	 */
+	public boolean isPotentialFactoryBlock(Material material) {
+		for(FactoryManager factoryManager:factoryManagers) {
+			if(factoryManager.getMaterials().contains(material)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void breakFactoryAt(Location location) {
+		Factory factory = getFactory (location);
+		if(factory != null) {
+			factory.breakFactory();
+		}
+
 	}
 }

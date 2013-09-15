@@ -6,9 +6,10 @@ import com.github.igotyou.FactoryMod.interfaces.Factory;
 import org.bukkit.Location;
 
 import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.utility.Anchor;
+import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
-import com.github.igotyou.FactoryMod.utility.Structure.Orientation;
 import java.util.List;
 import org.bukkit.entity.Player;
 
@@ -29,7 +30,7 @@ import org.bukkit.entity.Player;
  */
 public class FactoryObject implements Factory {
 	//the diffrent factory types, NOTE: these are not the sub-factory types, these are the main types.
-	public enum FactoryCatorgory
+	public enum FactoryCategory
 	{
 		PRODUCTION,
 		PRINTING_PRESS
@@ -37,44 +38,30 @@ public class FactoryObject implements Factory {
 	
 	
 	
-	protected Location location;//Anchor position of the factory structure
-	protected Orientation orientation;//describes oritentation of the factory structure
-	protected Structure structure;//The block structure of the factory
+	protected Anchor anchor;
 	protected List<Offset> interactionPoints;
 	protected boolean active; // Whether factory is currently active
-	protected FactoryCatorgory factoryCatorgory; // The type this factory is
+	protected FactoryCategory factoryCategory; // The type this factory is
 	protected String factoryType;//the SUBfactory type(the ones loaded from the config file)
 	protected Properties factoryProperties; // The properties of this factory type and tier
 	
 	/**
 	 * Constructor
 	 */
-	public FactoryObject(Location location,
+	public FactoryObject(Anchor anchor,
 		Structure structure,
-		Orientation orientation,
 		List<Offset> interactionPoints,
 		boolean active,
-		FactoryCatorgory factoryType,
-		String subFactoryType)
+		FactoryCategory factoryType,
+		Properties properties)
 	{
-		this.location=location;
-		this.structure=structure;
-		this.orientation=orientation;
+		this.anchor=anchor;
 		this.interactionPoints=interactionPoints;
 		this.active = active;
-		this.factoryCatorgory = factoryType;
-		this.factoryType = subFactoryType;
-		updateProperties();
+		this.factoryCategory = factoryType;
+		this.factoryProperties = properties;
 	}
 
-	/**
-	 * Updates the current properties for the factory.
-	 */
-	public void updateProperties()
-	{
-		factoryProperties = FactoryModPlugin.getManager().getManager(factoryCatorgory).getProperties(factoryType);
-	}
-	
 	/**
 	 * Returns the sub-factory type of the factory. 
 	 */
@@ -91,27 +78,24 @@ public class FactoryObject implements Factory {
 	{
 		return active;
 	}
-	
+	public Structure getStructure() {
+		return factoryProperties.getStructure();
+	}
 	/**
 	 * returns true if all factory blocks are occupied with the correct blocks
 	 */
 	public boolean isWhole()
 	{
-		return structure.exists(location, orientation);
+		return getStructure().exists(anchor);
 	}
 	public Location getLocation() {
-		return location;
+		return anchor.location;
 	}
-	public Structure getStructure()
-	{
-		return structure;
-	}
-	
 	public Orientation getOrientation() {
-		return orientation;
+		return anchor.orientation;
 	}
 	public boolean exists() {
-		return structure.exists(location, orientation);
+		return getStructure().exists(anchor);
 	}
 	public List<Offset> getInteractionPoints() {
 		return interactionPoints;
@@ -121,10 +105,21 @@ public class FactoryObject implements Factory {
 	 * returns -1 if no intearction point exists at that location
 	 */
 	public int getInteractionPointIndex(Location location) {
-		return structure.getInteractionPoint(this, location);
+		return getStructure().getInteractionPoint(this, location);
 	}
 	
-	public void interactionResponse(Player player, int interactionPoint) {
+	public void interactionResponse(Player player, Location location) {
 		
+	}
+	public FactoryCategory getFactoryCategory() {
+		return factoryCategory;
+	}
+	
+	public void breakFactory() {
+		
+	}
+	
+	public Anchor getAnchor() {
+		return anchor;
 	}
 }

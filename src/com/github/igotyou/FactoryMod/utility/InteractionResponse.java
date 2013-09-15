@@ -17,7 +17,8 @@ public class InteractionResponse
 	public static enum InteractionResult
 	{
 		SUCCESS,
-		FAILURE
+		FAILURE,
+		IGNORE
 	}
 	
 	private final InteractionResult interactionResult; //The result of this interaction attempt

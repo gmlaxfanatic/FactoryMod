@@ -1,6 +1,7 @@
 package com.github.igotyou.FactoryMod;
 
 
+import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCategory;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -28,7 +29,6 @@ public class FactoryModPlugin extends JavaPlugin
 	public static boolean RETURN_BUILD_MATERIALS;
 	public static boolean CITADEL_ENABLED;
 	public static Material FACTORY_INTERACTION_MATERIAL;
-	public static boolean DESTRUCTIBLE_FACTORIES;
 	public static boolean DISABLE_EXPERIENCE;
 	public static long DISREPAIR_PERIOD;
 	public static long REPAIR_PERIOD;
@@ -57,7 +57,7 @@ public class FactoryModPlugin extends JavaPlugin
 		try
 		{
 			getServer().getPluginManager().registerEvents(new FactoryModListener(manager), this);
-			getServer().getPluginManager().registerEvents(new RedstoneListener(manager, manager.getProductionManager()), this);
+			getServer().getPluginManager().registerEvents(new RedstoneListener(manager, manager.getManager(FactoryCategory.PRODUCTION)), this);
 		}
 		catch(Exception e)
 		{
@@ -87,8 +87,6 @@ public class FactoryModPlugin extends JavaPlugin
 		CITADEL_ENABLED = generalConfiguration.getBoolean("citadel_enabled",true);
 		//what's the tool that we use to interact with the factorys?
 		FACTORY_INTERACTION_MATERIAL = Material.getMaterial(generalConfiguration.getString("factory_interaction_material","STICK"));
-		//If factories are removed upon destruction of their blocks
-		DESTRUCTIBLE_FACTORIES=generalConfiguration.getBoolean("destructible_factories",false);		
 		//Check if XP drops should be disabled
 		DISABLE_EXPERIENCE=generalConfiguration.getBoolean("disable_experience",false);
 		//How frequently factories are updated

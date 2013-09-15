@@ -14,6 +14,7 @@ import org.bukkit.material.Attachable;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
+import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.managers.FactoryModManager;
 import com.github.igotyou.FactoryMod.managers.ProductionManager;
 import com.untamedears.citadel.entity.PlayerReinforcement;
@@ -21,12 +22,12 @@ import com.untamedears.citadel.entity.PlayerReinforcement;
 public class RedstoneListener implements Listener {
 	private FactoryModManager factoryMan;
 	//this is a lazy fix...
-	private ProductionManager productionMan;
+	private FactoryManager productionMan;
 	
 	/**
 	 * Constructor
 	 */
-	public RedstoneListener(FactoryModManager factoryManager, ProductionManager productionManager)
+	public RedstoneListener(FactoryModManager factoryManager, FactoryManager productionManager)
 	{
 		this.factoryMan = factoryManager;
 		this.productionMan = productionManager;
@@ -95,24 +96,21 @@ public class RedstoneListener implements Listener {
 			
 			//Is the block part of a factory?
 			if(block.getType() == Material.FURNACE || block.getType() == Material.BURNING_FURNACE)
-			{
-				if (factoryMan.factoryExistsAt(block.getLocation()))
-				{					
-					//Is the factory a production factory?
-					if (productionMan.factoryExistsAt(block.getLocation()))
-					{
-						ProductionFactory factory = (ProductionFactory) productionMan.factoryAtLocation(block.getLocation());
-						
-						Block lever = factory.findActivationLever();
-						if (lever == null) {
-							// No lever - don't respond to redstone
-							return;
-						}
-						
-						if (!factory.getActive()) {
-							// Try to start the factory
-							factory.togglePower();
-						}
+			{	
+				//Is the factory a production factory?
+				if (productionMan.factoryExistsAt(block.getLocation()))
+				{
+					ProductionFactory factory = (ProductionFactory) productionMan.factoryAtLocation(block.getLocation());
+
+					Block lever = factory.findActivationLever();
+					if (lever == null) {
+						// No lever - don't respond to redstone
+						return;
+					}
+
+					if (!factory.getActive()) {
+						// Try to start the factory
+						factory.togglePower();
 					}
 				}
 			}

@@ -27,8 +27,6 @@ public interface BaseFactoryInterface extends Factory
 	 */
 	public void update();
 	
-	public void destroy(Location destroyLocation);
-	
 	/**
 	 * Powers on the machine
 	 */

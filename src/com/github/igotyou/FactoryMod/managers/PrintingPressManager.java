@@ -17,41 +17,27 @@ import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress.OperationMode;
-import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
-import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
+import com.github.igotyou.FactoryMod.interfaces.Properties;
 import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
+import com.github.igotyou.FactoryMod.utility.Anchor;
+import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-import java.util.Iterator;
 
-//original file:
-/**
-* Manager.java
-* Purpose: Interface for Manager objects for basic manager functionality
-*
-* @author MrTwiggy
-* @version 0.1 1/08/13
-*/
-//edited version:
-/**
-* Manager.java	 
-* Purpose: Interface for Manager objects for basic manager functionality
-* @author igotyou
-*
-*/
 
 public class PrintingPressManager  extends BaseFactoryManager implements FactoryManager
 {
-	private long repairTime;
+
 	public PrintingPressProperties printingPressProperties;
 	
 	public PrintingPressManager (FactoryModPlugin plugin)
 	{
 		super(plugin);
 		printingPressProperties = PrintingPressProperties.fromConfig(plugin, plugin.getConfig().getConfigurationSection("printing_presses"));
+		interactionMaterials.addAll(printingPressProperties.getInteractionMaterials());
 		//Set maintenance clock to 0
 		updateFactorys();
 	}
@@ -63,31 +49,20 @@ public class PrintingPressManager  extends BaseFactoryManager implements Factory
 		repairTime=System.currentTimeMillis();
 		FileOutputStream fileOutputStream = new FileOutputStream(file);
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
-		int version = 1;
-		oos.writeInt(version);
+		int version = 2;
+		oos.writeInt(2);
 		oos.writeInt(factories.size());
 		for (BaseFactory baseFactory : factories)
 		{
-			//order: subFactoryType world recipe1,recipe2 central_x central_y central_z inventory_x inventory_y inventory_z power_x power_y power_z active productionTimer energyTimer current_Recipe_number 
 			PrintingPress printingPress=(PrintingPress) baseFactory;
+		
+			oos.writeUTF(printingPress.getAnchor().location.getWorld().getName());
+						
+			oos.writeInt(printingPress.getAnchor().location.getBlockX());
+			oos.writeInt(printingPress.getAnchor().location.getBlockY());
+			oos.writeInt(printingPress.getAnchor().location.getBlockZ());
 			
-			Location centerlocation = printingPress.getCenterLocation();
-			Location inventoryLocation = printingPress.getInventoryLocation();
-			Location powerLocation = printingPress.getPowerSourceLocation();
-			
-			oos.writeUTF(centerlocation.getWorld().getName());
-			
-			oos.writeInt(centerlocation.getBlockX());
-			oos.writeInt(centerlocation.getBlockY());
-			oos.writeInt(centerlocation.getBlockZ());
-
-			oos.writeInt(inventoryLocation.getBlockX());
-			oos.writeInt(inventoryLocation.getBlockY());
-			oos.writeInt(inventoryLocation.getBlockZ());
-
-			oos.writeInt(powerLocation.getBlockX());
-			oos.writeInt(powerLocation.getBlockY());
-			oos.writeInt(powerLocation.getBlockZ());
+			oos.writeInt(printingPress.getAnchor().orientation.id);
 			
 			oos.writeBoolean(printingPress.getActive());
 			oos.writeInt(printingPress.getMode().getId());
@@ -112,6 +87,62 @@ public class PrintingPressManager  extends BaseFactoryManager implements Factory
 	}
 
 	public void load(File file) throws IOException 
+	{
+		try {
+			FileInputStream fileInputStream = new FileInputStream(file);
+			ObjectInputStream ois = new ObjectInputStream(fileInputStream);
+			int version = ois.readInt();
+			if(version==1) {
+				load1(file);
+			}
+			else {
+				assert(version == 2);
+				repairTime=System.currentTimeMillis();
+				int count = ois.readInt();
+				int i = 0;
+				for (i = 0; i < count; i++)
+				{
+					String worldName = ois.readUTF();
+					World world = plugin.getServer().getWorld(worldName);
+					Location location = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
+					Orientation orientation = Orientation.getOrientation(ois.readInt());
+					boolean active = ois.readBoolean();
+					OperationMode mode = PrintingPress.OperationMode.byId(ois.readInt());
+					int productionTimer = ois.readInt();
+					int energyTimer = ois.readInt();
+					double currentRepair = ois.readDouble();
+					long timeDisrepair  = ois.readLong();
+					int containedPaper = ois.readInt();
+					int containedBindings = ois.readInt();
+					int containedSecurityMaterials = ois.readInt();
+					int lockedResultCode = ois.readInt();
+
+					int queueLength = ois.readInt();
+					int[] processQueue = new int[queueLength];
+					int j;
+					for (j = 0; j < queueLength; j++) {
+						processQueue[j] = ois.readInt();
+					}
+
+					PrintingPress printingPress = new PrintingPress(new Anchor(orientation,location),
+							active, productionTimer,
+							energyTimer, currentRepair, timeDisrepair,
+							mode,
+							printingPressProperties,
+							containedPaper, containedBindings, containedSecurityMaterials,
+							processQueue, lockedResultCode);
+					addFactory(printingPress);
+				}
+
+			}
+			fileInputStream.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+			
+	public void load1(File file) throws IOException 
 	{
 		try {
 			repairTime=System.currentTimeMillis();
@@ -146,8 +177,28 @@ public class PrintingPressManager  extends BaseFactoryManager implements Factory
 				for (j = 0; j < queueLength; j++) {
 					processQueue[j] = ois.readInt();
 				}
-
-				PrintingPress production = new PrintingPress(inventoryLocation, powerLocation,
+				
+				Location difference = inventoryLocation.subtract(powerLocation);
+				Orientation orientation;
+				if(difference.getX()==0) {
+					if(difference.getZ()>0) {
+						orientation = Orientation.NW;
+					}
+					else {
+						orientation = Orientation.SE;
+					}
+				}
+				else {
+					if(difference.getZ()>0) {
+						orientation = Orientation.NE;
+					}
+					else {
+						orientation = Orientation.SW;
+					}
+				}
+				
+				
+				PrintingPress production = new PrintingPress(new Anchor(orientation,inventoryLocation),
 						active, productionTimer,
 						energyTimer, currentRepair, timeDisrepair,
 						mode,
@@ -162,27 +213,23 @@ public class PrintingPressManager  extends BaseFactoryManager implements Factory
 		}
 	}
 
-	public InteractionResponse createFactory(Location factoryLocation, Location inventoryLocation, Location powerSourceLocation) 
+	public InteractionResponse createFactory(Properties properties, Anchor anchor) 
 	{
-		if (!factoryExistsAt(factoryLocation))
+		Block inventoryBlock = anchor.getBlock(properties.getCreationPoint());
+		Chest chest = (Chest) inventoryBlock.getState();
+		Inventory chestInventory = chest.getInventory();
+		ItemList<NamedItemStack> inputs = printingPressProperties.getConstructionMaterials();
+		boolean hasMaterials = inputs.allIn(chestInventory);
+		if (hasMaterials)
 		{
-			Block inventoryBlock = inventoryLocation.getBlock();
-			Chest chest = (Chest) inventoryBlock.getState();
-			Inventory chestInventory = chest.getInventory();
-			ItemList<NamedItemStack> inputs = printingPressProperties.getConstructionMaterials();
-			boolean hasMaterials = inputs.allIn(chestInventory);
-			if (hasMaterials)
+			PrintingPress production = new PrintingPress(anchor, false, printingPressProperties);
+			if (printingPressProperties.getConstructionMaterials().removeFrom(production.getInventory()))
 			{
-				PrintingPress production = new PrintingPress(factoryLocation, inventoryLocation, powerSourceLocation, false, printingPressProperties);
-				if (printingPressProperties.getConstructionMaterials().removeFrom(production.getInventory()))
-				{
-					addFactory(production);
-					return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + printingPressProperties.getName());
-				}
+				addFactory(production);
+				return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + printingPressProperties.getName());
 			}
-			return new InteractionResponse(InteractionResult.FAILURE, "Not enough materials in chest!");
 		}
-		return new InteractionResponse(InteractionResult.FAILURE, "There is already a " + printingPressProperties.getName() + " there!");
+		return new InteractionResponse(InteractionResult.FAILURE, "Not enough materials in chest!");
 	}
 	
 	public PrintingPress factoryAtLocation(Location factoryLocation) 

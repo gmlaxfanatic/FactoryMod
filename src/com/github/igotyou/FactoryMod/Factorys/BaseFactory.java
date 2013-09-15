@@ -18,7 +18,9 @@ import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
+import com.github.igotyou.FactoryMod.interfaces.Properties;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
+import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
@@ -36,40 +38,36 @@ public abstract class BaseFactory extends FactoryObject implements BaseFactoryIn
 	protected double currentRepair;
 	protected long timeDisrepair;//The time at which the factory went into disrepair
 	
-	public BaseFactory(Location location,
+	public BaseFactory(Anchor anchor,
 		Structure structure,
-		Structure.Orientation orientation,
 		boolean active,
-		FactoryCatorgory factoryType,
-		String subFactoryType) {
-		super(location,
-			structure,
-			orientation,
+		FactoryCategory factoryType,
+		Properties factoryProperties) {
+		super(anchor,
+			structure,			
 			Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0)),
 			active,
 			factoryType,
-			subFactoryType);
+			factoryProperties);
 		this.currentRepair=0.0;
 		this.timeDisrepair=3155692597470L;//Year 2070, default starting value
 	}
 	
-	public BaseFactory(Location location,
+	public BaseFactory(Anchor anchor,
 		Structure structure,
-		Structure.Orientation orientation,
 		boolean active,
-		FactoryCatorgory factoryType,
-		String subFactoryType,
+		FactoryCategory factoryType,
+		Properties factoryProperties,
 		int currentProductionTimer,
 		int currentEnergyTimer,	
 		double currentMaintenance,
 		long timeDisrepair) {
-		super(location,
-			structure,
-			orientation,
+		super(anchor,
+			structure,			
 			Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0)),
 			active,
 			factoryType,
-			subFactoryType);
+			factoryProperties);
 		this.active = active;
 		this.currentEnergyTimer = currentEnergyTimer;
 		this.currentProductionTimer = currentProductionTimer;
@@ -402,7 +400,7 @@ public abstract class BaseFactory extends FactoryObject implements BaseFactoryIn
 	 */
 	public Location getCenterLocation() 
 	{
-		return structure.getLocationOfOffset(location, interactionPoints.get(0));
+		return anchor.getLocationOfOffset(interactionPoints.get(0));
 	}
 
 	/**
@@ -410,7 +408,7 @@ public abstract class BaseFactory extends FactoryObject implements BaseFactoryIn
 	 */
 	public Location getInventoryLocation() 
 	{
-		return structure.getLocationOfOffset(location, interactionPoints.get(1));
+		return anchor.getLocationOfOffset(interactionPoints.get(1));
 	}
 
 	/**
@@ -418,11 +416,11 @@ public abstract class BaseFactory extends FactoryObject implements BaseFactoryIn
 	 */
 	public Location getPowerSourceLocation() 
 	{
-		return structure.getLocationOfOffset(location, interactionPoints.get(2));
+		return anchor.getLocationOfOffset(interactionPoints.get(2));
 	}
 	
 	/**
-	 * Checks if there is enough fuel Available for atleast once energy cycle
+	 * Checks if there is enough fuel Available for at least once energy cycle
 	 * @return true if there is enough fuel, false otherwise
 	 */
 	public boolean isFuelAvailable()
@@ -434,7 +432,7 @@ public abstract class BaseFactory extends FactoryObject implements BaseFactoryIn
 	 * Called by the block listener when the player(or a entity) destroys the fatory
 	 * Drops the build materials if the config says it shouls
 	 */
-	public void destroy(Location destroyLocation)
+	public void breakFactory()
 	{
 		powerOff();
 		currentRepair=getMaxRepair();

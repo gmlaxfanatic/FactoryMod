@@ -6,6 +6,8 @@ import java.io.IOException;
 import org.bukkit.Location;
 
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
+import java.util.Set;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -44,9 +46,9 @@ public interface FactoryManager
 	public void updateFactorys();
 
 /**
-* Attempts to create a new machine for this manager
+* Attempts to create a new factory for this manager 
 */
-	public InteractionResponse createFactory(Location factoryLocation, Location inventoryLocation, Location powerLocation);
+	public InteractionResponse createFactory(Location location);
 
 /**
 * Creates a machine from an existing machine data object
@@ -83,7 +85,11 @@ public interface FactoryManager
  */
 	public Properties getProperties(String title);
 /*
- * Response of these factories to an interaction event
+ * Get all materials potentially a part of a factory
  */
-	public void playerInteractionReponse(Player player, Block block);
+	public Set<Material> getMaterials();
+/*
+ * Returns a set of interaction materials associated with factories used in this manager
+ */
+	public Set<Material> getInteractionMaterials();
 }

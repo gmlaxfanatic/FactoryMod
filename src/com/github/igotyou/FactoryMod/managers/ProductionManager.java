@@ -9,37 +9,38 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
+import com.github.igotyou.FactoryMod.Factorys.PrintingPress;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
-import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
+import com.github.igotyou.FactoryMod.interfaces.Properties;
 import com.github.igotyou.FactoryMod.properties.ProductionProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
+import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-import java.util.Iterator;
-import java.util.LinkedList;
+import com.github.igotyou.FactoryMod.utility.Offset;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.InventoryHolder;
 
 public class ProductionManager  extends BaseFactoryManager implements FactoryManager
 {
-	public  Map<String, ProductionProperties> productionProperties;
+	public  Map<String, ProductionProperties> allProductionProperties;
 	public  Map<String,ProductionRecipe> productionRecipes;
-	private FactoryModPlugin plugin;
 	private List<ProductionFactory> productionFactories=new ArrayList<ProductionFactory>();;
 	private long repairTime;
 	
@@ -47,6 +48,9 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 	{
 		super(plugin);
 		initConfig(plugin.getConfig().getConfigurationSection("production"));
+		for(ProductionProperties productionProperties:allProductionProperties.values()) {
+			interactionMaterials.addAll(productionProperties.getInteractionMaterials());
+		}
 		//Set maintenance clock to 0
 		updateFactorys();
 	}
@@ -57,69 +61,74 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 		updateRepair(System.currentTimeMillis()-repairTime);
 		repairTime=System.currentTimeMillis();
 		FileOutputStream fileOutputStream = new FileOutputStream(file);
-		BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(fileOutputStream));
-		for (ProductionFactory production : productionFactories)
+		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
+		int version = 2;
+		oos.writeInt(version);
+		oos.writeInt(factories.size());
+		for (BaseFactory baseFactory : factories)
 		{
-			//order: subFactoryType world recipe1,recipe2 central_x central_y central_z inventory_x inventory_y inventory_z power_x power_y power_z active productionTimer energyTimer current_Recipe_number 
+			ProductionFactory productionFactory=(ProductionFactory) baseFactory;
+		
+			oos.writeUTF(productionFactory.getAnchor().location.getWorld().getName());
+						
+			oos.writeInt(productionFactory.getAnchor().location.getBlockX());
+			oos.writeInt(productionFactory.getAnchor().location.getBlockY());
+			oos.writeInt(productionFactory.getAnchor().location.getBlockZ());
 			
-			Location centerlocation = production.getCenterLocation();
-			Location inventoryLoctation = production.getInventoryLocation();
-			Location powerLocation = production.getPowerSourceLocation();
+			oos.writeInt(productionFactory.getAnchor().orientation.id);
 			
+			oos.writeUTF(productionFactory.getFactoryType());
 			
-			
-			bufferedWriter.append(production.getFactoryType());
-			bufferedWriter.append(" ");
-			
-			List<ProductionRecipe> recipes=production.getRecipes();
-			for (int i = 0; i < recipes.size(); i++)
-			{
-				bufferedWriter.append(String.valueOf(recipes.get(i).getTitle()));
-				bufferedWriter.append(",");
-			}
-			bufferedWriter.append(" ");
-			
-			bufferedWriter.append(centerlocation.getWorld().getName());
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(centerlocation.getBlockX()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(centerlocation.getBlockY()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(centerlocation.getBlockZ()));
-			bufferedWriter.append(" ");
-			
-			bufferedWriter.append(Integer.toString(inventoryLoctation.getBlockX()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(inventoryLoctation.getBlockY()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(inventoryLoctation.getBlockZ()));
-			bufferedWriter.append(" ");
-			
-			bufferedWriter.append(Integer.toString(powerLocation.getBlockX()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(powerLocation.getBlockY()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(powerLocation.getBlockZ()));
-			bufferedWriter.append(" ");
-			
-			bufferedWriter.append(Boolean.toString(production.getActive()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(production.getProductionTimer()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(production.getEnergyTimer()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Integer.toString(production.getCurrentRecipeNumber()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(Double.toString(production.getCurrentRepair()));
-			bufferedWriter.append(" ");
-			bufferedWriter.append(String.valueOf(production.getTimeDisrepair()));
-			bufferedWriter.append("\n");
+			oos.writeBoolean(productionFactory.getActive());
+		
+			oos.writeInt(productionFactory.getProductionTimer());
+			oos.writeInt(productionFactory.getEnergyTimer());
+			oos.writeDouble(productionFactory.getCurrentRepair());
+			oos.writeLong(productionFactory.getTimeDisrepair());
 		}
-		bufferedWriter.flush();
+		oos.flush();
 		fileOutputStream.close();
-	}
-
+	}	
 	public void load(File file) throws IOException 
+	{
+		try {
+			FileInputStream fileInputStream = new FileInputStream(file);
+			ObjectInputStream ois = new ObjectInputStream(fileInputStream);
+			int version = ois.readInt();
+			assert(version == 2);
+			repairTime=System.currentTimeMillis();
+			int count = ois.readInt();
+			int i = 0;
+			for (i = 0; i < count; i++)
+			{
+				String worldName = ois.readUTF();
+				World world = plugin.getServer().getWorld(worldName);
+				Location location = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
+				Anchor.Orientation orientation = Anchor.Orientation.getOrientation(ois.readInt());
+				boolean active = ois.readBoolean();
+				String factoryType = ois.readUTF();
+				int productionTimer = ois.readInt();
+				int energyTimer = ois.readInt();
+				int currentRecipeNumber = ois.readInt();
+				double currentRepair = ois.readDouble();
+				long timeDisrepair  =  ois.readLong();
+				
+				if(allProductionProperties.containsKey(factoryType))
+				{
+					ProductionFactory productionFactory = new ProductionFactory(new Anchor(orientation,location),
+						allProductionProperties.get(factoryType), active, productionTimer,
+						energyTimer, currentRecipeNumber, currentRepair, timeDisrepair);
+					addFactory(productionFactory);
+				}
+			}
+			fileInputStream.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void load1(File file) throws IOException 
 	{
 		repairTime=System.currentTimeMillis();
 		FileInputStream fileInputStream = new FileInputStream(file);
@@ -142,12 +151,12 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 			int currentRecipeNumber = Integer.parseInt(parts[15]);
 			double currentRepair = Double.parseDouble(parts[16]);
 			long timeDisrepair  =  Long.parseLong(parts[17]);
-			if(productionProperties.containsKey(subFactoryType))
+			if(allProductionProperties.containsKey(subFactoryType))
 			{
 				Set<ProductionRecipe> recipes=new HashSet<ProductionRecipe>();
 				
 				// TODO: Give default recipes for subfactory type
-				ProductionProperties properties = productionProperties.get(subFactoryType);
+				ProductionProperties properties = allProductionProperties.get(subFactoryType);
 				recipes.addAll(properties.getRecipes());
 				
 				for(String name:recipeNames)
@@ -157,8 +166,27 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 						recipes.add(productionRecipes.get(name));
 					}
 				}
-
-				ProductionFactory production = new ProductionFactory(null,null, subFactoryType, active, productionTimer, energyTimer, new ArrayList<ProductionRecipe>(recipes), currentRecipeNumber, currentRepair,timeDisrepair);
+				
+				Location difference = inventoryLocation.subtract(powerLocation);
+				Anchor.Orientation orientation;
+				if(difference.getX()==0) {
+					if(difference.getZ()>0) {
+						orientation = Anchor.Orientation.NW;
+					}
+					else {
+						orientation = Anchor.Orientation.SE;
+					}
+				}
+				else {
+					if(difference.getZ()>0) {
+						orientation = Anchor.Orientation.NE;
+					}
+					else {
+						orientation = Anchor.Orientation.SW;
+					}
+				}
+				
+				ProductionFactory production = new ProductionFactory(new Anchor(orientation,inventoryLocation), allProductionProperties.get(subFactoryType), active, productionTimer, energyTimer, currentRecipeNumber, currentRepair,timeDisrepair);
 				addFactory(production);
 			}
 		}
@@ -174,38 +202,26 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 		productionRecipes=ProductionRecipe.recipesFromConfig(productionConfiguration.getConfigurationSection("recipes"));
 		ProductionRecipe.loadAllScaledRecipes(productionRecipes);
 		//Import factory properties
-		productionProperties=ProductionProperties.productionPropertiesFromConfig(productionConfiguration.getConfigurationSection("factories"), this);
+		allProductionProperties=ProductionProperties.productionPropertiesFromConfig(productionConfiguration.getConfigurationSection("factories"), this);
 	}
-	
-	public InteractionResponse createFactory(Location location) 
-	{
-		if (!factoryExistsAt(location))
+	/*
+	 * Creates a factory at the location if the creation conditions are met
+	 *	Inputs are present in inventory block
+	 */
+	public InteractionResponse createFactory(Properties properties, Anchor anchor) {
+		ProductionProperties productionProperties = (ProductionProperties)properties;
+		ItemList<NamedItemStack> inputs =  productionProperties.getInputs();
+		Offset creationPoint = productionProperties.getCreationPoint();
+		if(inputs.exactlyIn(((InventoryHolder)anchor.getBlock(creationPoint)).getInventory()))
 		{
-			Map<String, ProductionProperties> properties = productionProperties;
-			Inventory inventory = ProductionFactory.getConstructionInventory(location);
-			String subFactoryType = null;
-			for (Map.Entry<String, ProductionProperties> entry : properties.entrySet())
-			{
-				ItemList<NamedItemStack> inputs = entry.getValue().getInputs();
-				if(inputs.exactlyIn(inventory))
-				{
-					subFactoryType = entry.getKey();
-				}
-			}
-			if (subFactoryType != null)
-			{
-				ProductionFactory production = new ProductionFactory(location, null, subFactoryType);
-				if (properties.get(subFactoryType).getInputs().allIn(production.getInventory()))
-				{
-					addFactory(production);
-					properties.get(subFactoryType).getInputs().removeFrom(production.getInventory());
-					return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + production.getProductionFactoryProperties().getName());
-				}
-			}
-			return new InteractionResponse(InteractionResult.FAILURE, "Incorrect materials in chest! Stacks must match perfectly.");
+			inputs.removeFrom(((InventoryHolder)anchor.getBlock(creationPoint)).getInventory());
+			ProductionFactory productionFactory = new ProductionFactory(anchor, (ProductionProperties) properties);
+			addFactory(productionFactory);
+			return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + productionFactory.getProductionFactoryProperties().getName());
 		}
-		return new InteractionResponse(InteractionResult.FAILURE, "There is already a factory there!");
+		return new InteractionResponse(InteractionResult.FAILURE, "Incorrect Materials! They must match exactly.");
 	}
+
 
 	@Override
 	public String getSavesFileName() 
@@ -218,7 +234,7 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 	 */
 	public ProductionProperties getProperties(String title)
 	{
-		return productionProperties.get(title);
+		return allProductionProperties.get(title);
 	}
 	
 	public ProductionRecipe getProductionRecipe(String identifier)
@@ -245,5 +261,5 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 		}
 		return factoriesByRecipe;
 	}
-
+	
 }

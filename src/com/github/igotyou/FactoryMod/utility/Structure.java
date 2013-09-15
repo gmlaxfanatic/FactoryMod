@@ -1,9 +1,10 @@
 package com.github.igotyou.FactoryMod.utility;
 
 import com.github.igotyou.FactoryMod.interfaces.Factory;
-import com.github.igotyou.FactoryMod.utility.Structure.Orientation;
+import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,15 +22,7 @@ import org.jnbt.Tag;
  * 
  */
 public class Structure {
-	//Describes the oritentation of the structure
-	public enum Orientation
-	{
-		NE,
-		SE,
-		SW,
-		NW
-		
-	}
+
 	
 
 	
@@ -46,47 +39,25 @@ public class Structure {
 	 * Checks if structure exists at a given point 
 	 */
 	public boolean exists(Location location) {
-		return true;
+		for(Orientation orientation:Orientation.values()) {
+			if(exists(new Anchor(orientation, location))) { 
+				return true;
+			}
+		}
+		return false;
 	}
 	/*
 	 * Checks if structure exists at a given anchor point and given
 	 * orientation
 	 */
-	public boolean exists(Location location,Orientation orientation)
+	public boolean exists(Anchor anchor)
 	{
-		Location currentLocation=location.clone();
-		int xOrigin=location.getBlockX();
-		int zOrigin=location.getBlockZ();
-		for(short x = 0; x < blocks.length; x++) {
-			if(orientation==Orientation.NE) {
-				currentLocation.setX(xOrigin+x);
-			}
-			else if(orientation==Orientation.SE) {
-				currentLocation.setX(xOrigin-x);
-			}
-			else if(orientation==Orientation.SW) {
-				currentLocation.setX(xOrigin-x);
-			}
-			else if(orientation==Orientation.NW) {
-				currentLocation.setX(xOrigin+x);
-			}
-			for(short z = 0; z < blocks[x].length; z++) {
-				if(orientation==Orientation.NE) {
-					currentLocation.setX(zOrigin+z);
-				}
-				else if(orientation==Orientation.SE) {
-					currentLocation.setX(zOrigin+z);
-				}
-				else if(orientation==Orientation.SW) {
-					currentLocation.setX(zOrigin-z);
-				}
-				else if(orientation==Orientation.NW) {
-					currentLocation.setX(zOrigin-z);
-				}
-				for(short y = 0; y<blocks[x][z].length; y++) {
+		for(int x = anchor.location.getBlockX(); x < anchor.location.getBlockX()+blocks.length*anchor.getXIncrement(); x+=anchor.getXIncrement()) {
+			for(int z = anchor.location.getBlockZ(); z < anchor.location.getBlockZ()+blocks[x].length*anchor.getZIncrement(); x+=anchor.getZIncrement()) {
+				for(int y = anchor.location.getBlockY(); y<anchor.location.getBlockY() + blocks[x][z].length; y++) {
 					//Check if this is not a index contianing air which should be ignored
 					if(!(blocks[x][z][y]==0 && ignoreAir)) {
-						if(!similiarBlocks(blocks[x][z][y],currentLocation.getBlock().getData())) {
+						if(!similiarBlocks(blocks[x][z][y], (new Location(anchor.location.getWorld(),x,y,z)).getBlock().getData())) {
 							return false;
 						}
 					}
@@ -100,7 +71,7 @@ public class Structure {
 	/*
 	 * Used to check if a structure exists at the current offset location
 	 */
-	
+	/*
 	private void newLocation(Location offsetLocation,Offset offset)
 	{
 		World world = offsetLocation.getWorld();
@@ -120,7 +91,7 @@ public class Structure {
 			return;
 		}
 		
-	}
+	}*/
 	
 	/*
 	 * Compares two blocks and checks if they are the same
@@ -131,19 +102,10 @@ public class Structure {
 	{
 		return block == 61 && otherBlock == 62 || block == 62 && otherBlock == 61 ||block==otherBlock;
 	}
-	
-	/*
-	 * 
-	 */
-	
-	public Location getLocationOfOffset(Location location, Offset offset) {
-		return null;
-	}
-	
 	/*
 	 * Checks if a given location is contained within structure
 	 */
-	public boolean locationContainedInStructure(Location sturctureLocation, Orientation orientation, Location location) {
+	public boolean locationContainedInStructure(Anchor anchor, Location location) {
 		return true;
 	}
 	
@@ -155,13 +117,25 @@ public class Structure {
 		return null;
 	}
 	
+	public Set<Material> getMaterials(){
+		Set<Material> materials=new HashSet<Material>();
+		for(short x = 0; x < blocks.length; x++) {
+			for(short z = 0; z < blocks[x].length; z++) {
+				for(short y = 0; y<blocks[x][z].length; y++) {
+					materials.add(Material.getMaterial((int) blocks[x][z][y]));
+				}
+			}		
+		}
+		return materials;
+	}
+	
 	/*
 	 * Checks if the point of interaction is one of the factory interaction points
 	 */
 	public int getInteractionPoint(Factory factory, Location location) {
 		return -1;
 	}
-	
+
 	/*
 	 * Parses a Minecraft schematic file to a structure object
 	 */
@@ -194,5 +168,9 @@ public class Structure {
 		}
 		return null;
 		
+	}
+	
+	public int[] getDimensions() {
+		return new int[]{blocks.length,blocks[0].length,blocks[0][0].length};
 	}
 }
