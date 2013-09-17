@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 import org.bukkit.inventory.Inventory;
 
-public class ProductionFactory extends BaseFactory
+public class ProductionFactory extends ItemFactory
 {
 
 	private ProductionRecipe currentRecipe = null;//the recipe that is currently selected
@@ -218,7 +218,7 @@ public class ProductionFactory extends BaseFactory
 		if(currentRecipe.hasRecipeScaling())
 		{
 			String response;
-			Set<ProductionFactory> scaledRecipeFactories=((ProductionManager)FactoryModPlugin.manager.getManager(ProductionManager.class)).getScaledFactories(currentRecipe.getscaledRecipes());
+			Set<ProductionFactory> scaledRecipeFactories=((ProductionManager)FactoryModPlugin.manager.getManager(FactoryCategory.PRODUCTION)).getScaledFactories(currentRecipe.getscaledRecipes());
 			List<ProductionFactory> interferingFactories=new LinkedList<ProductionFactory>();
 			for(ProductionFactory scaledRecipeFactory:scaledRecipeFactories)
 			{
@@ -284,12 +284,5 @@ public class ProductionFactory extends BaseFactory
 	@Override
 	public int getMaxRepair() {
 		return productionFactoryProperties.getRepair();
-	}
-	
-	/*
-	 * returns the inventory of a potential produciton factory at this location
-	 */
-	public static Inventory getConstructionInventory(Location location) {
-		return null;
 	}
 }

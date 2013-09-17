@@ -18,11 +18,11 @@ import org.bukkit.Location;
 import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
+import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
-import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.properties.ProductionProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
@@ -37,20 +37,17 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.InventoryHolder;
 
-public class ProductionManager  extends BaseFactoryManager implements FactoryManager
+public class ProductionManager  extends ItemFactoryManager implements FactoryManager
 {
 	public  Map<String, ProductionProperties> allProductionProperties;
 	public  Map<String,ProductionRecipe> productionRecipes;
 	private List<ProductionFactory> productionFactories=new ArrayList<ProductionFactory>();;
-	private long repairTime;
 	
 	public ProductionManager(FactoryModPlugin plugin)
 	{
 		super(plugin);
 		initConfig(plugin.getConfig().getConfigurationSection("production"));
 		for(ProductionProperties productionProperties:allProductionProperties.values()) {
-			productionProperties.getName();
-			interactionMaterials.clear();
 			interactionMaterials.addAll(productionProperties.getInteractionMaterials());
 		}
 		//Set maintenance clock to 0
@@ -66,10 +63,10 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
 		int version = 2;
 		oos.writeInt(version);
-		oos.writeInt(factories.size());
-		for (BaseFactory baseFactory : factories)
+		oos.writeInt(itemFactories.size());
+		for (ItemFactory itemFactory : itemFactories)
 		{
-			ProductionFactory productionFactory=(ProductionFactory) baseFactory;
+			ProductionFactory productionFactory=(ProductionFactory) itemFactory;
 		
 			oos.writeUTF(productionFactory.getAnchor().location.getWorld().getName());
 						
@@ -198,7 +195,7 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 	/*
 	 * Imports settings, recipes and factories from config
 	 */
-	public void initConfig(ConfigurationSection productionConfiguration)
+	private void initConfig(ConfigurationSection productionConfiguration)
 	{
 		//Import recipes from config.yml
 		productionRecipes=ProductionRecipe.recipesFromConfig(productionConfiguration.getConfigurationSection("recipes"));
@@ -210,7 +207,7 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 	 * Creates a factory at the location if the creation conditions are met
 	 *	Inputs are present in inventory block
 	 */
-	public InteractionResponse createFactory(Properties properties, Anchor anchor) {
+	public InteractionResponse createFactory(FactoryProperties properties, Anchor anchor) {
 		ProductionProperties productionProperties = (ProductionProperties)properties;
 		ItemList<NamedItemStack> inputs =  productionProperties.getInputs();
 		Offset creationPoint = productionProperties.getCreationPoint();
@@ -234,6 +231,7 @@ public class ProductionManager  extends BaseFactoryManager implements FactoryMan
 	/*
 	 * Returns of the ProductionProperites for a particular factory
 	 */
+	@Override
 	public ProductionProperties getProperties(String title)
 	{
 		return allProductionProperties.get(title);

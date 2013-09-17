@@ -12,7 +12,7 @@ import org.bukkit.event.Listener;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCategory;
-import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
+import com.github.igotyou.FactoryMod.interfaces.ItemFactoryInterface;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -20,7 +20,9 @@ import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResu
 import static com.untamedears.citadel.Utility.getReinforcement;
 import static com.untamedears.citadel.Utility.isReinforced;
 import com.untamedears.citadel.entity.PlayerReinforcement;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -31,6 +33,7 @@ public class FactoryModManager
 {
 	List<Listener> listeners;
 	List<FactoryManager> factoryManagers;
+	Map<FactoryCategory,FactoryManager> categoryToManager=new HashMap<FactoryCategory,FactoryManager>();
 	CraftingManager craftingManager;
 	StructureManager structureManager;
 	FactoryModPlugin plugin;
@@ -74,15 +77,16 @@ public class FactoryModManager
 	{
 		ProductionManager productionManager = new ProductionManager(plugin);
 		factoryManagers.add(productionManager);
-		
+		categoryToManager.put(FactoryCategory.PRODUCTION,productionManager);
 	}
 	/**
 	 * Initializes the Printing Press Manager
 	 */
 	private void initializePrintingPressManager()
 	{
-		PrintingPressManager printingMan = new PrintingPressManager(plugin);
-		factoryManagers.add(printingMan);
+		PrintingPressManager printingManager = new PrintingPressManager(plugin);
+		factoryManagers.add(printingManager);
+		categoryToManager.put(FactoryCategory.PRINTING_PRESS,printingManager);
 	}
 	
 	/**
@@ -101,7 +105,7 @@ public class FactoryModManager
 		saveFactoryManagers();
 	}
 	/**
-	 * Returns the BaseFactoryInterface Saves file
+	 * Returns the ItemFactoryInterface Saves file
 	 */
 	public File getSavesFile(String fileName)
 	{
@@ -240,7 +244,7 @@ public class FactoryModManager
 		return false;
 	}	
 
-	public BaseFactoryInterface getFactory(Location location) {
+	public ItemFactoryInterface getFactory(Location location) {
 		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.factoryExistsAt(location))
@@ -253,50 +257,23 @@ public class FactoryModManager
 	/*
 	 * Removes a factory at the given location if it exists
 	 */
-	public void remove(BaseFactoryInterface factory) {
+	public void remove(ItemFactoryInterface factory) {
 		for (FactoryManager factoryManager : factoryManagers)
 		{
 			factoryManager.removeFactory(factory);
 		}	
 	}
 	
-	public FactoryManager getManager(FactoryCategory factoryType)
+	public FactoryManager getManager(FactoryCategory factoryCategory)
 	{
-		Class managerClass=null;
-		if(factoryType==FactoryCategory.PRODUCTION)
-		{
-			managerClass = PrintingPressManager.class;
+		if(categoryToManager.containsKey(factoryCategory)) {
+			return categoryToManager.get(factoryCategory);
 		}
-		if(factoryType==FactoryCategory.PRINTING_PRESS)
-		{
-			managerClass = ProductionManager.class;
+		else {
+			return null;
 		}
-		for (FactoryManager manager : factoryManagers)
-		{
-			if (manager.getClass() == PrintingPressManager.class)
-			{
-				return (PrintingPressManager) manager;
-			}
-		}
-		return null;			
 	}
-	
-	/**
-	 * Returns the appropriate manager depending on the given Manager Type
-	 */
-	@SuppressWarnings("rawtypes")
-	public FactoryManager getManager(Class managerType)
-	{
-		for (FactoryManager manager : factoryManagers)
-		{
-			if (managerType.isInstance(manager))
-			{
-				return manager;
-			}
-		}
-		
-		return null;
-	}
+
 	
 	/*
 	 * Handles response to playerInteractionEvent

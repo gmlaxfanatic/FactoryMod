@@ -6,21 +6,7 @@ import java.util.List;
 import java.util.Set;
 import org.bukkit.Material;
 
-/**
- * Properties.java
- * Purpose: Interface for Properties objects for basic properties functionality
- *
- * @author MrTwiggy
- * @version 0.1 1/17/13
- */
-//edited version:
-/**
-* Properties.java	 
- * Purpose: Interface for Properties objects for basic properties functionality
-* @author igotyou
-*
-*/
-public interface Properties 
+public interface FactoryProperties 
 {
 	public String getName();
 

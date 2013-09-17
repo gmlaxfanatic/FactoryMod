@@ -2,6 +2,7 @@ package com.github.igotyou.FactoryMod.recipes;
 
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
+import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCategory;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
 import com.github.igotyou.FactoryMod.managers.ProductionManager;
@@ -127,7 +128,7 @@ public class ProductionRecipe implements Recipe
 	 */
 	public double getRecipeScaling(ProductionFactory producingFactory)
 	{
-		Set<ProductionFactory> otherFactories=((ProductionManager)FactoryModPlugin.manager.getManager(ProductionManager.class)).getScaledFactories(scaledRecipes);
+		Set<ProductionFactory> otherFactories=((ProductionManager)FactoryModPlugin.manager.getManager(FactoryCategory.PRODUCTION)).getScaledFactories(scaledRecipes);
 		if(distanceScaling==0)
 		{
 			return 1;
@@ -239,7 +240,6 @@ public class ProductionRecipe implements Recipe
 	
 	private void loadScaledRecipes(Map<String,ProductionRecipe> productionRecipes)
 	{
-		FactoryModPlugin.sendConsoleMessage(title);
 		scaledRecipes=new LinkedList<ProductionRecipe>();
 		for(String title:scaledRecipeTitles)
 		{

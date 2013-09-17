@@ -22,9 +22,6 @@ import org.jnbt.Tag;
  * 
  */
 public class Structure {
-
-	
-
 	
 	private byte[][][] blocks;
 	//Whether air blocks are a required part of the structure
@@ -52,12 +49,12 @@ public class Structure {
 	 */
 	public boolean exists(Anchor anchor)
 	{
-		for(int x = anchor.location.getBlockX(); x < anchor.location.getBlockX()+blocks.length*anchor.getXIncrement(); x+=anchor.getXIncrement()) {
-			for(int z = anchor.location.getBlockZ(); z < anchor.location.getBlockZ()+blocks[x].length*anchor.getZIncrement(); x+=anchor.getZIncrement()) {
-				for(int y = anchor.location.getBlockY(); y<anchor.location.getBlockY() + blocks[x][z].length; y++) {
+		for(int x = anchor.location.getBlockX(); Math.abs(x-anchor.location.getBlockX()) < blocks.length; x+=anchor.getXModifier()) {
+			for(int y = anchor.location.getBlockY(); y<anchor.location.getBlockY() + blocks[x].length; y++) {
+				for(int z = anchor.location.getBlockZ(); Math.abs(z-anchor.location.getBlockZ()) < blocks[x][y].length; x+=anchor.getZModifier()) {
 					//Check if this is not a index contianing air which should be ignored
-					if(!(blocks[x][z][y]==0 && ignoreAir)) {
-						if(!similiarBlocks(blocks[x][z][y], (new Location(anchor.location.getWorld(),x,y,z)).getBlock().getData())) {
+					if(!(blocks[x][y][z]==0 && ignoreAir)) {
+						if(!similiarBlocks(blocks[x][y][z], (new Location(anchor.location.getWorld(),x,y,z)).getBlock().getData())) {
 							return false;
 						}
 					}
@@ -67,31 +64,6 @@ public class Structure {
 		return true;
 			
 	}
-	
-	/*
-	 * Used to check if a structure exists at the current offset location
-	 */
-	/*
-	private void newLocation(Location offsetLocation,Offset offset)
-	{
-		World world = offsetLocation.getWorld();
-		int xOffsetLocation=offsetLocation.getBlockX();
-		int zOffsetLocation=offsetLocation.getBlockZ();
-		int yLocation=offsetLocation.getBlockY()-offset.y;
-		if(exists(new Location(world, xOffsetLocation-offset.x, zOffsetLocation-offset.z, yLocation), Orientation.NE)) {
-			return;
-		}
-		else if(exists(new Location(world, xOffsetLocation+offset.x, zOffsetLocation-offset.z, yLocation), Orientation.SE)) {
-			return;
-		}
-		else if(exists(new Location(world, xOffsetLocation+offset.x, zOffsetLocation+offset.z, yLocation), Orientation.SW)) {
-			return;
-		}
-		else if(exists(new Location(world, xOffsetLocation-offset.x, zOffsetLocation+offset.z, yLocation), Orientation.SW)) {
-			return;
-		}
-		
-	}*/
 	
 	/*
 	 * Compares two blocks and checks if they are the same
@@ -117,34 +89,35 @@ public class Structure {
 		Set<Material> materials = new HashSet();
 		for(Offset offset:offsets) {
 			if(validOffset(offset)) {
-				materials.add(Material.getMaterial(blocks[offset.x][offset.y][offset.z]));
+				if(!(blocks[offset.x][offset.y][offset.z]==0 && ignoreAir)) {
+					materials.add(Material.getMaterial(blocks[offset.x][offset.y][offset.z]));
+				}
 			}
 		}
 		return materials;
 	}
-	
+	/*
+	 * Checks if the given offset is within the bounds of the structure
+	 */
 	private boolean validOffset(Offset offset) {
 		return offset.x<blocks.length && offset.y<blocks[0].length && offset.z<blocks[0][0].length
 			&& offset.x>=0 && offset.y>=0 && offset.z>=0;
 	}
-	
+	/*
+	 * Gets all material use in this schematic
+	 */
 	public Set<Material> getMaterials(){
 		Set<Material> materials=new HashSet<Material>();
 		for(short x = 0; x < blocks.length; x++) {
 			for(short z = 0; z < blocks[x].length; z++) {
 				for(short y = 0; y<blocks[x][z].length; y++) {
-					materials.add(Material.getMaterial((int) blocks[x][z][y]));
+					if(!(blocks[x][y][z]==0 && ignoreAir)) {
+						materials.add(Material.getMaterial((int) blocks[x][z][y]));
+					}
 				}
 			}		
 		}
 		return materials;
-	}
-	
-	/*
-	 * Checks if the point of interaction is one of the factory interaction points
-	 */
-	public int getInteractionPoint(Factory factory, Location location) {
-		return -1;
 	}
 
 	/*

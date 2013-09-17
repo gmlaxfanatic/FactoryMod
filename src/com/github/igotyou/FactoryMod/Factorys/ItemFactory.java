@@ -17,8 +17,8 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
-import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.interfaces.ItemFactoryInterface;
+import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -31,18 +31,18 @@ import java.util.Arrays;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 
-public abstract class BaseFactory extends FactoryObject implements BaseFactoryInterface {
+public abstract class ItemFactory extends FactoryObject implements ItemFactoryInterface {
 	public static final BlockFace[] REDSTONE_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
 	protected int currentProductionTimer = 0;//The "production timer", which trachs for how long the factory has been producing the selected recipe
 	protected int currentEnergyTimer = 0;//Time since last energy consumption(if there's no lag, it's in seconds)
 	protected double currentRepair;
 	protected long timeDisrepair;//The time at which the factory went into disrepair
 	
-	public BaseFactory(Anchor anchor,
+	public ItemFactory(Anchor anchor,
 		Structure structure,
 		boolean active,
 		FactoryCategory factoryType,
-		Properties factoryProperties) {
+		FactoryProperties factoryProperties) {
 		super(anchor,
 			structure,			
 			Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0)),
@@ -53,11 +53,11 @@ public abstract class BaseFactory extends FactoryObject implements BaseFactoryIn
 		this.timeDisrepair=3155692597470L;//Year 2070, default starting value
 	}
 	
-	public BaseFactory(Anchor anchor,
+	public ItemFactory(Anchor anchor,
 		Structure structure,
 		boolean active,
 		FactoryCategory factoryType,
-		Properties factoryProperties,
+		FactoryProperties factoryProperties,
 		int currentProductionTimer,
 		int currentEnergyTimer,	
 		double currentMaintenance,

@@ -20,7 +20,7 @@ import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.PrettyLore;
 
-public class PrintingPress extends BaseFactory {
+public class PrintingPress extends ItemFactory {
 	
 	private PrintingPressProperties printingPressProperties;
 	private OperationMode mode;

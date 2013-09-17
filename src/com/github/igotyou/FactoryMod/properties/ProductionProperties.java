@@ -1,8 +1,9 @@
 package com.github.igotyou.FactoryMod.properties;
 
+import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import java.util.List;
 
-import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.managers.ProductionManager;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
@@ -17,18 +18,17 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 
-public class ProductionProperties extends BaseFactoryProperties implements Properties
+public class ProductionProperties extends ItemFactoryProperties implements FactoryProperties
 {
 	private ItemList<NamedItemStack> inputs;
 	private List<ProductionRecipe> recipes;
 	
-	public ProductionProperties(ItemList<NamedItemStack> inputs, List<ProductionRecipe> recipes,
+	public ProductionProperties(Structure structure, ItemList<NamedItemStack> inputs, List<ProductionRecipe> recipes,
 			ItemList<NamedItemStack> fuel, int energyTime, String name,int repair)
 	{
-		super(fuel, repair, energyTime, name);
+		super(structure,fuel, repair, energyTime, name);
 		this.inputs = inputs;
 		this.recipes = recipes;
-		this.repair=repair;
 		
 	}
 
@@ -66,7 +66,7 @@ public class ProductionProperties extends BaseFactoryProperties implements Prope
 		return productionProperties;
 	}
 	
-	private static ProductionProperties productionPropertyFromConfig(String title, ConfigurationSection factoryConfiguration, ProductionManager productionManager)
+	protected static ProductionProperties productionPropertyFromConfig(String title, ConfigurationSection factoryConfiguration, ProductionManager productionManager)
 	{
 		title=title.replaceAll(" ","_");
 		String factoryName=factoryConfiguration.getString("name","Default Name");
@@ -91,6 +91,6 @@ public class ProductionProperties extends BaseFactoryProperties implements Prope
 		ProductionRecipe repairRecipe=new ProductionRecipe(title+"REPAIR","Repair Factory",1,repairs);
 		productionManager.addProductionRecipe(title+"REPAIR",repairRecipe);
 		factoryRecipes.add(repairRecipe);
-		return new ProductionProperties(inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
+		return new ProductionProperties(FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory"),inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
 	}
 }

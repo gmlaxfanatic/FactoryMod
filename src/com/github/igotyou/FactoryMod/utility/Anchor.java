@@ -4,14 +4,12 @@
  */
 package com.github.igotyou.FactoryMod.utility;
 
-import java.util.HashSet;
-import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
 /**
- *
- * @author Brian
+ * Represents a location with a orientation from which offsets
+ * can be calculated to achieve absolute positions
  */
 public class Anchor {
 	//Describes the oritentation of the structure
@@ -23,21 +21,17 @@ public class Anchor {
 		NW(3);
 		
 		public final int id;
+		public static final Orientation[] byId = {Orientation.NE,Orientation.SE,Orientation.SW,Orientation.NW};
 		
 		private Orientation(int id) {
 			this.id=id;
 		}
 		
 		public static Orientation getOrientation(int id) {
-			for(Orientation orientation:Orientation.values()) {
-				if (orientation.id==id) {
-					return orientation;
-				}
-			}
-			return null;
-		}
-		
+			return id<byId.length ? byId[id] : null;
+		}		
 	}
+	
 	public final Orientation orientation;
 	public final Location location;
 	
@@ -48,28 +42,45 @@ public class Anchor {
 	}
 	
 	/*
-	 * Gets the block located in the structure given the offset
-	 */
-	public Block getBlock(Offset offset) {
-		return offset.orient(orientation).toLocation(location).getBlock();
-	}
-	
-	/*
 	 * Gets either a negative or positive increment of X depending on its orientation
 	 */
-	public int getXIncrement() {
+	public int getXModifier() {
 		return orientation==Orientation.NE || orientation==Orientation.NW ? 1 : -1;
 	}
 	
 	/*
 	 * Gets either a negative or positive increment of X depending on its orientation
 	 */
-	public int getZIncrement() {
+	public int getZModifier() {
 		return orientation==Orientation.NE || orientation==Orientation.SE ? 1 : -1;
 	}
 	
+	/*
+	 * Returns an location the offset given this anchor
+	 */
 	public Location getLocationOfOffset(Offset offset) {
 		Offset orientedOffset = offset.orient(orientation);
 		return location.clone().add(orientedOffset.x, orientedOffset.y, orientedOffset.z);
+	}
+
+	/*
+	 * Gets the block located in the world given the offset and this anchor
+	 */
+	public Block getBlock(Offset offset) {
+		return getLocationOfOffset(offset).getBlock();
+	}
+		
+	/*
+	 * Check if location is contained within a bounding box at this anchor
+	 */
+	public boolean containedIn(Location testLocation, int[] dimensions) {
+		if((testLocation.getBlockX()-location.getBlockX())<dimensions[0]*getXModifier()) {
+			if((testLocation.getBlockZ()-location.getBlockZ())<dimensions[2]*getZModifier()) {
+				if(0<=(testLocation.getBlockZ()-location.getBlockZ()) && (testLocation.getBlockZ()-location.getBlockZ())<dimensions[1]) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

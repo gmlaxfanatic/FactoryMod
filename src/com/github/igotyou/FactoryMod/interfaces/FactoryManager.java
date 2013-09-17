@@ -53,12 +53,12 @@ public interface FactoryManager
 /**
 * Creates a machine from an existing machine data object
 */
-	public InteractionResponse addFactory(BaseFactoryInterface factory);
+	public InteractionResponse addFactory(ItemFactoryInterface factory);
 
 /**
 * Returns the machine (if any exists) at the given location from this manager
 */
-	public BaseFactoryInterface factoryAtLocation(Location factoryLocation);
+	public ItemFactoryInterface factoryAtLocation(Location factoryLocation);
 
 /**
 * Returns whether a machine exists at the given location
@@ -73,7 +73,7 @@ public interface FactoryManager
 /**
 * Removes the given machine from the object list
 */
-	public void removeFactory(BaseFactoryInterface factory);
+	public void removeFactory(ItemFactoryInterface factory);
 
 /**
 * Returns the saves file name for this manager
@@ -83,7 +83,7 @@ public interface FactoryManager
 /**
  * Returns the properties of a particular factory
  */
-	public Properties getProperties(String title);
+	public FactoryProperties getProperties(String title);
 /*
  * Get all materials potentially a part of a factory
  */

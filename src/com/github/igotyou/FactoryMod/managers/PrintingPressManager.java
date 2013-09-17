@@ -14,11 +14,11 @@ import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
+import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress;
 import com.github.igotyou.FactoryMod.Factorys.PrintingPress.OperationMode;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
-import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
@@ -28,7 +28,7 @@ import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 
 
-public class PrintingPressManager  extends BaseFactoryManager implements FactoryManager
+public class PrintingPressManager  extends ItemFactoryManager implements FactoryManager
 {
 
 	public PrintingPressProperties printingPressProperties;
@@ -51,10 +51,10 @@ public class PrintingPressManager  extends BaseFactoryManager implements Factory
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
 		int version = 2;
 		oos.writeInt(2);
-		oos.writeInt(factories.size());
-		for (BaseFactory baseFactory : factories)
+		oos.writeInt(itemFactories.size());
+		for (ItemFactory itemFactory : itemFactories)
 		{
-			PrintingPress printingPress=(PrintingPress) baseFactory;
+			PrintingPress printingPress=(PrintingPress) itemFactory;
 		
 			oos.writeUTF(printingPress.getAnchor().location.getWorld().getName());
 						
@@ -157,7 +157,6 @@ public class PrintingPressManager  extends BaseFactoryManager implements Factory
 				String worldName = ois.readUTF();
 				World world = plugin.getServer().getWorld(worldName);
 
-				Location centerLocation = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
 				Location inventoryLocation = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
 				Location powerLocation = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
 				boolean active = ois.readBoolean();
@@ -212,8 +211,9 @@ public class PrintingPressManager  extends BaseFactoryManager implements Factory
 			e.printStackTrace();
 		}
 	}
-
-	public InteractionResponse createFactory(Properties properties, Anchor anchor) 
+	
+	@Override
+	public InteractionResponse createFactory(FactoryProperties properties, Anchor anchor) 
 	{
 		Block inventoryBlock = anchor.getBlock(properties.getCreationPoint());
 		Chest chest = (Chest) inventoryBlock.getState();

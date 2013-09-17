@@ -11,9 +11,11 @@ import org.bukkit.util.Vector;
  * Represents a location within a structure
  */
 public class Offset {
+	
 	public final int x;
 	public final int y;
 	public final int z;
+	
 	public Offset(int x, int y, int z) {
 		this.x=x;
 		this.y=y;
@@ -21,20 +23,16 @@ public class Offset {
 	}
 	
 	/*
-	 * rotates the positive offsets given an orientation
+	 * Rotates the positive offsets given an orientation
 	 */
 	public Offset orient(Orientation orientation) {
 		return new Offset(x*(orientation==Orientation.NE || orientation==Orientation.NW ? 1 : -1),y,
 			z*(orientation==Orientation.NE || orientation==Orientation.SE ? 1 : -1));
 	}
-	
+
 	/*
-	 * Maps a given offset to a location given an anchor point
+	 * Converts the offset to a bukkit vector
 	 */
-	public Location toLocation(Location location) {
-		return location.add(x, y, z);
-	}
-	
 	public Vector toVector() {
 		return new Vector(x,y,z);
 	}

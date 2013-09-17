@@ -5,13 +5,13 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.interfaces.Properties;
+import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
+import com.github.igotyou.FactoryMod.utility.Structure;
 
-public class PrintingPressProperties extends BaseFactoryProperties implements Properties{
+public class PrintingPressProperties extends ItemFactoryProperties implements FactoryProperties{
 
-	private ItemList<NamedItemStack> fuel;
 	private ItemList<NamedItemStack> constructionMaterials;
 	private ItemList<NamedItemStack> plateMaterials;
 	private ItemList<NamedItemStack> bindingMaterials;
@@ -21,9 +21,6 @@ public class PrintingPressProperties extends BaseFactoryProperties implements Pr
 	private int pamphletsPerLot;
 	private ItemList<NamedItemStack> securityMaterials;
 	private int securityNotesPerLot;
-	private int energyTime;
-	private String name;
-	private int repair;
 	private ItemList<NamedItemStack> repairMaterials;
 	private int pageLead;
 	private int setPlateTime;
@@ -36,6 +33,7 @@ public class PrintingPressProperties extends BaseFactoryProperties implements Pr
 
 
 	public PrintingPressProperties(
+			Structure structure,
 			ItemList<NamedItemStack> fuel,
 			ItemList<NamedItemStack> constructionMaterials,
 			ItemList<NamedItemStack> repairMaterials,
@@ -51,7 +49,7 @@ public class PrintingPressProperties extends BaseFactoryProperties implements Pr
 			int pageLead, int setPlateTime, int repairTime
 			)
 	{
-		super(fuel, repair, energyTime, name);
+		super(structure, fuel, repair, energyTime, name);
 		this.constructionMaterials = constructionMaterials;
 		this.repairMaterials = repairMaterials;
 		this.plateMaterials = plateMaterials;
@@ -67,7 +65,6 @@ public class PrintingPressProperties extends BaseFactoryProperties implements Pr
 		this.repairTime = repairTime;
 	}
 
-	
 	public int getSetPlateTime() {
 		return setPlateTime;
 	}
@@ -125,7 +122,7 @@ public class PrintingPressProperties extends BaseFactoryProperties implements Pr
 		int pageLead = configPrintingPresses.getInt("page_lead",12);
 		int setPageTime = configPrintingPresses.getInt("set_page_time",20);
 		int repairTime = configPrintingPresses.getInt("repair_time",12);
-		return new PrintingPressProperties(ppFuel, ppConstructionCost, ppRepairCost, ppPlateCost, ppBindingCost, ppPageCost, pagesPerLot, ppPamphletCost, pamphletsPerLot, ppSecurityCost, securityNotesPerLot, ppEnergyTime, ppName, ppRepair, paperRate, pageLead, setPageTime, repairTime);
+		return new PrintingPressProperties(FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory"),ppFuel, ppConstructionCost, ppRepairCost, ppPlateCost, ppBindingCost, ppPageCost, pagesPerLot, ppPamphletCost, pamphletsPerLot, ppSecurityCost, securityNotesPerLot, ppEnergyTime, ppName, ppRepair, paperRate, pageLead, setPageTime, repairTime);
 	}
 
 
@@ -159,15 +156,6 @@ public class PrintingPressProperties extends BaseFactoryProperties implements Pr
 		return fuel;
 	}
 	
-	public int getEnergyTime()
-	{
-		return energyTime;
-	}
-	
-	public String getName()
-	{
-		return name;
-	}
 
 	public ItemList<NamedItemStack> getConstructionMaterials() {
 		return constructionMaterials;

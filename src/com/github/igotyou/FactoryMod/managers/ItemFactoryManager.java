@@ -5,10 +5,10 @@
 package com.github.igotyou.FactoryMod.managers;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
-import com.github.igotyou.FactoryMod.interfaces.BaseFactoryInterface;
-import com.github.igotyou.FactoryMod.interfaces.Properties;
-import com.github.igotyou.FactoryMod.properties.BaseFactoryProperties;
+import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
+import com.github.igotyou.FactoryMod.interfaces.ItemFactoryInterface;
+import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
+import com.github.igotyou.FactoryMod.properties.ItemFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
@@ -29,10 +29,10 @@ import org.bukkit.Material;
  *
  * @author Brian
  */
-public class BaseFactoryManager {
+public class ItemFactoryManager {
 	
 	protected FactoryModPlugin plugin;
-	protected List<BaseFactory> factories;
+	protected List<ItemFactory> itemFactories;
 	protected Set<Material> interactionMaterials;
 	protected long repairTime;
 	/*
@@ -40,12 +40,12 @@ public class BaseFactoryManager {
 	 * used by that structure, which in turn points to the properites which use those offsets
 	 */
 	
-	protected Map<Structure,Map<Offset,Properties>> structures=new HashMap<Structure,Map<Offset,Properties>>();
+	protected Map<Structure,Map<Offset,FactoryProperties>> structures=new HashMap<Structure,Map<Offset,FactoryProperties>>();
 	
-	public BaseFactoryManager(FactoryModPlugin plugin)
+	public ItemFactoryManager(FactoryModPlugin plugin)
 	{
 		this.plugin=plugin;
-		factories = new ArrayList<BaseFactory>();
+		itemFactories = new ArrayList<ItemFactory>();
 		interactionMaterials=new HashSet<Material>();
 	}
 	
@@ -56,21 +56,20 @@ public class BaseFactoryManager {
 			@Override
 			public void run()
 			{
-				for (BaseFactory baseFactory:factories)
+				for (ItemFactory itemFactory:itemFactories)
 				{
-					baseFactory.update();
+					itemFactory.update();
 				}
 			}
 		}, 0L, FactoryModPlugin.UPDATE_CYCLE);
 	}
 
-	public BaseFactory factoryAtLocation(Location factoryLocation) 
+	public ItemFactory factoryAtLocation(Location factoryLocation) 
 	{
-		for (BaseFactory baseFactory : factories)
-		{
-			
-			if(baseFactory.getStructure().locationContainedInStructure(baseFactory.getAnchor(),factoryLocation)) {
-				return baseFactory;
+		for (ItemFactory itemFactory : itemFactories)
+		{			
+			if(itemFactory.getAnchor().containedIn(factoryLocation, itemFactory.getStructure().getDimensions())) {
+				return itemFactory;
 			}
 		}
 		return null;
@@ -81,36 +80,36 @@ public class BaseFactoryManager {
 	}
 	public boolean factoryWholeAt(Location factoryLocation) 
 	{
-		BaseFactory baseFactory = factoryAtLocation(factoryLocation);
-		return baseFactory != null ? baseFactory.isWhole() : false;
+		ItemFactory itemFactory = factoryAtLocation(factoryLocation);
+		return itemFactory != null ? itemFactory.isWhole() : false;
 	}
-	public void removeFactory(BaseFactoryInterface factory) 
+	public void removeFactory(ItemFactoryInterface factory) 
 	{
-		factories.remove((BaseFactory)factory);
+		itemFactories.remove((ItemFactory)factory);
 	}
 		
 	public void updateRepair(long time)
 	{
-		for (BaseFactory baseFactory: factories)
+		for (ItemFactory itemFactory: itemFactories)
 		{
-			baseFactory.updateRepair(time/((double)FactoryModPlugin.REPAIR_PERIOD));
+			itemFactory.updateRepair(time/((double)FactoryModPlugin.REPAIR_PERIOD));
 		}
 		long currentTime=System.currentTimeMillis();
-		Iterator<BaseFactory> itr=factories.iterator();
+		Iterator<ItemFactory> itr=itemFactories.iterator();
 		while(itr.hasNext())
 		{
-			BaseFactory baseFactory=itr.next();
-			if(currentTime>(baseFactory.getTimeDisrepair()+FactoryModPlugin.DISREPAIR_PERIOD))
+			ItemFactory itemFactory=itr.next();
+			if(currentTime>(itemFactory.getTimeDisrepair()+FactoryModPlugin.DISREPAIR_PERIOD))
 			{
 				itr.remove();
 			}
 		}
 	}
 		
-	public InteractionResponse addFactory(BaseFactoryInterface factory) 
+	public InteractionResponse addFactory(ItemFactoryInterface factory) 
 	{
 		if(factory.exists()) {
-			factories.add((BaseFactory) factory);
+			itemFactories.add((ItemFactory) factory);
 			return new InteractionResponse(InteractionResponse.InteractionResult.SUCCESS, "");
 		}
 		else
@@ -132,7 +131,7 @@ public class BaseFactoryManager {
 	public InteractionResponse createFactory(Location location){
 		InteractionResponse response = new InteractionResponse(InteractionResult.IGNORE,"Not a viable structure");
 		for(Structure structure:structures.keySet()) {
-			for(Entry<Offset,Properties> entry:structures.get(structure).entrySet()) {
+			for(Entry<Offset,FactoryProperties> entry:structures.get(structure).entrySet()) {
 				Set<Anchor> potentialAnchors = entry.getKey().getPotentialAnchors(location);
 				for(Anchor potentialAnchor:potentialAnchors) {
 					if(structure.exists(potentialAnchor)) {
@@ -148,15 +147,23 @@ public class BaseFactoryManager {
 		return response;
 	}
 	
-	public InteractionResponse createFactory(Properties properties, Anchor anchor) {
+	public InteractionResponse createFactory(FactoryProperties properties, Anchor anchor) {
 		return null;
 	}
 	
 	public Set<Material> getInteractionMaterials() {
-		return BaseFactoryProperties.structure.materialsOfOffsets(BaseFactoryProperties.interactionPoints);
+		Set<Material> interactionMaterials = new HashSet<Material>();
+		for(ItemFactory itemFactory:itemFactories) {
+			interactionMaterials.addAll(itemFactory.getStructure().materialsOfOffsets(ItemFactoryProperties.interactionPoints));
+		}
+		return interactionMaterials;
 	}
 	
 	public Set<Material> getMaterials() {
-		return BaseFactoryProperties.structure.getMaterials();
+		Set<Material> materials = new HashSet<Material>();
+		for(ItemFactory itemFactory:itemFactories) {
+			materials.addAll(itemFactory.getStructure().getMaterials());
+		}
+		return materials;
 	}
 }
