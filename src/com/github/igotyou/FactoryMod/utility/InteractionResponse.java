@@ -18,7 +18,9 @@ public class InteractionResponse
 	{
 		SUCCESS,
 		FAILURE,
-		IGNORE
+		IGNORE,
+		DEBUG,
+		CHAT
 	}
 	
 	private final InteractionResult interactionResult; //The result of this interaction attempt
@@ -72,6 +74,8 @@ public class InteractionResponse
 			return ChatColor.GREEN;
 		case FAILURE:
 			return ChatColor.RED;
+		case CHAT:
+			return ChatColor.WHITE;
 		default:
 			return ChatColor.YELLOW;
 		}

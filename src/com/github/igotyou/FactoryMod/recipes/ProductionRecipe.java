@@ -2,10 +2,10 @@ package com.github.igotyou.FactoryMod.recipes;
 
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCategory;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
-import com.github.igotyou.FactoryMod.managers.ProductionManager;
+import com.github.igotyou.FactoryMod.managers.ProductionFactoryManager;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.ArrayList;
@@ -94,14 +94,7 @@ public class ProductionRecipe implements Recipe
 	
 	public ItemList<NamedItemStack> getOutputs(ProductionFactory productionFactory) 
 	{
-		if(hasRecipeScaling())
-		{
-			return outputs.getMultiple(getRecipeScaling(productionFactory));
-		}
-		else
-		{
-			return outputs;
-		}
+		return outputs;
 	}
 	
 	public boolean hasRecipeScaling()
@@ -109,53 +102,6 @@ public class ProductionRecipe implements Recipe
 		return !scaledRecipes.isEmpty()||distanceScaling==0;
 	}
 		
-	/*
-	 * Scaling takes into account distance and number of factories by the
-	 * formula: (1/sum(e^(r/w)/l))^n where:
-	 * w is the worldBoarderCorrection, this number is 1 for factories at
-	 * the center of the world and decreases as you approach the edge.
-	 * It is calculated by taking the surface integral of the distance
-	 * cost formula over the playable area and dividing it by the surface
-	 * integral of the distance cost formula when take at the origin.
-	 * e is the base of the natural logarithm
-	 * r is the distance between two factories
-	 * l is distanceScaling/ln(2) where:
-	 *	distanceScaling is the distance at which a neighboring
-	 *	factory cuts production by 1/2
-	 * n is ln(1/20)/ln(numberScaling/2) where:
-	 *	numberScaling is the number of factories at distance
-	 *	distanceScaling that is takes to cut production to 1/20
-	 */
-	public double getRecipeScaling(ProductionFactory producingFactory)
-	{
-		Set<ProductionFactory> otherFactories=((ProductionManager)FactoryModPlugin.manager.getManager(FactoryCategory.PRODUCTION)).getScaledFactories(scaledRecipes);
-		if(distanceScaling==0)
-		{
-			return 1;
-		}
-		
-		double sum=0;
-		//Compensates for the world border restricting area factories can be by
-		//Formula needs to be created
-		double worldBorderCorrection=1;
-		for(ProductionFactory factory:otherFactories)
-		{
-			if(factory!=producingFactory)
-			{
-				double distance=factory.getCenterLocation().distance(producingFactory.getCenterLocation());
-				sum+=Math.exp((distance/worldBorderCorrection)/(distanceScaling/Math.log(2)));
-			}
-		}
-		if(sum==0)
-		{
-			return 1;
-		}
-		else
-		{
-			return Math.pow(1.0/sum,(Math.log(1.0/20.0)/Math.log(1.0/2*numberScaling)));
-		}
-	}
-	
 	public ItemList<NamedItemStack> getRepairs()
 	{
 		return repairs;

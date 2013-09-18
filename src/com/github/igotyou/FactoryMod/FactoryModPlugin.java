@@ -1,7 +1,7 @@
 package com.github.igotyou.FactoryMod;
 
 
-import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCategory;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -16,12 +16,14 @@ import com.github.igotyou.FactoryMod.managers.FactoryModManager;
 public class FactoryModPlugin extends JavaPlugin
 {
 
+	private static boolean debug=true;
+	
 	public static FactoryModManager manager;
 	
 	public static final String PLUGIN_NAME = "[FactoryMod] "; //Name of plugin
-	public static final String PRODUCTION_SAVES_FILE = "productionSaves"; // The production saves file name
+	public static final String PRODUCTION_FACTORY_SAVES_FILE = "productionSaves"; // The production saves file name
 	public static final int TICKS_PER_SECOND = 20; //The number of ticks per second
-	public static final String PRINTING_PRESSES_SAVE_FILE = "pressSaves";
+	public static final String PRINTING_FACTORY_SAVE_FILE = "pressSaves";
 	
 	public static int UPDATE_CYCLE;
 	public static int SAVE_CYCLE;
@@ -106,6 +108,11 @@ public class FactoryModPlugin extends JavaPlugin
 	public static void sendConsoleMessage(String message) 
 	{
 		Bukkit.getLogger().info(FactoryModPlugin.PLUGIN_NAME + message);	
+	}
+	public static void debugMessage(String message) {
+		if(debug) {
+			sendConsoleMessage(message);
+		}
 	}
 
 	

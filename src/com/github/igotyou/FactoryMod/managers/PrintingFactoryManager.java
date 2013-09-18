@@ -14,12 +14,11 @@ import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
-import com.github.igotyou.FactoryMod.Factorys.PrintingPress;
-import com.github.igotyou.FactoryMod.Factorys.PrintingPress.OperationMode;
-import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
+import com.github.igotyou.FactoryMod.Factorys.PrintingFactory;
+import com.github.igotyou.FactoryMod.Factorys.PrintingFactory.OperationMode;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
-import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
+import com.github.igotyou.FactoryMod.properties.PrintingFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -28,16 +27,16 @@ import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 
 
-public class PrintingPressManager  extends ItemFactoryManager implements FactoryManager
-{
+public class PrintingFactoryManager  extends ItemFactoryManager {
 
-	public PrintingPressProperties printingPressProperties;
+	public PrintingFactoryProperties printingFactoryProperties;
 	
-	public PrintingPressManager (FactoryModPlugin plugin)
+	public PrintingFactoryManager (FactoryModPlugin plugin)
 	{
 		super(plugin);
-		printingPressProperties = PrintingPressProperties.fromConfig(plugin, plugin.getConfig().getConfigurationSection("printing_presses"));
-		interactionMaterials.addAll(printingPressProperties.getInteractionMaterials());
+		allFactoryProperties.put("PrintingFactoryProperties",PrintingFactoryProperties.fromConfig(plugin, plugin.getConfig().getConfigurationSection("printing")));
+		updateMaterials();
+		updateInteractionMaterials();
 		//Set maintenance clock to 0
 		updateFactorys();
 	}
@@ -51,32 +50,32 @@ public class PrintingPressManager  extends ItemFactoryManager implements Factory
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
 		int version = 2;
 		oos.writeInt(2);
-		oos.writeInt(itemFactories.size());
-		for (ItemFactory itemFactory : itemFactories)
+		oos.writeInt(baseFactories.size());
+		for (BaseFactory baseFactory : baseFactories)
 		{
-			PrintingPress printingPress=(PrintingPress) itemFactory;
+			PrintingFactory printingFactory=(PrintingFactory) baseFactory;
 		
-			oos.writeUTF(printingPress.getAnchor().location.getWorld().getName());
+			oos.writeUTF(printingFactory.getAnchor().location.getWorld().getName());
 						
-			oos.writeInt(printingPress.getAnchor().location.getBlockX());
-			oos.writeInt(printingPress.getAnchor().location.getBlockY());
-			oos.writeInt(printingPress.getAnchor().location.getBlockZ());
+			oos.writeInt(printingFactory.getAnchor().location.getBlockX());
+			oos.writeInt(printingFactory.getAnchor().location.getBlockY());
+			oos.writeInt(printingFactory.getAnchor().location.getBlockZ());
 			
-			oos.writeInt(printingPress.getAnchor().orientation.id);
+			oos.writeInt(printingFactory.getAnchor().orientation.id);
 			
-			oos.writeBoolean(printingPress.getActive());
-			oos.writeInt(printingPress.getMode().getId());
-			oos.writeInt(printingPress.getProductionTimer());
-			oos.writeInt(printingPress.getEnergyTimer());
-			oos.writeDouble(printingPress.getCurrentRepair());
-			oos.writeLong(printingPress.getTimeDisrepair());
+			oos.writeBoolean(printingFactory.getActive());
+			oos.writeInt(printingFactory.getMode().getId());
+			oos.writeInt(printingFactory.getProductionTimer());
+			oos.writeInt(printingFactory.getEnergyTimer());
+			oos.writeDouble(printingFactory.getCurrentRepair());
+			oos.writeLong(printingFactory.getTimeDisrepair());
 
-			oos.writeInt(printingPress.getContainedPaper());
-			oos.writeInt(printingPress.getContainedBindings());
-			oos.writeInt(printingPress.getContainedSecurityMaterials());
-			oos.writeInt(printingPress.getLockedResultCode());
+			oos.writeInt(printingFactory.getContainedPaper());
+			oos.writeInt(printingFactory.getContainedBindings());
+			oos.writeInt(printingFactory.getContainedSecurityMaterials());
+			oos.writeInt(printingFactory.getLockedResultCode());
 			
-			int[] processQueue = printingPress.getProcessQueue();
+			int[] processQueue = printingFactory.getProcessQueue();
 			oos.writeInt(processQueue.length);
 			for (int entry : processQueue) {
 				oos.writeInt(entry);
@@ -107,7 +106,7 @@ public class PrintingPressManager  extends ItemFactoryManager implements Factory
 					Location location = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
 					Orientation orientation = Orientation.getOrientation(ois.readInt());
 					boolean active = ois.readBoolean();
-					OperationMode mode = PrintingPress.OperationMode.byId(ois.readInt());
+					OperationMode mode = PrintingFactory.OperationMode.byId(ois.readInt());
 					int productionTimer = ois.readInt();
 					int energyTimer = ois.readInt();
 					double currentRepair = ois.readDouble();
@@ -124,14 +123,14 @@ public class PrintingPressManager  extends ItemFactoryManager implements Factory
 						processQueue[j] = ois.readInt();
 					}
 
-					PrintingPress printingPress = new PrintingPress(new Anchor(orientation,location),
+					PrintingFactory printingFactory = new PrintingFactory(new Anchor(orientation,location),
 							active, productionTimer,
 							energyTimer, currentRepair, timeDisrepair,
 							mode,
-							printingPressProperties,
+							printingFactoryProperties,
 							containedPaper, containedBindings, containedSecurityMaterials,
 							processQueue, lockedResultCode);
-					addFactory(printingPress);
+					addFactory(printingFactory);
 				}
 
 			}
@@ -160,7 +159,7 @@ public class PrintingPressManager  extends ItemFactoryManager implements Factory
 				Location inventoryLocation = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
 				Location powerLocation = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
 				boolean active = ois.readBoolean();
-				OperationMode mode = PrintingPress.OperationMode.byId(ois.readInt());
+				OperationMode mode = PrintingFactory.OperationMode.byId(ois.readInt());
 				int productionTimer = ois.readInt();
 				int energyTimer = ois.readInt();
 				double currentRepair = ois.readDouble();
@@ -197,11 +196,11 @@ public class PrintingPressManager  extends ItemFactoryManager implements Factory
 				}
 				
 				
-				PrintingPress production = new PrintingPress(new Anchor(orientation,inventoryLocation),
+				PrintingFactory production = new PrintingFactory(new Anchor(orientation,inventoryLocation),
 						active, productionTimer,
 						energyTimer, currentRepair, timeDisrepair,
 						mode,
-						printingPressProperties,
+						printingFactoryProperties,
 						containedPaper, containedBindings, containedSecurityMaterials,
 						processQueue, lockedResultCode);
 				addFactory(production);
@@ -218,34 +217,34 @@ public class PrintingPressManager  extends ItemFactoryManager implements Factory
 		Block inventoryBlock = anchor.getBlock(properties.getCreationPoint());
 		Chest chest = (Chest) inventoryBlock.getState();
 		Inventory chestInventory = chest.getInventory();
-		ItemList<NamedItemStack> inputs = printingPressProperties.getConstructionMaterials();
+		ItemList<NamedItemStack> inputs = printingFactoryProperties.getConstructionMaterials();
 		boolean hasMaterials = inputs.allIn(chestInventory);
 		if (hasMaterials)
 		{
-			PrintingPress production = new PrintingPress(anchor, false, printingPressProperties);
-			if (printingPressProperties.getConstructionMaterials().removeFrom(production.getInventory()))
+			PrintingFactory production = new PrintingFactory(anchor, false, printingFactoryProperties);
+			if (printingFactoryProperties.getConstructionMaterials().removeFrom(production.getInventory()))
 			{
 				addFactory(production);
-				return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + printingPressProperties.getName());
+				return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + printingFactoryProperties.getName());
 			}
 		}
 		return new InteractionResponse(InteractionResult.FAILURE, "Not enough materials in chest!");
 	}
 	
-	public PrintingPress factoryAtLocation(Location factoryLocation) 
+	public PrintingFactory factoryAtLocation(Location factoryLocation) 
 	{
-		return (PrintingPress) super.factoryAtLocation(factoryLocation);
+		return (PrintingFactory) super.factoryAtLocation(factoryLocation);
 	}
 
 	public String getSavesFileName() 
 	{
-		return FactoryModPlugin.PRINTING_PRESSES_SAVE_FILE;
+		return FactoryModPlugin.PRINTING_FACTORY_SAVE_FILE;
 	}
 	/*
-	 * Returns of PrintingPressProperites
+	 * Returns of PrintingFactoryProperites
 	 */
-	public PrintingPressProperties getProperties(String title)
+	public PrintingFactoryProperties getProperties(String title)
 	{
-		return printingPressProperties;
+		return printingFactoryProperties;
 	}
 }

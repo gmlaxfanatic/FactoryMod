@@ -4,27 +4,23 @@
  */
 package com.github.igotyou.FactoryMod.properties;
 
-import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
-import com.github.igotyou.FactoryMod.managers.ProductionManager;
-import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
+import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 
 /**
  *
  * @author Brian
  */
-public class ItemFactoryProperties {
-	protected Structure structure;//=FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory");;
-	public static List<Offset> interactionPoints = Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0));
+public class ItemFactoryProperties implements FactoryProperties{
+	protected Structure structure;//=FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory");//=FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory");;
+	protected List<Offset> interactionPoints;// = Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0));
 	protected ItemList<NamedItemStack> fuel;
 	protected int repair;
 	protected int energyTime;
@@ -36,6 +32,7 @@ public class ItemFactoryProperties {
 		this.repair=repair;
 		this.energyTime=energyTime;
 		this.name=name;
+		interactionPoints = Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0));
 	}
 
 	public int getEnergyTime()

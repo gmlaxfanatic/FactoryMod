@@ -4,8 +4,6 @@ import static com.untamedears.citadel.Utility.isReinforced;
 
 import java.util.List;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,10 +15,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.interfaces.ItemFactoryInterface;
 import com.github.igotyou.FactoryMod.managers.FactoryModManager;
-import com.github.igotyou.FactoryMod.utility.InteractionResponse;
-import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 
 public class FactoryModListener implements Listener
 {
@@ -46,7 +41,7 @@ public class FactoryModListener implements Listener
 		{
 			if(factoryManager.isPotentialFactoryBlock(block.getType()))
 			{
-				factoryManager.breakFactoryAt(block.getLocation());
+				factoryManager.blockBreakResponse(block.getLocation());
 			}
 		}
 	}
@@ -65,7 +60,7 @@ public class FactoryModListener implements Listener
 			{
 				if(factoryManager.isPotentialFactoryBlock(block.getType()))
 				{
-					factoryManager.breakFactoryAt(block.getLocation());
+					factoryManager.blockBreakResponse(block.getLocation());
 				}
 			}
 		}
@@ -81,7 +76,7 @@ public class FactoryModListener implements Listener
 		Block block = e.getBlock();
 		if(factoryManager.isPotentialFactoryBlock(block.getType()))
 		{
-			factoryManager.breakFactoryAt(block.getLocation());
+			factoryManager.blockBreakResponse(block.getLocation());
 		}
 	}
 	
@@ -104,6 +99,12 @@ public class FactoryModListener implements Listener
 				factoryManager.playerInteractionReponse(player,clicked);			
 				
 			}
+			else {
+				FactoryModPlugin.debugMessage("Not an interaction material");
+			}
+		}
+		else {
+			FactoryModPlugin.debugMessage("Not Left Click");
 		}
 	}
 }

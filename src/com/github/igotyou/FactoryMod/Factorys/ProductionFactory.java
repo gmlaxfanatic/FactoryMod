@@ -4,8 +4,8 @@ import org.bukkit.Location;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
-import com.github.igotyou.FactoryMod.managers.ProductionManager;
-import com.github.igotyou.FactoryMod.properties.ProductionProperties;
+import com.github.igotyou.FactoryMod.managers.ProductionFactoryManager;
+import com.github.igotyou.FactoryMod.properties.ProductionFactoryProperties;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.Anchor;
@@ -24,7 +24,7 @@ public class ProductionFactory extends ItemFactory
 {
 
 	private ProductionRecipe currentRecipe = null;//the recipe that is currently selected
-	private ProductionProperties productionFactoryProperties;//the properties of the production factory
+	private ProductionFactoryProperties productionFactoryProperties;//the properties of the production factory
 	public static final FactoryCategory FACTORY_TYPE = FactoryCategory.PRODUCTION;//the factory's type
 	public static Structure productionStructure;
 	private List<ProductionRecipe> recipes;
@@ -33,7 +33,7 @@ public class ProductionFactory extends ItemFactory
 	/**
 	 * Constructor
 	 */
-	public ProductionFactory (Anchor anchor, ProductionProperties productionProperties)
+	public ProductionFactory (Anchor anchor, ProductionFactoryProperties productionProperties)
 	{
 		super(anchor, productionStructure, false, ProductionFactory.FACTORY_TYPE, productionProperties);
 		this.productionFactoryProperties = productionProperties;
@@ -45,11 +45,11 @@ public class ProductionFactory extends ItemFactory
 	 * Constructor
 	 */
 	public ProductionFactory (Anchor anchor,
-			ProductionProperties productionProperties, boolean active, int currentProductionTimer, int currentEnergyTimer,
+			ProductionFactoryProperties productionProperties, boolean active, int currentProductionTimer, int currentEnergyTimer,
 			int currentRecipeNumber,double currentMaintenance,long timeDisrepair)
 	{
 		super(anchor, productionStructure, active, ProductionFactory.FACTORY_TYPE, productionProperties, currentProductionTimer, currentEnergyTimer, currentMaintenance, timeDisrepair);
-		this.productionFactoryProperties = (ProductionProperties) factoryProperties;
+		this.productionFactoryProperties = (ProductionFactoryProperties) factoryProperties;
 		this.recipes=recipes;
 		this.setRecipeToNumber(currentRecipeNumber);
 	}
@@ -170,7 +170,7 @@ public class ProductionFactory extends ItemFactory
 	/**
 	 * Returns the factory's properties
 	 */
-	public ProductionProperties getProductionFactoryProperties()
+	public ProductionFactoryProperties getProductionFactoryProperties()
 	{
 		return productionFactoryProperties;
 	}
@@ -213,35 +213,6 @@ public class ProductionFactory extends ItemFactory
 			int amountRepaired=amountAvailable>currentRepair ? (int) Math.ceil(currentRepair) : amountAvailable;
 			int percentRepaired=(int) (( (double) amountRepaired)/getProductionFactoryProperties().getRepair()*100);
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Will repair "+String.valueOf(percentRepaired)+"% of the factory with "+currentRecipe.getRepairs().getMultiple(amountRepaired).toString()+"."));
-		}
-		//[Operates at XX% efficiency due to interference from: Location1, Location 2, Location 3, ...]
-		if(currentRecipe.hasRecipeScaling())
-		{
-			String response;
-			Set<ProductionFactory> scaledRecipeFactories=((ProductionManager)FactoryModPlugin.manager.getManager(FactoryCategory.PRODUCTION)).getScaledFactories(currentRecipe.getscaledRecipes());
-			List<ProductionFactory> interferingFactories=new LinkedList<ProductionFactory>();
-			for(ProductionFactory scaledRecipeFactory:scaledRecipeFactories)
-			{
-				if(scaledRecipeFactory.isWhole()&&scaledRecipeFactory!=this)
-				{
-					interferingFactories.add(scaledRecipeFactory);
-				}
-			}
-			if(interferingFactories.size()==0)
-			{
-				response="Operates at 100% efficiency with no interference";
-			}
-			else
-			{
-				String factoryList="";
-				for(ProductionFactory inteferingFactory:interferingFactories)
-				{
-					factoryList+=String.valueOf((int) this.getCenterLocation().distance(inteferingFactory.getCenterLocation()));
-					factoryList+=inteferingFactory!=interferingFactories.get(interferingFactories.size()-1) ? ", " : "";
-				}
-				response="Operates at "+Math.round(100*currentRecipe.getRecipeScaling(this)) + "% efficiency: "+factoryList;
-			}
-			responses.add(new InteractionResponse(InteractionResult.SUCCESS,response));
 		}
 		return responses;
 	}

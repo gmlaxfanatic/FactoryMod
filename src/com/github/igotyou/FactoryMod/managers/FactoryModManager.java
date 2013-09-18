@@ -11,8 +11,8 @@ import org.bukkit.Location;
 import org.bukkit.event.Listener;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.FactoryObject.FactoryCategory;
-import com.github.igotyou.FactoryMod.interfaces.ItemFactoryInterface;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
+import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -57,7 +57,7 @@ public class FactoryModManager
 		initializeStructureManager();
 		initializeCraftingManager();
 		initializeProductionManager();
-		initializePrintingPressManager();
+		initializePrintingManager();
 		periodicSaving();
 	}
 	
@@ -75,18 +75,18 @@ public class FactoryModManager
 	 */
 	private void initializeProductionManager()
 	{
-		ProductionManager productionManager = new ProductionManager(plugin);
+		ProductionFactoryManager productionManager = new ProductionFactoryManager(plugin);
 		factoryManagers.add(productionManager);
 		categoryToManager.put(FactoryCategory.PRODUCTION,productionManager);
 	}
 	/**
-	 * Initializes the Printing Press Manager
+	 * Initializes the Printing  Manager
 	 */
-	private void initializePrintingPressManager()
+	private void initializePrintingManager()
 	{
-		PrintingPressManager printingManager = new PrintingPressManager(plugin);
+		PrintingFactoryManager printingManager = new PrintingFactoryManager(plugin);
 		factoryManagers.add(printingManager);
-		categoryToManager.put(FactoryCategory.PRINTING_PRESS,printingManager);
+		categoryToManager.put(FactoryCategory.PRINTING,printingManager);
 	}
 	
 	/**
@@ -105,7 +105,7 @@ public class FactoryModManager
 		saveFactoryManagers();
 	}
 	/**
-	 * Returns the ItemFactoryInterface Saves file
+	 * Returns the ItemFactory Saves file
 	 */
 	public File getSavesFile(String fileName)
 	{
@@ -244,7 +244,7 @@ public class FactoryModManager
 		return false;
 	}	
 
-	public ItemFactoryInterface getFactory(Location location) {
+	public Factory getFactory(Location location) {
 		for (FactoryManager manager : factoryManagers)
 		{
 			if (manager.factoryExistsAt(location))
@@ -257,7 +257,7 @@ public class FactoryModManager
 	/*
 	 * Removes a factory at the given location if it exists
 	 */
-	public void remove(ItemFactoryInterface factory) {
+	public void remove(ItemFactory factory) {
 		for (FactoryManager factoryManager : factoryManagers)
 		{
 			factoryManager.removeFactory(factory);
@@ -283,21 +283,25 @@ public class FactoryModManager
 		//Check which managers contain relevant interaction blocks
 		Set<FactoryManager> possibleManagers=new HashSet();
 		for(FactoryManager factoryManager:factoryManagers) {
+			FactoryModPlugin.debugMessage(factoryManager.getInteractionMaterials().toString());
 			if(factoryManager.getInteractionMaterials().contains(block.getType())) {
 				possibleManagers.add(factoryManager);
 			}
 		}
 		if(possibleManagers.isEmpty()) {
+			FactoryModPlugin.sendConsoleMessage("Not an interaction block: "+block.getTypeId());
 			return;
 		}
 		//Check that the player is able ot interact with the block
 		if ((FactoryModPlugin.CITADEL_ENABLED && isReinforced(block)) && !(((PlayerReinforcement) getReinforcement(block)).isAccessible(player))) {
 			InteractionResponse.messagePlayerResult(player, new InteractionResponse(InteractionResponse.InteractionResult.FAILURE,"You do not have permission to use this factory!" ));
+			FactoryModPlugin.debugMessage("Blocked by interaction by citadel");
 			return;
 		}
 		//Check if a factory exists at the location and have it respond
 		Factory factory = factoryAtLocation(block.getLocation());
 		if(factory!=null) {
+			FactoryModPlugin.debugMessage("Factory at location");
 			factory.interactionResponse(player, block.getLocation());
 		}
 		else {
@@ -306,6 +310,7 @@ public class FactoryModManager
 				InteractionResponse response = factoryManager.createFactory(block.getLocation());
 				if(response.getInteractionResult()==InteractionResult.SUCCESS) {
 					InteractionResponse.messagePlayerResult(player, response);
+					FactoryModPlugin.debugMessage("Factory Created");
 					break;
 				}
 			}
@@ -335,10 +340,10 @@ public class FactoryModManager
 		return false;
 	}
 	
-	public void breakFactoryAt(Location location) {
-		Factory factory = getFactory (location);
+	public void blockBreakResponse(Location location) {
+		Factory factory = getFactory(location);
 		if(factory != null) {
-			factory.breakFactory();
+			factory.blockBreakResponse();
 		}
 
 	}

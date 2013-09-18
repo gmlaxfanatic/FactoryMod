@@ -4,7 +4,7 @@
  */
 package com.github.igotyou.FactoryMod.interfaces;
 
-import com.github.igotyou.FactoryMod.Factorys.FactoryObject;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.Structure;
 import org.bukkit.Location;
@@ -28,7 +28,9 @@ public interface Factory {
 	
 	public void interactionResponse(Player player, Location location);
 	
-	public FactoryObject.FactoryCategory getFactoryCategory();
+	public BaseFactory.FactoryCategory getFactoryCategory();
 	
-	public void breakFactory();
+	public void blockBreakResponse();
+	
+	public abstract void update();
 }

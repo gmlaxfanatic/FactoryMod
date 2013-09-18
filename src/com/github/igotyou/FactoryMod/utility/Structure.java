@@ -1,5 +1,6 @@
 package com.github.igotyou.FactoryMod.utility;
 
+import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import java.io.File;
@@ -87,10 +88,14 @@ public class Structure {
 	 */
 	public Set<Material> materialsOfOffsets(List<Offset> offsets) {
 		Set<Material> materials = new HashSet();
+		FactoryModPlugin.debugMessage("Offset Size:"+offsets.size());
 		for(Offset offset:offsets) {
+			FactoryModPlugin.debugMessage(offset.x+","+offset.y+","+offset.z);
 			if(validOffset(offset)) {
+				FactoryModPlugin.debugMessage("Valid Offset");
 				if(!(blocks[offset.x][offset.y][offset.z]==0 && ignoreAir)) {
 					materials.add(Material.getMaterial(blocks[offset.x][offset.y][offset.z]));
+					
 				}
 			}
 		}
@@ -140,6 +145,7 @@ public class Structure {
 				for(short z = 0; z < l; z++){
 					for(short y = 0; y < l; y++){
 						blocks[x][y][z]=importedBlocks[y * w * l + z * w + x];
+						FactoryModPlugin.debugMessage(String.valueOf(blocks[x][y][z]));
 					}
 				}
 			}

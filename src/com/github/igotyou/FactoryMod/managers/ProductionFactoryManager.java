@@ -1,29 +1,23 @@
 package com.github.igotyou.FactoryMod.managers;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.bukkit.Location;
-import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
-import com.github.igotyou.FactoryMod.Factorys.PrintingPress;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
-import com.github.igotyou.FactoryMod.properties.ProductionProperties;
+import com.github.igotyou.FactoryMod.properties.ProductionFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
@@ -37,20 +31,16 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.InventoryHolder;
 
-public class ProductionManager  extends ItemFactoryManager implements FactoryManager
-{
-	public  Map<String, ProductionProperties> allProductionProperties;
-	public  Map<String,ProductionRecipe> productionRecipes;
-	private List<ProductionFactory> productionFactories=new ArrayList<ProductionFactory>();;
+public class ProductionFactoryManager  extends ItemFactoryManager {
 	
-	public ProductionManager(FactoryModPlugin plugin)
+	public  Map<String,ProductionRecipe> productionRecipes;
+
+	public ProductionFactoryManager(FactoryModPlugin plugin)
 	{
 		super(plugin);
 		initConfig(plugin.getConfig().getConfigurationSection("production"));
-		for(ProductionProperties productionProperties:allProductionProperties.values()) {
-			interactionMaterials.addAll(productionProperties.getInteractionMaterials());
-		}
-		//Set maintenance clock to 0
+		updateMaterials();
+		updateInteractionMaterials();
 		updateFactorys();
 	}
 	
@@ -63,10 +53,10 @@ public class ProductionManager  extends ItemFactoryManager implements FactoryMan
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
 		int version = 2;
 		oos.writeInt(version);
-		oos.writeInt(itemFactories.size());
-		for (ItemFactory itemFactory : itemFactories)
+		oos.writeInt(baseFactories.size());
+		for (BaseFactory baseFactory : baseFactories)
 		{
-			ProductionFactory productionFactory=(ProductionFactory) itemFactory;
+			ProductionFactory productionFactory=(ProductionFactory) baseFactory;
 		
 			oos.writeUTF(productionFactory.getAnchor().location.getWorld().getName());
 						
@@ -112,10 +102,10 @@ public class ProductionManager  extends ItemFactoryManager implements FactoryMan
 				double currentRepair = ois.readDouble();
 				long timeDisrepair  =  ois.readLong();
 				
-				if(allProductionProperties.containsKey(factoryType))
+				if(allFactoryProperties.containsKey(factoryType))
 				{
 					ProductionFactory productionFactory = new ProductionFactory(new Anchor(orientation,location),
-						allProductionProperties.get(factoryType), active, productionTimer,
+						(ProductionFactoryProperties) allFactoryProperties.get(factoryType), active, productionTimer,
 						energyTimer, currentRecipeNumber, currentRepair, timeDisrepair);
 					addFactory(productionFactory);
 				}
@@ -150,12 +140,12 @@ public class ProductionManager  extends ItemFactoryManager implements FactoryMan
 			int currentRecipeNumber = Integer.parseInt(parts[15]);
 			double currentRepair = Double.parseDouble(parts[16]);
 			long timeDisrepair  =  Long.parseLong(parts[17]);
-			if(allProductionProperties.containsKey(subFactoryType))
+			if(allFactoryProperties.containsKey(subFactoryType))
 			{
 				Set<ProductionRecipe> recipes=new HashSet<ProductionRecipe>();
 				
 				// TODO: Give default recipes for subfactory type
-				ProductionProperties properties = allProductionProperties.get(subFactoryType);
+				ProductionFactoryProperties properties = (ProductionFactoryProperties) allFactoryProperties.get(subFactoryType);
 				recipes.addAll(properties.getRecipes());
 				
 				for(String name:recipeNames)
@@ -185,7 +175,7 @@ public class ProductionManager  extends ItemFactoryManager implements FactoryMan
 					}
 				}
 				
-				ProductionFactory production = new ProductionFactory(new Anchor(orientation,inventoryLocation), allProductionProperties.get(subFactoryType), active, productionTimer, energyTimer, currentRecipeNumber, currentRepair,timeDisrepair);
+				ProductionFactory production = new ProductionFactory(new Anchor(orientation,inventoryLocation), (ProductionFactoryProperties)allFactoryProperties.get(subFactoryType), active, productionTimer, energyTimer, currentRecipeNumber, currentRepair,timeDisrepair);
 				addFactory(production);
 			}
 		}
@@ -201,40 +191,39 @@ public class ProductionManager  extends ItemFactoryManager implements FactoryMan
 		productionRecipes=ProductionRecipe.recipesFromConfig(productionConfiguration.getConfigurationSection("recipes"));
 		ProductionRecipe.loadAllScaledRecipes(productionRecipes);
 		//Import factory properties
-		allProductionProperties=ProductionProperties.productionPropertiesFromConfig(productionConfiguration.getConfigurationSection("factories"), this);
+		allFactoryProperties=ProductionFactoryProperties.productionPropertiesFromConfig(productionConfiguration.getConfigurationSection("factories"), this);
 	}
 	/*
 	 * Creates a factory at the location if the creation conditions are met
 	 *	Inputs are present in inventory block
 	 */
 	public InteractionResponse createFactory(FactoryProperties properties, Anchor anchor) {
-		ProductionProperties productionProperties = (ProductionProperties)properties;
+		ProductionFactoryProperties productionProperties = (ProductionFactoryProperties)properties;
 		ItemList<NamedItemStack> inputs =  productionProperties.getInputs();
 		Offset creationPoint = productionProperties.getCreationPoint();
 		if(inputs.exactlyIn(((InventoryHolder)anchor.getBlock(creationPoint)).getInventory()))
 		{
 			inputs.removeFrom(((InventoryHolder)anchor.getBlock(creationPoint)).getInventory());
-			ProductionFactory productionFactory = new ProductionFactory(anchor, (ProductionProperties) properties);
+			ProductionFactory productionFactory = new ProductionFactory(anchor, (ProductionFactoryProperties) properties);
 			addFactory(productionFactory);
 			return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + productionFactory.getProductionFactoryProperties().getName());
 		}
+		FactoryModPlugin.debugMessage("Creation materials not present");
 		return new InteractionResponse(InteractionResult.FAILURE, "Incorrect Materials! They must match exactly.");
 	}
 
 
-	@Override
 	public String getSavesFileName() 
 	{
-		return FactoryModPlugin.PRODUCTION_SAVES_FILE;
+		return FactoryModPlugin.PRODUCTION_FACTORY_SAVES_FILE;
 	}
 	
 	/*
 	 * Returns of the ProductionProperites for a particular factory
 	 */
-	@Override
-	public ProductionProperties getProperties(String title)
+	public ProductionFactoryProperties getProperties(String title)
 	{
-		return allProductionProperties.get(title);
+		return (ProductionFactoryProperties) allFactoryProperties.get(title);
 	}
 	
 	public ProductionRecipe getProductionRecipe(String identifier)
@@ -246,20 +235,4 @@ public class ProductionManager  extends ItemFactoryManager implements FactoryMan
 	{
 		productionRecipes.put(title,productionRecipe);
 	}
-	public Set<ProductionFactory> getScaledFactories(List<ProductionRecipe> scaledRecipes)
-	{
-		Set<ProductionFactory> factoriesByRecipe=new HashSet<ProductionFactory>();
-		for(ProductionFactory productionFactory:productionFactories)
-		{
-			for(ProductionRecipe scaledRecipe:scaledRecipes)
-			{
-				if(productionFactory.getRecipes().contains(scaledRecipe))
-				{
-					factoriesByRecipe.add(productionFactory);
-				}
-			}
-		}
-		return factoriesByRecipe;
-	}
-	
 }

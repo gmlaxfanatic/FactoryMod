@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
+import com.github.igotyou.FactoryMod.properties.PrintingFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.ItemList;
@@ -20,9 +20,9 @@ import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.PrettyLore;
 
-public class PrintingPress extends ItemFactory {
+public class PrintingFactory extends ItemFactory {
 	
-	private PrintingPressProperties printingPressProperties;
+	private PrintingFactoryProperties printingFactoryProperties;
 	private OperationMode mode;
 	public OperationMode getMode() {
 		return mode;
@@ -35,10 +35,10 @@ public class PrintingPress extends ItemFactory {
 	private int processQueueOffset;
 	private int lockedResultCode;
 
-	public PrintingPress(Anchor anchor, boolean active, PrintingPressProperties printingPressProperties) {
-		super(anchor, printingPressProperties.getStructure(), active, FactoryCategory.PRINTING_PRESS, printingPressProperties);
+	public PrintingFactory(Anchor anchor, boolean active, PrintingFactoryProperties printingFactoryProperties) {
+		super(anchor, printingFactoryProperties.getStructure(), active, FactoryCategory.PRINTING, printingFactoryProperties);
 		this.mode = OperationMode.REPAIR;
-		this.printingPressProperties = printingPressProperties;
+		this.printingFactoryProperties = printingFactoryProperties;
 		this.containedPaper = 0;
 		this.containedBindings = 0;
 		this.containedSecurityMaterials = 0;
@@ -47,19 +47,19 @@ public class PrintingPress extends ItemFactory {
 		this.lockedResultCode = 0;
 	}
 
-	public PrintingPress(Anchor anchor,
+	public PrintingFactory(Anchor anchor,
 			boolean active,
 			int currentProductionTimer, int currentEnergyTimer,
 			double currentMaintenance, long timeDisrepair, OperationMode mode,
-			PrintingPressProperties printingPressProperties,
+			PrintingFactoryProperties printingFactoryProperties,
 			int containedPaper, int containedBindings, int containedSecurityMaterials,
 			int[] processQueue, int lockedResultCode) {
-		super(anchor, printingPressProperties.getStructure(), active,
-				FactoryCategory.PRINTING_PRESS, printingPressProperties, currentProductionTimer,
+		super(anchor, printingFactoryProperties.getStructure(), active,
+				FactoryCategory.PRINTING, printingFactoryProperties, currentProductionTimer,
 				currentEnergyTimer, currentMaintenance, timeDisrepair);
 		this.mode = mode;
 		this.active = active;
-		this.printingPressProperties = printingPressProperties;
+		this.printingFactoryProperties = printingFactoryProperties;
 		this.containedPaper = containedPaper;
 		this.containedBindings = containedBindings;
 		this.containedSecurityMaterials = containedSecurityMaterials;
@@ -77,7 +77,7 @@ public class PrintingPress extends ItemFactory {
 
 	@Override
 	public ItemList<NamedItemStack> getFuel() {
-		return printingPressProperties.getFuel();
+		return printingFactoryProperties.getFuel();
 	}
 	
 	public int getContainedPaper() {
@@ -94,7 +94,7 @@ public class PrintingPress extends ItemFactory {
 
 	@Override
 	public double getEnergyTime() {
-		return printingPressProperties.getEnergyTime();
+		return printingFactoryProperties.getEnergyTime();
 	}
 
 	@Override
@@ -106,9 +106,9 @@ public class PrintingPress extends ItemFactory {
 				if (plates != null) {
 					pageCount = Math.max(1, ((BookMeta) plates.getItemMeta()).getPageCount());
 				}
-				return printingPressProperties.getSetPlateTime() * pageCount;
+				return printingFactoryProperties.getSetPlateTime() * pageCount;
 			case REPAIR:
-				return printingPressProperties.getRepairTime();
+				return printingFactoryProperties.getRepairTime();
 			default:
 				// Continuous recipes -> 1 year limit at 1 update per second
 				return 3600 * 24 * 365;
@@ -123,7 +123,7 @@ public class PrintingPress extends ItemFactory {
 			NamedItemStack plates = getPlateResult();
 			if (plates != null) {
 				int pageCount = ((BookMeta) plates.getItemMeta()).getPageCount();
-				inputs.addAll(printingPressProperties.getPlateMaterials().getMultiple(pageCount));
+				inputs.addAll(printingFactoryProperties.getPlateMaterials().getMultiple(pageCount));
 			}
 			break;
 		}
@@ -149,7 +149,7 @@ public class PrintingPress extends ItemFactory {
 		ItemList<NamedItemStack> inputs = new ItemList<NamedItemStack>();
 		switch(mode) {
 		case REPAIR:
-			inputs.addAll(printingPressProperties.getRepairMaterials());
+			inputs.addAll(printingFactoryProperties.getRepairMaterials());
 			break;
 		}
 		return inputs;
@@ -157,7 +157,7 @@ public class PrintingPress extends ItemFactory {
 
 	@Override
 	public int getMaxRepair() {
-		return printingPressProperties.getMaxRepair();
+		return printingFactoryProperties.getMaxRepair();
 	}
 	
 	@Override
@@ -166,7 +166,7 @@ public class PrintingPress extends ItemFactory {
 		this.containedPaper = 0;
 		this.containedBindings = 0;
 		this.containedSecurityMaterials = 0;
-		int outputDelay = printingPressProperties.getPageLead();
+		int outputDelay = printingFactoryProperties.getPageLead();
 		this.processQueue = new int[outputDelay];
 		this.processQueueOffset = 0;
 		
@@ -221,27 +221,27 @@ public class PrintingPress extends ItemFactory {
 		}
 		
 		// Load materials
-		ItemList<NamedItemStack> pages = printingPressProperties.getPageMaterials();
+		ItemList<NamedItemStack> pages = printingFactoryProperties.getPageMaterials();
 		boolean hasPages = pages.allIn(getInventory());
 		boolean inputStall = false;
 		if (hasPages) {
 			// Check bindings
-			int expectedBindings = (int) Math.floor((double) (containedPaper + printingPressProperties.getPagesPerLot()) / (double) getPrintResult().pageCount());
+			int expectedBindings = (int) Math.floor((double) (containedPaper + printingFactoryProperties.getPagesPerLot()) / (double) getPrintResult().pageCount());
 			boolean hasBindings = true;
 			ItemList<NamedItemStack> allBindings = new ItemList<NamedItemStack>();
 			if (expectedBindings > containedBindings) {
 				int neededBindings = expectedBindings - containedBindings;
-				allBindings = printingPressProperties.getBindingMaterials().getMultiple(neededBindings);
+				allBindings = printingFactoryProperties.getBindingMaterials().getMultiple(neededBindings);
 				hasBindings = allBindings.allIn(getInventory());
 			}
 			
 			if (hasBindings) {
 				pages.removeFrom(getInventory());
-				containedPaper += printingPressProperties.getPagesPerLot();
+				containedPaper += printingFactoryProperties.getPagesPerLot();
 				
 				while (containedBindings < expectedBindings) {
-					if (printingPressProperties.getBindingMaterials().allIn(getInventory())) {
-						printingPressProperties.getBindingMaterials().removeFrom(getInventory());
+					if (printingFactoryProperties.getBindingMaterials().allIn(getInventory())) {
+						printingFactoryProperties.getBindingMaterials().removeFrom(getInventory());
 						containedBindings += 1;
 					}
 				}
@@ -297,11 +297,11 @@ public class PrintingPress extends ItemFactory {
 		}
 		
 		// Load materials
-		ItemList<NamedItemStack> pages = printingPressProperties.getPamphletMaterials();
+		ItemList<NamedItemStack> pages = printingFactoryProperties.getPamphletMaterials();
 		boolean hasPages = pages.allIn(getInventory());
 		if (hasPages) {
 			pages.removeFrom(getInventory());
-			processQueue[processQueueOffset] = printingPressProperties.getPamphletsPerLot();
+			processQueue[processQueueOffset] = printingFactoryProperties.getPamphletsPerLot();
 		} else {
 			processQueue[processQueueOffset] = 0;
 			stopIfEmpty();
@@ -326,30 +326,30 @@ public class PrintingPress extends ItemFactory {
 		}
 		
 		// Load materials
-		ItemList<NamedItemStack> pages = printingPressProperties.getPamphletMaterials();
+		ItemList<NamedItemStack> pages = printingFactoryProperties.getPamphletMaterials();
 		boolean hasPages = pages.allIn(getInventory());
 		boolean inputStall = false;
 		if (hasPages) {
 			// Check security materials
-			int expectedExtras = (int) Math.ceil((double) containedPaper + printingPressProperties.getPamphletsPerLot());
+			int expectedExtras = (int) Math.ceil((double) containedPaper + printingFactoryProperties.getPamphletsPerLot());
 			boolean hasExtras = true;
 			ItemList<NamedItemStack> allSecurityMaterials = new ItemList<NamedItemStack>();
 			if (expectedExtras > containedSecurityMaterials) {
 				int neededExtras = expectedExtras - containedSecurityMaterials;
-				int neededExtraLots = (int) Math.ceil((double) neededExtras / (double) printingPressProperties.getSecurityNotesPerLot());
-				allSecurityMaterials = printingPressProperties.getSecurityMaterials().getMultiple(neededExtraLots);
+				int neededExtraLots = (int) Math.ceil((double) neededExtras / (double) printingFactoryProperties.getSecurityNotesPerLot());
+				allSecurityMaterials = printingFactoryProperties.getSecurityMaterials().getMultiple(neededExtraLots);
 				hasExtras = allSecurityMaterials.allIn(getInventory());
 			}
 			
 			if (hasExtras) {
 				pages.removeFrom(getInventory());
-				containedPaper += printingPressProperties.getPamphletsPerLot();
+				containedPaper += printingFactoryProperties.getPamphletsPerLot();
 				
 				// Load security materials if security notes
 				while (containedSecurityMaterials < containedPaper) {
-					if (printingPressProperties.getSecurityMaterials().allIn(getInventory())) {
-						printingPressProperties.getSecurityMaterials().removeFrom(getInventory());
-						containedSecurityMaterials += printingPressProperties.getSecurityNotesPerLot();
+					if (printingFactoryProperties.getSecurityMaterials().allIn(getInventory())) {
+						printingFactoryProperties.getSecurityMaterials().removeFrom(getInventory());
+						containedSecurityMaterials += printingFactoryProperties.getSecurityNotesPerLot();
 					}
 				}
 			} else {
@@ -425,10 +425,10 @@ public class PrintingPress extends ItemFactory {
 		List<InteractionResponse> responses=new ArrayList<InteractionResponse>();
 		String status=active ? "On" : "Off";
 		//Name: Status with XX% health.
-		int maxRepair = printingPressProperties.getMaxRepair();
+		int maxRepair = printingFactoryProperties.getMaxRepair();
 		boolean maintenanceActive = maxRepair!=0;
 		int health =(!maintenanceActive) ? 100 : (int) Math.round(100*(1-currentRepair/(maxRepair)));
-		responses.add(new InteractionResponse(InteractionResult.SUCCESS, printingPressProperties.getName()+": "+status+" with "+String.valueOf(health)+"% health."));
+		responses.add(new InteractionResponse(InteractionResult.SUCCESS, printingFactoryProperties.getName()+": "+status+" with "+String.valueOf(health)+"% health."));
 		//RecipeName: X seconds(Y ticks)[ - XX% done.]
 		responses.add(new InteractionResponse(InteractionResult.SUCCESS, mode.getDescription()));
 		//[Inputs: amount Name, amount Name.]
@@ -446,7 +446,7 @@ public class PrintingPress extends ItemFactory {
 		{
 			int amountAvailable=getRepairs().amountAvailable(getInventory());
 			int amountRepaired=amountAvailable>currentRepair ? (int) Math.ceil(currentRepair) : amountAvailable;
-			int percentRepaired=(int) (( (double) amountRepaired)/printingPressProperties.getMaxRepair()*100);
+			int percentRepaired=(int) (( (double) amountRepaired)/printingFactoryProperties.getMaxRepair()*100);
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Will repair "+String.valueOf(percentRepaired)+"% of the factory with "+getRepairs().getMultiple(amountRepaired).toString()+"."));
 		}
 		return responses;

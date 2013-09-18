@@ -10,7 +10,7 @@ import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.Structure;
 
-public class PrintingPressProperties extends ItemFactoryProperties implements FactoryProperties{
+public class PrintingFactoryProperties extends ItemFactoryProperties implements FactoryProperties{
 
 	private ItemList<NamedItemStack> constructionMaterials;
 	private ItemList<NamedItemStack> plateMaterials;
@@ -32,7 +32,7 @@ public class PrintingPressProperties extends ItemFactoryProperties implements Fa
 	}
 
 
-	public PrintingPressProperties(
+	public PrintingFactoryProperties(
 			Structure structure,
 			ItemList<NamedItemStack> fuel,
 			ItemList<NamedItemStack> constructionMaterials,
@@ -97,14 +97,14 @@ public class PrintingPressProperties extends ItemFactoryProperties implements Fa
 	}
 
 
-	public static PrintingPressProperties fromConfig(FactoryModPlugin plugin, ConfigurationSection configPrintingPresses) {
-		ItemList<NamedItemStack> ppFuel=ItemList.fromConfig(configPrintingPresses.getConfigurationSection("fuel"));
+	public static PrintingFactoryProperties fromConfig(FactoryModPlugin plugin, ConfigurationSection configPrintingFactoryes) {
+		ItemList<NamedItemStack> ppFuel=ItemList.fromConfig(configPrintingFactoryes.getConfigurationSection("fuel"));
 		if(ppFuel.isEmpty())
 		{
 			ppFuel=new ItemList<NamedItemStack>();
 			ppFuel.add(new NamedItemStack(Material.getMaterial("COAL"),1,(short)1,"Charcoal"));
 		}
-		ConfigurationSection costs = configPrintingPresses.getConfigurationSection("costs");
+		ConfigurationSection costs = configPrintingFactoryes.getConfigurationSection("costs");
 		ItemList<NamedItemStack> ppConstructionCost=ItemList.fromConfig(costs.getConfigurationSection("construction"));
 		ItemList<NamedItemStack> ppRepairCost=ItemList.fromConfig(costs.getConfigurationSection("repair"));
 		ItemList<NamedItemStack> ppPlateCost=ItemList.fromConfig(costs.getConfigurationSection("plates"));
@@ -115,14 +115,14 @@ public class PrintingPressProperties extends ItemFactoryProperties implements Fa
 		int pamphletsPerLot = costs.getInt("pamphlets_per_lot",24);
 		ItemList<NamedItemStack> ppSecurityCost=ItemList.fromConfig(costs.getConfigurationSection("security_lot"));
 		int securityNotesPerLot = costs.getInt("security_notes_per_lot",24);
-		int ppEnergyTime = configPrintingPresses.getInt("fuel_time", 10);
+		int ppEnergyTime = configPrintingFactoryes.getInt("fuel_time", 10);
 		int ppRepair = costs.getInt("repair_multiple",1);
-		String ppName = configPrintingPresses.getString("name", "Printing Press");
-		int paperRate = configPrintingPresses.getInt("paper_rate",3);
-		int pageLead = configPrintingPresses.getInt("page_lead",12);
-		int setPageTime = configPrintingPresses.getInt("set_page_time",20);
-		int repairTime = configPrintingPresses.getInt("repair_time",12);
-		return new PrintingPressProperties(FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory"),ppFuel, ppConstructionCost, ppRepairCost, ppPlateCost, ppBindingCost, ppPageCost, pagesPerLot, ppPamphletCost, pamphletsPerLot, ppSecurityCost, securityNotesPerLot, ppEnergyTime, ppName, ppRepair, paperRate, pageLead, setPageTime, repairTime);
+		String ppName = configPrintingFactoryes.getString("name", "Printing Factory");
+		int paperRate = configPrintingFactoryes.getInt("paper_rate",3);
+		int pageLead = configPrintingFactoryes.getInt("page_lead",12);
+		int setPageTime = configPrintingFactoryes.getInt("set_page_time",20);
+		int repairTime = configPrintingFactoryes.getInt("repair_time",12);
+		return new PrintingFactoryProperties(FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory"),ppFuel, ppConstructionCost, ppRepairCost, ppPlateCost, ppBindingCost, ppPageCost, pagesPerLot, ppPamphletCost, pamphletsPerLot, ppSecurityCost, securityNotesPerLot, ppEnergyTime, ppName, ppRepair, paperRate, pageLead, setPageTime, repairTime);
 	}
 
 

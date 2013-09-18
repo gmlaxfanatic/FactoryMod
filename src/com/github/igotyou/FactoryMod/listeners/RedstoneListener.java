@@ -16,7 +16,7 @@ import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.managers.FactoryModManager;
-import com.github.igotyou.FactoryMod.managers.ProductionManager;
+import com.github.igotyou.FactoryMod.managers.ProductionFactoryManager;
 import com.untamedears.citadel.entity.PlayerReinforcement;
 
 public class RedstoneListener implements Listener {

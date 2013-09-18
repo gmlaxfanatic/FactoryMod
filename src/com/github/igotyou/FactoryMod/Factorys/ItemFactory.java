@@ -17,7 +17,6 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.interfaces.ItemFactoryInterface;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.utility.Anchor;
@@ -31,7 +30,7 @@ import java.util.Arrays;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 
-public abstract class ItemFactory extends FactoryObject implements ItemFactoryInterface {
+public abstract class ItemFactory extends BaseFactory {
 	public static final BlockFace[] REDSTONE_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
 	protected int currentProductionTimer = 0;//The "production timer", which trachs for how long the factory has been producing the selected recipe
 	protected int currentEnergyTimer = 0;//Time since last energy consumption(if there's no lag, it's in seconds)
@@ -432,7 +431,7 @@ public abstract class ItemFactory extends FactoryObject implements ItemFactoryIn
 	 * Called by the block listener when the player(or a entity) destroys the fatory
 	 * Drops the build materials if the config says it shouls
 	 */
-	public void breakFactory()
+	public void blockBreakResponse()
 	{
 		powerOff();
 		currentRepair=getMaxRepair();
@@ -455,7 +454,9 @@ public abstract class ItemFactory extends FactoryObject implements ItemFactoryIn
 	}
 
 	/**
-	 * Degrades the factory
+	 * Degrades the factory by the percentage "percent". If the factory exceeds
+	 * its total amount of repair possible, its time entering disrepair is 
+	 * recorded.
 	 */
 	public void updateRepair(double percent)
 	{

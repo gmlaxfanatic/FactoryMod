@@ -4,7 +4,7 @@ import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import java.util.List;
 
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
-import com.github.igotyou.FactoryMod.managers.ProductionManager;
+import com.github.igotyou.FactoryMod.managers.ProductionFactoryManager;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
@@ -18,12 +18,12 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 
-public class ProductionProperties extends ItemFactoryProperties implements FactoryProperties
+public class ProductionFactoryProperties extends ItemFactoryProperties implements FactoryProperties
 {
 	private ItemList<NamedItemStack> inputs;
 	private List<ProductionRecipe> recipes;
 	
-	public ProductionProperties(Structure structure, ItemList<NamedItemStack> inputs, List<ProductionRecipe> recipes,
+	public ProductionFactoryProperties(Structure structure, ItemList<NamedItemStack> inputs, List<ProductionRecipe> recipes,
 			ItemList<NamedItemStack> fuel, int energyTime, String name,int repair)
 	{
 		super(structure,fuel, repair, energyTime, name);
@@ -54,19 +54,19 @@ public class ProductionProperties extends ItemFactoryProperties implements Facto
 
 	
 	/*
-	 * Parse a ProductionProperties from a ConfigurationSection
+	 * Parse a ProductionFactoryProperties from a ConfigurationSection
 	 */
-	public static Map<String, ProductionProperties> productionPropertiesFromConfig(ConfigurationSection factoriesConfiguration, ProductionManager productionManager)
+	public static Map<String, FactoryProperties> productionPropertiesFromConfig(ConfigurationSection factoriesConfiguration, ProductionFactoryManager productionManager)
 	{
-		Map<String, ProductionProperties> productionProperties=new HashMap<String, ProductionProperties>();
+		Map<String, FactoryProperties> productionProperties=new HashMap<String, FactoryProperties>();
 		for(String title:factoriesConfiguration.getKeys(false))
 		{
-			productionProperties.put(title, ProductionProperties.productionPropertyFromConfig(title, factoriesConfiguration.getConfigurationSection(title),productionManager));
+			productionProperties.put(title, ProductionFactoryProperties.productionPropertyFromConfig(title, factoriesConfiguration.getConfigurationSection(title),productionManager));
 		}
 		return productionProperties;
 	}
 	
-	protected static ProductionProperties productionPropertyFromConfig(String title, ConfigurationSection factoryConfiguration, ProductionManager productionManager)
+	protected static ProductionFactoryProperties productionPropertyFromConfig(String title, ConfigurationSection factoryConfiguration, ProductionFactoryManager productionManager)
 	{
 		title=title.replaceAll(" ","_");
 		String factoryName=factoryConfiguration.getString("name","Default Name");
@@ -91,6 +91,6 @@ public class ProductionProperties extends ItemFactoryProperties implements Facto
 		ProductionRecipe repairRecipe=new ProductionRecipe(title+"REPAIR","Repair Factory",1,repairs);
 		productionManager.addProductionRecipe(title+"REPAIR",repairRecipe);
 		factoryRecipes.add(repairRecipe);
-		return new ProductionProperties(FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory"),inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
+		return new ProductionFactoryProperties(FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory"),inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
 	}
 }

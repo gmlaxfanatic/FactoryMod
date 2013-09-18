@@ -1,7 +1,6 @@
 package com.github.igotyou.FactoryMod.Factorys;
 
 
-import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import org.bukkit.Location;
 
@@ -13,15 +12,13 @@ import com.github.igotyou.FactoryMod.utility.Structure;
 import java.util.List;
 import org.bukkit.entity.Player;
 
-public class FactoryObject implements Factory {
+public abstract class BaseFactory implements Factory {
 	//the diffrent factory types, NOTE: these are not the sub-factory types, these are the main types.
 	public enum FactoryCategory
 	{
 		PRODUCTION,
-		PRINTING_PRESS
+		PRINTING
 	}
-	
-	
 	
 	protected Anchor anchor;
 	protected List<Offset> interactionPoints;
@@ -30,10 +27,7 @@ public class FactoryObject implements Factory {
 	protected String factoryType;//the SUBfactory type(the ones loaded from the config file)
 	protected FactoryProperties factoryProperties; // The properties of this factory type and tier
 	
-	/**
-	 * Constructor
-	 */
-	public FactoryObject(Anchor anchor,
+	public BaseFactory(Anchor anchor,
 		Structure structure,
 		List<Offset> interactionPoints,
 		boolean active,
@@ -90,10 +84,6 @@ public class FactoryObject implements Factory {
 	}
 	public FactoryCategory getFactoryCategory() {
 		return factoryCategory;
-	}
-	
-	public void breakFactory() {
-		
 	}
 	
 	public Anchor getAnchor() {
