@@ -26,8 +26,6 @@ public abstract class BaseFactory implements Factory {
 	protected FactoryProperties factoryProperties; // The properties of this factory type and tier
 	
 	public BaseFactory(Anchor anchor,
-		Structure structure,
-		List<Offset> interactionPoints,
 		boolean active,
 		FactoryCategory factoryType,
 		FactoryProperties properties)

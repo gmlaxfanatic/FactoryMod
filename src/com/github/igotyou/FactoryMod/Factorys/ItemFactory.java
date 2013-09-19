@@ -39,13 +39,10 @@ public abstract class ItemFactory extends BaseFactory {
 	protected long timeDisrepair;//The time at which the factory went into disrepair
 	
 	public ItemFactory(Anchor anchor,
-		Structure structure,
 		boolean active,
 		FactoryCategory factoryType,
 		FactoryProperties factoryProperties) {
 		super(anchor,
-			structure,			
-			Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0)),
 			active,
 			factoryType,
 			factoryProperties);
@@ -54,7 +51,6 @@ public abstract class ItemFactory extends BaseFactory {
 	}
 	
 	public ItemFactory(Anchor anchor,
-		Structure structure,
 		boolean active,
 		FactoryCategory factoryType,
 		FactoryProperties factoryProperties,
@@ -62,9 +58,7 @@ public abstract class ItemFactory extends BaseFactory {
 		int currentEnergyTimer,	
 		double currentMaintenance,
 		long timeDisrepair) {
-		super(anchor,
-			structure,			
-			Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0)),
+		super(anchor,			
 			active,
 			factoryType,
 			factoryProperties);

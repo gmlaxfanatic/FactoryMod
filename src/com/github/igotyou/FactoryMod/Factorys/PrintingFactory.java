@@ -36,7 +36,7 @@ public class PrintingFactory extends ItemFactory {
 	private int lockedResultCode;
 
 	public PrintingFactory(Anchor anchor, boolean active, PrintingFactoryProperties printingFactoryProperties) {
-		super(anchor, printingFactoryProperties.getStructure(), active, FactoryCategory.PRINTING, printingFactoryProperties);
+		super(anchor, active, FactoryCategory.PRINTING, printingFactoryProperties);
 		this.mode = OperationMode.REPAIR;
 		this.printingFactoryProperties = printingFactoryProperties;
 		this.containedPaper = 0;
@@ -54,7 +54,7 @@ public class PrintingFactory extends ItemFactory {
 			PrintingFactoryProperties printingFactoryProperties,
 			int containedPaper, int containedBindings, int containedSecurityMaterials,
 			int[] processQueue, int lockedResultCode) {
-		super(anchor, printingFactoryProperties.getStructure(), active,
+		super(anchor, active,
 				FactoryCategory.PRINTING, printingFactoryProperties, currentProductionTimer,
 				currentEnergyTimer, currentMaintenance, timeDisrepair);
 		this.mode = mode;

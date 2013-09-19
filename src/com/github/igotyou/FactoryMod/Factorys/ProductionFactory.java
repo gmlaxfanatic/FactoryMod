@@ -26,7 +26,6 @@ public class ProductionFactory extends ItemFactory
 	private ProductionRecipe currentRecipe = null;//the recipe that is currently selected
 	private ProductionFactoryProperties productionFactoryProperties;//the properties of the production factory
 	public static final FactoryCategory FACTORY_TYPE = FactoryCategory.PRODUCTION;//the factory's type
-	public static Structure productionStructure;
 	private List<ProductionRecipe> recipes;
 	private int currentRecipeNumber = 0;//the array index of the current recipe
 	
@@ -35,7 +34,7 @@ public class ProductionFactory extends ItemFactory
 	 */
 	public ProductionFactory (Anchor anchor, ProductionFactoryProperties productionProperties)
 	{
-		super(anchor, productionStructure, false, ProductionFactory.FACTORY_TYPE, productionProperties);
+		super(anchor, false, ProductionFactory.FACTORY_TYPE, productionProperties);
 		this.productionFactoryProperties = productionProperties;
 		this.recipes=new ArrayList<ProductionRecipe> (productionFactoryProperties.getRecipes());
 		this.setRecipeToNumber(0);
@@ -48,7 +47,7 @@ public class ProductionFactory extends ItemFactory
 			ProductionFactoryProperties productionProperties, boolean active, int currentProductionTimer, int currentEnergyTimer,
 			int currentRecipeNumber,double currentMaintenance,long timeDisrepair)
 	{
-		super(anchor, productionStructure, active, ProductionFactory.FACTORY_TYPE, productionProperties, currentProductionTimer, currentEnergyTimer, currentMaintenance, timeDisrepair);
+		super(anchor, active, ProductionFactory.FACTORY_TYPE, productionProperties, currentProductionTimer, currentEnergyTimer, currentMaintenance, timeDisrepair);
 		this.productionFactoryProperties = (ProductionFactoryProperties) factoryProperties;
 		this.recipes=recipes;
 		this.setRecipeToNumber(currentRecipeNumber);
