@@ -5,7 +5,6 @@
 package com.github.igotyou.FactoryMod.managers;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
@@ -19,19 +18,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
 /**
- * Superclass for specific BaseFactory managers to extend
+ * Superclass for specific Factory managers to extend
  */
 
 public abstract class BaseFactoryManager implements FactoryManager {
 	
 	protected FactoryModPlugin plugin;
-	protected List<BaseFactory> baseFactories;
+	protected List<Factory> factories;
 	protected Map<String,FactoryProperties> allFactoryProperties;
 	protected long repairTime;
 	//Initally generated set of possible materials and interaction
@@ -40,12 +38,14 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	protected Set<Material> interactionMaterials;
 	//For efficiency in factory creation Each unique structure points to a creation point
 	//used by that structure, which in turn points to the properites which use those offsets
-	protected Map<Structure,Map<Offset,FactoryProperties>> structures=new HashMap<Structure,Map<Offset,FactoryProperties>>();
+	protected Map<Structure,Map<Offset,Set<FactoryProperties>>> structures=new HashMap<Structure,Map<Offset,Set<FactoryProperties>>>();
 
 	public BaseFactoryManager(FactoryModPlugin plugin)
 	{
 		this.plugin=plugin;
-		baseFactories = new ArrayList<BaseFactory>();
+		factories = new ArrayList<Factory>();
+		allFactoryProperties = new HashMap<String,FactoryProperties>();
+		materials = new HashSet<Material>();
 		interactionMaterials=new HashSet<Material>();
 	}
 	
@@ -56,9 +56,9 @@ public abstract class BaseFactoryManager implements FactoryManager {
 			@Override
 			public void run()
 			{
-				for (BaseFactory baseFactory:baseFactories)
+				for (Factory factory:factories)
 				{
-					baseFactory.update();
+					factory.update();
 				}
 			}
 		}, 0L, FactoryModPlugin.UPDATE_CYCLE);
@@ -69,10 +69,10 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	 */
 	public Factory factoryAtLocation(Location factoryLocation) 
 	{
-		for (BaseFactory baseFactory : baseFactories)
+		for (Factory factory : factories)
 		{			
-			if(baseFactory.getAnchor().containedIn(factoryLocation, baseFactory.getStructure().getDimensions())) {
-				return baseFactory;
+			if(factory.getAnchor().containedIn(factoryLocation, factory.getStructure().getDimensions())) {
+				return factory;
 			}
 		}
 		return null;
@@ -83,15 +83,15 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	 */
 	public void removeFactory(Factory factory) 
 	{
-		baseFactories.remove(factory);
+		factories.remove(factory);
 	}
 	
 	/*
 	 * Add the given factory to the list of factories
 	 */
-	public void addFactory(BaseFactory factory) 
+	public void addFactory(Factory factory) 
 	{
-		baseFactories.add(factory);
+		factories.add(factory);
 	}
 	
 
@@ -106,14 +106,20 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	
 	public InteractionResponse createFactory(Location location){
 		InteractionResponse response = new InteractionResponse(InteractionResult.IGNORE,"Not a viable structure");
+		FactoryModPlugin.debugMessage("BaseFactoryManager creating factory...");
 		for(Structure structure:structures.keySet()) {
-			for(Entry<Offset,FactoryProperties> entry:structures.get(structure).entrySet()) {
-				Set<Anchor> potentialAnchors = entry.getKey().getPotentialAnchors(location);
+			Map<Offset,Set<FactoryProperties>> offsets=structures.get(structure);
+			for(Offset offset:offsets.keySet()) {
+				Set<Anchor> potentialAnchors = offset.getPotentialAnchors(location);
+				FactoryModPlugin.debugMessage("Searching Potential anchors: "+potentialAnchors.size());
 				for(Anchor potentialAnchor:potentialAnchors) {
 					if(structure.exists(potentialAnchor)) {
-						response = createFactory(entry.getValue(), potentialAnchor);
-						if(response != null && response.getInteractionResult()==InteractionResult.SUCCESS) {
-							return response;
+						FactoryModPlugin.debugMessage("Found anchor, testing create conditions for various property files");
+						for(FactoryProperties factoryProperties:offsets.get(offset)) {
+							response = createFactory(factoryProperties, potentialAnchor);
+							if(response != null && response.getInteractionResult()==InteractionResult.SUCCESS) {
+								return response;
+							}
 						}
 					}
 				}
@@ -153,6 +159,19 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		materials.clear();
 		for(FactoryProperties factoryProperties:allFactoryProperties.values()) {
 			materials.addAll(factoryProperties.getStructure().getMaterials());
+		}
+	}
+	protected void updateStructures() {
+		for(FactoryProperties factoryProperties:allFactoryProperties.values()) {
+			Structure structure = factoryProperties.getStructure();
+			if(!structures.containsKey(structure)){
+				structures.put(structure,new HashMap<Offset,Set<FactoryProperties>>());
+			}
+			Map<Offset,Set<FactoryProperties>> offsets = structures.get(structure);
+			if(!offsets.containsKey(factoryProperties.getCreationPoint())) {
+				offsets.put(factoryProperties.getCreationPoint(), new HashSet<FactoryProperties>());
+			}
+			offsets.get(factoryProperties.getCreationPoint()).add(factoryProperties);
 		}
 	}
 	/*

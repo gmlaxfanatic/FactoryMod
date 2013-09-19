@@ -1,6 +1,5 @@
 package com.github.igotyou.FactoryMod.Factorys;
 
-
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import org.bukkit.Location;
 
@@ -21,10 +20,9 @@ public abstract class BaseFactory implements Factory {
 	}
 	
 	protected Anchor anchor;
-	protected List<Offset> interactionPoints;
 	protected boolean active; // Whether factory is currently active
-	protected FactoryCategory factoryCategory; // The type this factory is
-	protected String factoryType;//the SUBfactory type(the ones loaded from the config file)
+	protected FactoryCategory factoryCategory; // The category of this factory
+	protected String factoryType;//the factory type(the ones loaded from the config file)
 	protected FactoryProperties factoryProperties; // The properties of this factory type and tier
 	
 	public BaseFactory(Anchor anchor,
@@ -35,7 +33,6 @@ public abstract class BaseFactory implements Factory {
 		FactoryProperties properties)
 	{
 		this.anchor=anchor;
-		this.interactionPoints=interactionPoints;
 		this.active = active;
 		this.factoryCategory = factoryType;
 		this.factoryProperties = properties;
@@ -48,7 +45,6 @@ public abstract class BaseFactory implements Factory {
 	{
 		return factoryType;
 	}
-	
 	
 	/**
 	 * returns if the factory is on or not.
@@ -67,6 +63,9 @@ public abstract class BaseFactory implements Factory {
 	{
 		return getStructure().exists(anchor);
 	}
+	public Anchor getAnchor() {
+		return anchor;
+	}
 	public Location getLocation() {
 		return anchor.location;
 	}
@@ -77,16 +76,12 @@ public abstract class BaseFactory implements Factory {
 		return getStructure().exists(anchor);
 	}
 	public List<Offset> getInteractionPoints() {
-		return interactionPoints;
+		return factoryProperties.getInteractionPoints();
 	}
 	public void interactionResponse(Player player, Location location) {
 		
 	}
 	public FactoryCategory getFactoryCategory() {
 		return factoryCategory;
-	}
-	
-	public Anchor getAnchor() {
-		return anchor;
 	}
 }

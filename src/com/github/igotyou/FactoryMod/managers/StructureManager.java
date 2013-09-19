@@ -32,8 +32,8 @@ public class StructureManager {
 		Map<String,Structure> structures = new HashMap<String,Structure>();
 		List<String> filenames=uncastFilenames;
 		for(String filename:filenames) {
-			plugin.saveResource("schematics/"+filename, true);
-			structures.put(filename,Structure.parseSchematic(new File(plugin.getDataFolder(),"schematics/"+filename)));
+			plugin.saveResource("schematics/"+filename+".schematic", true);
+			structures.put(filename,Structure.parseSchematic(new File(plugin.getDataFolder(),"schematics/"+filename+".schematic")));
 		}
 		return structures;
 	}

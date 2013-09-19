@@ -5,8 +5,8 @@
 package com.github.igotyou.FactoryMod.managers;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
+import com.github.igotyou.FactoryMod.interfaces.Factory;
 import java.util.Iterator;
 
 /**
@@ -33,12 +33,12 @@ public abstract class ItemFactoryManager extends BaseFactoryManager{
 	 */
 	public void updateRepair(long time)
 	{
-		for (BaseFactory itemFactory: baseFactories)
+		for (Factory itemFactory: factories)
 		{
 			((ItemFactory) itemFactory).updateRepair(time/((double)FactoryModPlugin.REPAIR_PERIOD));
 		}
 		long currentTime=System.currentTimeMillis();
-		Iterator<BaseFactory> itr=baseFactories.iterator();
+		Iterator<Factory> itr=factories.iterator();
 		while(itr.hasNext())
 		{
 			ItemFactory itemFactory = (ItemFactory) itr.next();

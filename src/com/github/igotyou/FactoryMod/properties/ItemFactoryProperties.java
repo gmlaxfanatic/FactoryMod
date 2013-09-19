@@ -19,20 +19,22 @@ import org.bukkit.Material;
  * @author Brian
  */
 public class ItemFactoryProperties implements FactoryProperties{
+	protected String factoryID;//Unique name of the factory
 	protected Structure structure;//=FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory");//=FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory");;
 	protected List<Offset> interactionPoints;// = Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0));
 	protected ItemList<NamedItemStack> fuel;
 	protected int repair;
 	protected int energyTime;
 	protected String name;
-		
-	public ItemFactoryProperties(Structure structure, ItemList<NamedItemStack>  fuel, int repair, int energyTime, String name) {
+
+	public ItemFactoryProperties(String factoryID, Structure structure, List<Offset> interactionPoints, ItemList<NamedItemStack>  fuel, int repair, int energyTime, String name) {
+		this.factoryID=factoryID;
 		this.structure=structure;
+		this.interactionPoints=interactionPoints;
 		this.fuel=fuel;
 		this.repair=repair;
 		this.energyTime=energyTime;
 		this.name=name;
-		interactionPoints = Arrays.asList(new Offset(0,0,0),new Offset(1,0,0),new Offset(2,0,0));
 	}
 
 	public int getEnergyTime()
@@ -60,5 +62,17 @@ public class ItemFactoryProperties implements FactoryProperties{
 		
 	public Offset getCreationPoint() {
 		return interactionPoints.get(1);
+	}
+	
+	public Offset getInventoryOffset() {
+		return interactionPoints.get(0);
+	}
+	
+	public Offset getCenterOffset() {
+		return interactionPoints.get(1);
+	}
+	
+	public Offset getPowerSourceOffset() {
+		return interactionPoints.get(2);
 	}
 }

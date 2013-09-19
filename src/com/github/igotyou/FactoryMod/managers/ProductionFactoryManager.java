@@ -13,9 +13,8 @@ import java.util.Set;
 import org.bukkit.Location;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
-import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
+import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.properties.ProductionFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -28,6 +27,7 @@ import com.github.igotyou.FactoryMod.utility.Offset;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.bukkit.World;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.InventoryHolder;
 
@@ -53,8 +53,8 @@ public class ProductionFactoryManager  extends ItemFactoryManager {
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
 		int version = 2;
 		oos.writeInt(version);
-		oos.writeInt(baseFactories.size());
-		for (BaseFactory baseFactory : baseFactories)
+		oos.writeInt(factories.size());
+		for (Factory baseFactory : factories)
 		{
 			ProductionFactory productionFactory=(ProductionFactory) baseFactory;
 		
@@ -201,7 +201,7 @@ public class ProductionFactoryManager  extends ItemFactoryManager {
 		ProductionFactoryProperties productionProperties = (ProductionFactoryProperties)properties;
 		ItemList<NamedItemStack> inputs =  productionProperties.getInputs();
 		Offset creationPoint = productionProperties.getCreationPoint();
-		if(inputs.exactlyIn(((InventoryHolder)anchor.getBlock(creationPoint)).getInventory()))
+		if(inputs.exactlyIn(((Chest)anchor.getBlock(creationPoint).getState()).getInventory()))
 		{
 			inputs.removeFrom(((InventoryHolder)anchor.getBlock(creationPoint)).getInventory());
 			ProductionFactory productionFactory = new ProductionFactory(anchor, (ProductionFactoryProperties) properties);

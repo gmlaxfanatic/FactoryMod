@@ -1,9 +1,11 @@
 package com.github.igotyou.FactoryMod.utility;
 
+import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Location;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.util.Vector;
 
 /**
@@ -42,10 +44,19 @@ public class Offset {
 	 */
 	public Set<Anchor> getPotentialAnchors(Location location) {
 		Set<Anchor> anchors = new HashSet<Anchor>();
+		FactoryModPlugin.debugMessage("Potential anchors for " +location.toString());
 		for(Orientation orientation:Orientation.values()) {
 			Offset orientatedOffset = this.orient(orientation);
-			anchors.add(new Anchor(orientation,location.clone().add(orientatedOffset.toVector())));
+			anchors.add(new Anchor(orientation,location.clone().subtract(orientatedOffset.toVector())));
+			FactoryModPlugin.debugMessage("Orientation "+orientation.name()+". "+new Anchor(orientation,location.clone().subtract(orientatedOffset.toVector())).location.toString());
 		}
 		return anchors;
+	}
+	
+	/*
+	 * Imports an offset from the configuration file
+	 */
+	public static Offset fromConfig(ConfigurationSection configurationSection) {
+		return new Offset(configurationSection.getInt("x", 0),configurationSection.getInt("y", 0),configurationSection.getInt("z", 0));
 	}
 }

@@ -1,11 +1,8 @@
 package com.github.igotyou.FactoryMod.recipes;
 
 
-import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
 import com.github.igotyou.FactoryMod.interfaces.Recipe;
-import com.github.igotyou.FactoryMod.managers.ProductionFactoryManager;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import java.util.ArrayList;
@@ -14,7 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.Inventory;
 

@@ -18,6 +18,7 @@ import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
+import com.github.igotyou.FactoryMod.properties.ItemFactoryProperties;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -399,7 +400,7 @@ public abstract class ItemFactory extends BaseFactory {
 	 */
 	public Location getCenterLocation() 
 	{
-		return anchor.getLocationOfOffset(interactionPoints.get(0));
+		return anchor.getLocationOfOffset(((ItemFactoryProperties)factoryProperties).getCenterOffset());
 	}
 
 	/**
@@ -407,7 +408,7 @@ public abstract class ItemFactory extends BaseFactory {
 	 */
 	public Location getInventoryLocation() 
 	{
-		return anchor.getLocationOfOffset(interactionPoints.get(1));
+		return anchor.getLocationOfOffset(((ItemFactoryProperties)factoryProperties).getInventoryOffset());
 	}
 
 	/**
@@ -415,7 +416,7 @@ public abstract class ItemFactory extends BaseFactory {
 	 */
 	public Location getPowerSourceLocation() 
 	{
-		return anchor.getLocationOfOffset(interactionPoints.get(2));
+		return anchor.getLocationOfOffset(((ItemFactoryProperties)factoryProperties).getPowerSourceOffset());
 	}
 	
 	/**

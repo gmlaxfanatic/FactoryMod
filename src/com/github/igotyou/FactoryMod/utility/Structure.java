@@ -50,12 +50,18 @@ public class Structure {
 	 */
 	public boolean exists(Anchor anchor)
 	{
-		for(int x = anchor.location.getBlockX(); Math.abs(x-anchor.location.getBlockX()) < blocks.length; x+=anchor.getXModifier()) {
-			for(int y = anchor.location.getBlockY(); y<anchor.location.getBlockY() + blocks[x].length; y++) {
-				for(int z = anchor.location.getBlockZ(); Math.abs(z-anchor.location.getBlockZ()) < blocks[x][y].length; x+=anchor.getZModifier()) {
+		FactoryModPlugin.debugMessage("Blocks size. x:"+blocks.length+", y:"+blocks[0].length+", z:"+blocks[0][0].length);
+		FactoryModPlugin.debugMessage("Testing for exisistance at anchor: "+anchor.location.getBlockX()+", "+anchor.location.getY()+", "+ anchor.location.getZ());
+		for(int x = 0; x < blocks.length; x++) {
+			FactoryModPlugin.debugMessage("Testing X for the "+x+" time.");
+			for(int y = 0; y<blocks[x].length; y++) {
+				for(int z = 0; z < blocks[x][y].length; z++)
+				{
+					FactoryModPlugin.debugMessage("Testing Block: "+blocks[x][y][z]);
 					//Check if this is not a index contianing air which should be ignored
 					if(!(blocks[x][y][z]==0 && ignoreAir)) {
-						if(!similiarBlocks(blocks[x][y][z], (new Location(anchor.location.getWorld(),x,y,z)).getBlock().getData())) {
+						FactoryModPlugin.debugMessage("Predicted Block: "+Material.getMaterial(blocks[x][y][z]).toString()+". Actual Block: "+anchor.location.clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).getBlock().getType().toString()+". Location: "+anchor.location.clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).toString());
+						if(!similiarBlocks(blocks[x][y][z], (byte) anchor.location.clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).getBlock().getTypeId())) {
 							return false;
 						}
 					}

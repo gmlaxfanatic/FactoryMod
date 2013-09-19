@@ -8,7 +8,10 @@ import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
+import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PrintingFactoryProperties extends ItemFactoryProperties implements FactoryProperties{
 
@@ -33,7 +36,9 @@ public class PrintingFactoryProperties extends ItemFactoryProperties implements 
 
 
 	public PrintingFactoryProperties(
+			String factoryID,
 			Structure structure,
+			List<Offset> interactionPoints,
 			ItemList<NamedItemStack> fuel,
 			ItemList<NamedItemStack> constructionMaterials,
 			ItemList<NamedItemStack> repairMaterials,
@@ -49,7 +54,7 @@ public class PrintingFactoryProperties extends ItemFactoryProperties implements 
 			int pageLead, int setPlateTime, int repairTime
 			)
 	{
-		super(structure, fuel, repair, energyTime, name);
+		super(factoryID, structure, interactionPoints, fuel, repair, energyTime, name);
 		this.constructionMaterials = constructionMaterials;
 		this.repairMaterials = repairMaterials;
 		this.plateMaterials = plateMaterials;
@@ -122,7 +127,26 @@ public class PrintingFactoryProperties extends ItemFactoryProperties implements 
 		int pageLead = configPrintingFactoryes.getInt("page_lead",12);
 		int setPageTime = configPrintingFactoryes.getInt("set_page_time",20);
 		int repairTime = configPrintingFactoryes.getInt("repair_time",12);
-		return new PrintingFactoryProperties(FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory"),ppFuel, ppConstructionCost, ppRepairCost, ppPlateCost, ppBindingCost, ppPageCost, pagesPerLot, ppPamphletCost, pamphletsPerLot, ppSecurityCost, securityNotesPerLot, ppEnergyTime, ppName, ppRepair, paperRate, pageLead, setPageTime, repairTime);
+		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(configPrintingFactoryes.getString("structure","ItemFactory"));
+		ConfigurationSection interactionPointsConfiguration = configPrintingFactoryes.getConfigurationSection("interaction_points");
+		List<Offset> interactionPoints=new ArrayList<Offset>(3);
+		interactionPoints.set(0, new Offset(0,0,0));
+		interactionPoints.set(1, new Offset(1,0,0));
+		interactionPoints.set(2, new Offset(2,0,0));
+		if(interactionPointsConfiguration!=null) {
+			if(interactionPointsConfiguration.contains("inventory")) {
+				interactionPoints.set(0, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("inventory")));
+			}
+			if(interactionPointsConfiguration.contains("center")) {
+				interactionPoints.set(2, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("center")));
+			}
+			if(interactionPointsConfiguration.contains("power_source")) {
+				interactionPoints.set(3, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("power_source")));
+			}
+		}
+		return new PrintingFactoryProperties("printing_press", structure, interactionPoints,
+			ppFuel, ppConstructionCost, ppRepairCost, ppPlateCost, ppBindingCost, ppPageCost, pagesPerLot, ppPamphletCost, pamphletsPerLot, ppSecurityCost,
+			securityNotesPerLot, ppEnergyTime, ppName, ppRepair, paperRate, pageLead, setPageTime, repairTime);
 	}
 
 

@@ -9,22 +9,19 @@ import java.io.ObjectOutputStream;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import com.github.igotyou.FactoryMod.Factorys.PrintingFactory;
 import com.github.igotyou.FactoryMod.Factorys.PrintingFactory.OperationMode;
+import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.properties.PrintingFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
-import com.github.igotyou.FactoryMod.utility.ItemList;
-import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 
 
 public class PrintingFactoryManager  extends ItemFactoryManager {
@@ -37,6 +34,7 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 		allFactoryProperties.put("PrintingFactoryProperties",PrintingFactoryProperties.fromConfig(plugin, plugin.getConfig().getConfigurationSection("printing")));
 		updateMaterials();
 		updateInteractionMaterials();
+		updateStructures();
 		//Set maintenance clock to 0
 		updateFactorys();
 	}
@@ -50,8 +48,8 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
 		int version = 2;
 		oos.writeInt(2);
-		oos.writeInt(baseFactories.size());
-		for (BaseFactory baseFactory : baseFactories)
+		oos.writeInt(factories.size());
+		for (Factory baseFactory : factories)
 		{
 			PrintingFactory printingFactory=(PrintingFactory) baseFactory;
 		
@@ -214,12 +212,8 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 	@Override
 	public InteractionResponse createFactory(FactoryProperties properties, Anchor anchor) 
 	{
-		Block inventoryBlock = anchor.getBlock(properties.getCreationPoint());
-		Chest chest = (Chest) inventoryBlock.getState();
-		Inventory chestInventory = chest.getInventory();
-		ItemList<NamedItemStack> inputs = printingFactoryProperties.getConstructionMaterials();
-		boolean hasMaterials = inputs.allIn(chestInventory);
-		if (hasMaterials)
+		Inventory inventory = ((Chest)anchor.getBlock(properties.getCreationPoint()).getState()).getInventory();
+		if (printingFactoryProperties.getConstructionMaterials().allIn(inventory))
 		{
 			PrintingFactory production = new PrintingFactory(anchor, false, printingFactoryProperties);
 			if (printingFactoryProperties.getConstructionMaterials().removeFrom(production.getInventory()))

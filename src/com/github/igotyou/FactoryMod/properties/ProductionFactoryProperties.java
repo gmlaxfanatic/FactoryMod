@@ -11,9 +11,9 @@ import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -23,10 +23,10 @@ public class ProductionFactoryProperties extends ItemFactoryProperties implement
 	private ItemList<NamedItemStack> inputs;
 	private List<ProductionRecipe> recipes;
 	
-	public ProductionFactoryProperties(Structure structure, ItemList<NamedItemStack> inputs, List<ProductionRecipe> recipes,
+	public ProductionFactoryProperties(String factoryID, Structure structure, List<Offset> interactionPoints, ItemList<NamedItemStack> inputs, List<ProductionRecipe> recipes,
 			ItemList<NamedItemStack> fuel, int energyTime, String name,int repair)
 	{
-		super(structure,fuel, repair, energyTime, name);
+		super(factoryID, structure, interactionPoints, fuel, repair, energyTime, name);
 		this.inputs = inputs;
 		this.recipes = recipes;
 		
@@ -91,6 +91,23 @@ public class ProductionFactoryProperties extends ItemFactoryProperties implement
 		ProductionRecipe repairRecipe=new ProductionRecipe(title+"REPAIR","Repair Factory",1,repairs);
 		productionManager.addProductionRecipe(title+"REPAIR",repairRecipe);
 		factoryRecipes.add(repairRecipe);
-		return new ProductionFactoryProperties(FactoryModPlugin.getManager().getStructureManager().getStructure("ItemFactory"),inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
+		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(factoryConfiguration.getString("structure","ItemFactory"));
+		ConfigurationSection interactionPointsConfiguration = factoryConfiguration.getConfigurationSection("interaction_points");
+		List<Offset> interactionPoints=new ArrayList<Offset>(3);
+		interactionPoints.set(0, new Offset(0,0,0));
+		interactionPoints.set(1, new Offset(1,0,0));
+		interactionPoints.set(2, new Offset(2,0,0));
+		if(interactionPointsConfiguration!=null) {
+			if(interactionPointsConfiguration.contains("inventory")) {
+				interactionPoints.set(0, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("inventory")));
+			}
+			if(interactionPointsConfiguration.contains("center")) {
+				interactionPoints.set(1, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("center")));
+			}
+			if(interactionPointsConfiguration.contains("power_source")) {
+				interactionPoints.set(2, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("power_source")));
+			}
+		}
+		return new ProductionFactoryProperties(title, structure, interactionPoints, inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
 	}
 }
