@@ -5,6 +5,7 @@
 package com.github.igotyou.FactoryMod.managers;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
+import static com.github.igotyou.FactoryMod.FactoryModPlugin.UPDATE_CYCLE;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 
 /**
  * Superclass for specific Factory managers to extend
@@ -32,6 +34,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	protected List<Factory> factories;
 	protected Map<String,FactoryProperties> allFactoryProperties;
 	protected long repairTime;
+	protected int updatePeriod;
 	//Initally generated set of possible materials and interaction
 	//materials to speed up responses to interactions and construction.
 	protected Set<Material> materials;
@@ -40,9 +43,10 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	//used by that structure, which in turn points to the properites which use those offsets
 	protected Map<Structure,Map<Offset,Set<FactoryProperties>>> structures=new HashMap<Structure,Map<Offset,Set<FactoryProperties>>>();
 
-	public BaseFactoryManager(FactoryModPlugin plugin)
+	public BaseFactoryManager(FactoryModPlugin plugin, ConfigurationSection configuration)
 	{
 		this.plugin=plugin;
+		this.updatePeriod = configuration.getInt("update_period",20);
 		factories = new ArrayList<Factory>();
 		allFactoryProperties = new HashMap<String,FactoryProperties>();
 		materials = new HashSet<Material>();
@@ -61,7 +65,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 					factory.update();
 				}
 			}
-		}, 0L, FactoryModPlugin.UPDATE_CYCLE);
+		}, 0L, updatePeriod);
 	}
 	/*
 	 * Finds a factory whose three dimensional binding box is contains the 
@@ -189,4 +193,5 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		Factory Factory = factoryAtLocation(factoryLocation);
 		return Factory != null ? Factory.isWhole() : false;
 	}
+	
 }

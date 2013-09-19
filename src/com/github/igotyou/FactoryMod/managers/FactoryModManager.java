@@ -75,7 +75,7 @@ public class FactoryModManager
 	 */
 	private void initializeProductionManager()
 	{
-		ProductionFactoryManager productionManager = new ProductionFactoryManager(plugin);
+		ProductionFactoryManager productionManager = new ProductionFactoryManager(plugin, plugin.getConfig().getConfigurationSection("production"));
 		factoryManagers.add(productionManager);
 		categoryToManager.put(FactoryCategory.PRODUCTION,productionManager);
 	}
@@ -84,7 +84,7 @@ public class FactoryModManager
 	 */
 	private void initializePrintingManager()
 	{
-		PrintingFactoryManager printingManager = new PrintingFactoryManager(plugin);
+		PrintingFactoryManager printingManager = new PrintingFactoryManager(plugin, plugin.getConfig().getConfigurationSection("printing"));
 		factoryManagers.add(printingManager);
 		categoryToManager.put(FactoryCategory.PRINTING,printingManager);
 	}

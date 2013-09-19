@@ -22,16 +22,17 @@ import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
+import org.bukkit.configuration.ConfigurationSection;
 
 
 public class PrintingFactoryManager  extends ItemFactoryManager {
 
 	public PrintingFactoryProperties printingFactoryProperties;
 	
-	public PrintingFactoryManager (FactoryModPlugin plugin)
+	public PrintingFactoryManager (FactoryModPlugin plugin, ConfigurationSection printingConfiguration)
 	{
-		super(plugin);
-		allFactoryProperties.put("PrintingFactoryProperties",PrintingFactoryProperties.fromConfig(plugin, plugin.getConfig().getConfigurationSection("printing")));
+		super(plugin, printingConfiguration);
+		allFactoryProperties.put("PrintingFactoryProperties",PrintingFactoryProperties.fromConfig(plugin, printingConfiguration));
 		updateMaterials();
 		updateInteractionMaterials();
 		updateStructures();
