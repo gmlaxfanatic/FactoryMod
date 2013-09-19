@@ -20,18 +20,15 @@ public abstract class BaseFactory implements Factory {
 	}
 	
 	protected Anchor anchor;
-	protected boolean active; // Whether factory is currently active
 	protected FactoryCategory factoryCategory; // The category of this factory
 	protected String factoryType;//the factory type(the ones loaded from the config file)
 	protected FactoryProperties factoryProperties; // The properties of this factory type and tier
 	
 	public BaseFactory(Anchor anchor,
-		boolean active,
 		FactoryCategory factoryType,
 		FactoryProperties properties)
 	{
 		this.anchor=anchor;
-		this.active = active;
 		this.factoryCategory = factoryType;
 		this.factoryProperties = properties;
 	}
@@ -44,13 +41,7 @@ public abstract class BaseFactory implements Factory {
 		return factoryType;
 	}
 	
-	/**
-	 * returns if the factory is on or not.
-	 */
-	public boolean getActive()
-	{
-		return active;
-	}
+	
 	public Structure getStructure() {
 		return factoryProperties.getStructure();
 	}

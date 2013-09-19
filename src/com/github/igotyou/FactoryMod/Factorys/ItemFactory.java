@@ -37,15 +37,16 @@ public abstract class ItemFactory extends BaseFactory {
 	protected int currentEnergyTimer = 0;//Time since last energy consumption(if there's no lag, it's in seconds)
 	protected double currentRepair;
 	protected long timeDisrepair;//The time at which the factory went into disrepair
+	protected boolean active; // Whether factory is currently active
 	
 	public ItemFactory(Anchor anchor,
 		boolean active,
 		FactoryCategory factoryType,
 		FactoryProperties factoryProperties) {
 		super(anchor,
-			active,
 			factoryType,
 			factoryProperties);
+		this.active=active;
 		this.currentRepair=0.0;
 		this.timeDisrepair=3155692597470L;//Year 2070, default starting value
 	}
@@ -59,7 +60,6 @@ public abstract class ItemFactory extends BaseFactory {
 		double currentMaintenance,
 		long timeDisrepair) {
 		super(anchor,			
-			active,
 			factoryType,
 			factoryProperties);
 		this.active = active;
@@ -536,6 +536,12 @@ public abstract class ItemFactory extends BaseFactory {
 				break;
 		}
 	}
-	
+	/**
+	 * returns if the factory is on or not.
+	 */
+	public boolean getActive()
+	{
+		return active;
+	}
 	
 }
