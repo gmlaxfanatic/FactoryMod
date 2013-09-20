@@ -16,7 +16,8 @@ public abstract class BaseFactory implements Factory {
 	public enum FactoryCategory
 	{
 		PRODUCTION,
-		PRINTING
+		PRINTING,
+		AREA
 	}
 	
 	protected Anchor anchor;

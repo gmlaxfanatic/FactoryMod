@@ -70,4 +70,9 @@ public interface FactoryManager
  * Returns a set of interaction materials associated with factories used in this manager
  */
 	public Set<Material> getInteractionMaterials();
+	/*
+	 * Gets the update period in ticks
+	 */
+	
+	public int getUpdatePeriod();
 }

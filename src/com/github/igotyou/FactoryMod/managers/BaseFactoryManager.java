@@ -53,6 +53,10 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		interactionMaterials=new HashSet<Material>();
 	}
 	
+	public int getUpdatePeriod() {
+		return updatePeriod;
+	}
+	
 	protected void updateManager() {
 		updateMaterials();
 		updateInteractionMaterials();
