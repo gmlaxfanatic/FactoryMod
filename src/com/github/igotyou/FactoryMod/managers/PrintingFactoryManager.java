@@ -33,11 +33,7 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 	{
 		super(plugin, printingConfiguration);
 		allFactoryProperties.put("PrintingFactoryProperties",PrintingFactoryProperties.fromConfig(plugin, printingConfiguration));
-		updateMaterials();
-		updateInteractionMaterials();
-		updateStructures();
-		//Set maintenance clock to 0
-		updateFactorys();
+		updateManager();
 	}
 	
 	public void save(File file) throws IOException 

@@ -39,6 +39,14 @@ public abstract class BaseFactory implements Factory {
 		return factoryProperties.getStructure();
 	}
 	/**
+	 * Returns the sub-factory type of the factory. 
+	 */
+	public String getFactoryType()
+	{
+		return factoryType;
+	}
+
+	/**
 	 * returns true if all factory blocks are occupied with the correct blocks
 	 */
 	public boolean isWhole()
