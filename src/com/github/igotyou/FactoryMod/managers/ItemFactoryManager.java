@@ -8,6 +8,7 @@ import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import java.util.Iterator;
+import org.bukkit.configuration.ConfigurationSection;
 
 /**
  * Superclass for specific ItemFactory managers to extend
@@ -16,9 +17,9 @@ import java.util.Iterator;
 public abstract class ItemFactoryManager extends BaseFactoryManager{
 	
 	
-	public ItemFactoryManager(FactoryModPlugin plugin)
+	public ItemFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection)
 	{
-		super(plugin);
+		super(plugin, configurationSection);
 	}
 
 	/*

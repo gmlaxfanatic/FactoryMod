@@ -35,9 +35,9 @@ public class ProductionFactoryManager  extends ItemFactoryManager {
 	
 	public  Map<String,ProductionRecipe> productionRecipes;
 
-	public ProductionFactoryManager(FactoryModPlugin plugin)
+	public ProductionFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection)
 	{
-		super(plugin);
+		super(plugin, configurationSection);
 		initConfig(plugin.getConfig().getConfigurationSection("production"));
 		updateMaterials();
 		updateInteractionMaterials();

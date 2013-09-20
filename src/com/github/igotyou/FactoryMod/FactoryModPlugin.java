@@ -93,7 +93,7 @@ public class FactoryModPlugin extends JavaPlugin
 		//Check if XP drops should be disabled
 		DISABLE_EXPERIENCE=generalConfiguration.getBoolean("disable_experience",false);
 		//How frequently factories are updated
-		UPDATE_CYCLE = generalConfiguration.getInt("update_cycle",20);
+
 		//Period of days before a factory is removed after it falls into disrepair
 		DISREPAIR_PERIOD= generalConfiguration.getLong("disrepair_period",14)*24*60*60*1000;
 		//The length of time it takes a factory to go to 0% health

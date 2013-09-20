@@ -33,13 +33,6 @@ public abstract class BaseFactory implements Factory {
 		this.factoryProperties = properties;
 	}
 
-	/**
-	 * Returns the sub-factory type of the factory. 
-	 */
-	public String getFactoryType()
-	{
-		return factoryType;
-	}
 	
 	
 	public Structure getStructure() {
