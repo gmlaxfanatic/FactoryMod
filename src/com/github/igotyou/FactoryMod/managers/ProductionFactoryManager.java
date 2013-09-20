@@ -38,9 +38,10 @@ public class ProductionFactoryManager  extends ItemFactoryManager {
 	public ProductionFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection)
 	{
 		super(plugin, configurationSection);
-		initConfig(plugin.getConfig().getConfigurationSection("production"));
+		initConfig(configurationSection);
 		updateMaterials();
 		updateInteractionMaterials();
+		updateStructures();
 		updateFactorys();
 	}
 	

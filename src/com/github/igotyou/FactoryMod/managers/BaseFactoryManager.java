@@ -53,6 +53,13 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		interactionMaterials=new HashSet<Material>();
 	}
 	
+	protected void updateManager() {
+		updateMaterials();
+		updateInteractionMaterials();
+		updateStructures();
+		updateFactorys();
+	}
+	
 	public void updateFactorys() 
 	{
 		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable()
