@@ -5,7 +5,7 @@ import static com.untamedears.citadel.Utility.getReinforcement;
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.AreaEffect;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
-import com.github.igotyou.FactoryMod.properties.AreaFactoryProperties;
+import com.github.igotyou.FactoryMod.properties.SimpleFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
@@ -18,47 +18,61 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
-public class AreaFactory extends BaseFactory {
+public class SimpleFactory extends BaseFactory {
 
 	private int currentEnergyTime;
-	
+	private int currentProductionTime;
 
-	public AreaFactory(Anchor anchor,
-		Structure structure,
-		boolean active,
-		FactoryProperties factoryProperties) {
-		super(anchor,
-			FactoryCategory.AREA,
-			factoryProperties);
-		this.currentEnergyTime = 0;
+	public SimpleFactory(Anchor anchor, SimpleFactoryProperties simpleFactoryProperties) {
+		this(anchor, simpleFactoryProperties, simpleFactoryProperties.getEnergyTime(),0);
 	}
 
-	public AreaFactory(Anchor anchor,
-		Structure structure,
-		FactoryProperties factoryProperties,
-		int currentEnergyTime) {
-		super(anchor,
-			FactoryCategory.AREA,
-			factoryProperties);
+	public SimpleFactory(Anchor anchor, FactoryProperties factoryProperties, int currentEnergyTime, int currenProductionTime) {
+		super(anchor, FactoryCategory.AREA, factoryProperties);
 		this.currentEnergyTime = currentEnergyTime;
+		this.currentProductionTime = currentProductionTime;
 	}
 	
 	@Override
 	public void update() {
+		if(!isWhole()){
+			powerOff();
+			return;
+		}	
+		if(!updateEnergy()) {
+			powerOff();
+			return;
+		}
+		updateProduction();
+		updateEffects();
+		currentEnergyTime += FactoryModPlugin.getManager().getManager(factoryCategory).getUpdatePeriod();
+	}
+	/*
+	 * Updates the energy state of the factory, returns false if fuel is needed
+	 * and is not present
+	 */
+	public boolean updateEnergy() {
 		if (currentEnergyTime >= getEnergyTime()) {
 			if (consumeFuel()) {
 				currentEnergyTime = 0;
 			} else {
-				powerOff();
-				return;
+				return false;
 			}
 		}
-		updateEffects();
-		currentEnergyTime += FactoryModPlugin.getManager().getManager(factoryCategory).getUpdatePeriod();
+		return true;
+	}
+	/*
+	 * Updates the production state of the factory
+	 */
+	public void updateProduction() {
+		if(currentProductionTime >= getProductionTime()) {
+				currentProductionTime = 0;
+				generateProducts();
+		}
 	}
 	
 	/*
-	 * Power off the AreaFactory, completely deleting it
+	 * Power off the SimpleFactory, completely deleting it
 	 */
 	private void powerOff() {
 		for(AreaEffect areaEffect:getProperties().getAllAreaEffects()) {
@@ -72,6 +86,13 @@ public class AreaFactory extends BaseFactory {
 	 */
 	public int getEnergyTime() {
 		return getProperties().getEnergyTime();
+	}
+	
+	/*
+	 * Returns the time between proudction in ticks
+	 */
+	public int getProductionTime() {
+		return getProperties().getProductionTime();
 	}
 
 	/*
@@ -94,18 +115,18 @@ public class AreaFactory extends BaseFactory {
 	 * Gets the inventory of the powersource used for this factory
 	 */
 	private Inventory getPowerSourceInventory() {
-		return ((InventoryHolder)anchor.getLocationOfOffset(getProperties().getPowerSourceOffset()).getBlock().getState()).getInventory();
+		return ((InventoryHolder)anchor.getLocationOfOffset(getProperties().getInventory()).getBlock().getState()).getInventory();
 	}
 	
 	/*
 	 * Gets a correctly caste properties file
 	 */
-	private AreaFactoryProperties getProperties() {
-		return ((AreaFactoryProperties)factoryProperties);
+	private SimpleFactoryProperties getProperties() {
+		return ((SimpleFactoryProperties)factoryProperties);
 	}
 	
 	/*
-	 * Updates the effects and palyers effected
+	 * Updates the effects and players effected
 	 */
 	public void updateEffects() {
 		Map<Integer,Set<AreaEffect>> areaEffects = getProperties().getAreaEffects();
@@ -133,7 +154,12 @@ public class AreaFactory extends BaseFactory {
 			}
 		}
 	}
-	
+	/*
+	 * Generates the outputs produced by this factory
+	 */
+	public void generateProducts() {
+		
+	}
 	/*
 	 * Updates the Effect depending on what class it is
 	 */
@@ -144,5 +170,19 @@ public class AreaFactory extends BaseFactory {
 	@Override
 	public void blockBreakResponse() {
 		powerOff();
+	}
+	
+	/*
+	 * Changes the power indicator block to indicate the factory is on
+	 */
+	public void indicatePowerOn() {
+		
+	}
+	
+	/*
+	 * Changes the power indicator block to indicate the factory is off
+	 */
+	public void indicatePowerOff() {
+		
 	}
 }

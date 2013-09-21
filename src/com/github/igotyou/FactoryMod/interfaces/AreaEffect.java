@@ -4,7 +4,7 @@
  */
 package com.github.igotyou.FactoryMod.interfaces;
 
-import com.github.igotyou.FactoryMod.Factorys.AreaFactory;
+import com.github.igotyou.FactoryMod.Factorys.SimpleFactory;
 import org.bukkit.entity.Player;
 
 
@@ -21,5 +21,5 @@ public interface AreaEffect {
 	/*
 	 * Removes the record for the factory
 	 */
-	public void disable(AreaFactory areaFactory);
+	public void disable(SimpleFactory areaFactory);
 }
