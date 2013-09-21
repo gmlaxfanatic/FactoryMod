@@ -16,6 +16,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public abstract class ItemFactoryManager extends BaseFactoryManager{
 	
+	protected long repairTime;
 	
 	public ItemFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection)
 	{

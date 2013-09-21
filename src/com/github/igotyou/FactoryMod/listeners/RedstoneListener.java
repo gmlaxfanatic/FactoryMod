@@ -13,24 +13,18 @@ import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.material.Attachable;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
-import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.managers.FactoryModManager;
 import com.github.igotyou.FactoryMod.managers.ProductionFactoryManager;
 import com.untamedears.citadel.entity.PlayerReinforcement;
 
 public class RedstoneListener implements Listener {
-	private FactoryModManager factoryMan;
-	//this is a lazy fix...
-	private FactoryManager productionMan;
-	
-	/**
-	 * Constructor
-	 */
-	public RedstoneListener(FactoryModManager factoryManager, FactoryManager productionManager)
+	private FactoryModManager factoryManager;
+
+	public RedstoneListener(FactoryModManager factoryManager)
 	{
-		this.factoryMan = factoryManager;
-		this.productionMan = productionManager;
+		this.factoryManager = factoryManager;
 	}
 	
 	@EventHandler(ignoreCancelled = true)
@@ -41,7 +35,7 @@ public class RedstoneListener implements Listener {
 		
 		Block clicked = e.getBlockAgainst();
 		//is there a factory there? and if it has all its blocks
-		if (factoryMan.factoryExistsAt(clicked.getLocation())&&factoryMan.factoryWholeAt(clicked.getLocation()))
+		if (factoryManager.factoryExistsAt(clicked.getLocation())&&factoryManager.factoryWholeAt(clicked.getLocation()))
 		{
 			//if the player is allowed to interact with that block?
 			if ((!FactoryModPlugin.CITADEL_ENABLED || FactoryModPlugin.CITADEL_ENABLED && !isReinforced(clicked)) || 
@@ -98,9 +92,9 @@ public class RedstoneListener implements Listener {
 			if(block.getType() == Material.FURNACE || block.getType() == Material.BURNING_FURNACE)
 			{	
 				//Is the factory a production factory?
-				if (productionMan.factoryExistsAt(block.getLocation()))
+				if (factoryManager.getManager(FactoryCategory.PRODUCTION).factoryExistsAt(block.getLocation()))
 				{
-					ProductionFactory factory = (ProductionFactory) productionMan.factoryAtLocation(block.getLocation());
+					ProductionFactory factory = (ProductionFactory) factoryManager.getManager(FactoryCategory.PRODUCTION).factoryAtLocation(block.getLocation());
 
 					Block lever = factory.findActivationLever();
 					if (lever == null) {

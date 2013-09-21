@@ -33,7 +33,6 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	protected FactoryModPlugin plugin;
 	protected List<Factory> factories;
 	protected Map<String,FactoryProperties> allFactoryProperties;
-	protected long repairTime;
 	protected int updatePeriod;
 	//Initally generated set of possible materials and interaction
 	//materials to speed up responses to interactions and construction.
