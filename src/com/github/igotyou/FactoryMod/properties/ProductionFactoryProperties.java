@@ -94,9 +94,9 @@ public class ProductionFactoryProperties extends ItemFactoryProperties implement
 		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(factoryConfiguration.getString("structure","ItemFactory"));
 		ConfigurationSection interactionPointsConfiguration = factoryConfiguration.getConfigurationSection("interaction_points");
 		List<Offset> interactionPoints=new ArrayList<Offset>(3);
-		interactionPoints.set(0, new Offset(0,0,0));
-		interactionPoints.set(1, new Offset(1,0,0));
-		interactionPoints.set(2, new Offset(2,0,0));
+		interactionPoints.add(new Offset(0,0,0));
+		interactionPoints.add(new Offset(1,0,0));
+		interactionPoints.add(new Offset(2,0,0));
 		if(interactionPointsConfiguration!=null) {
 			if(interactionPointsConfiguration.contains("inventory")) {
 				interactionPoints.set(0, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("inventory")));
