@@ -4,6 +4,8 @@
  */
 package com.github.igotyou.FactoryMod.managers;
 
+import com.github.igotyou.FactoryMod.AreaEffect.AreaPotionEffect;
+import com.github.igotyou.FactoryMod.AreaEffect.ChatEffect;
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.SimpleFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
@@ -31,17 +33,47 @@ import org.bukkit.inventory.InventoryHolder;
 public class SimpleFactoryManager extends BaseFactoryManager {
 
 	private String savesFileName;
+	protected int areaEffectUpdatePeriod;
+	protected int territoryUpdatePeriod;
 
 	public SimpleFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection) {
 		super(plugin, configurationSection);
 		initConfig(configurationSection);
 		updateManager();
+		//Schedule area effect updates
+		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+			@Override
+			public void run() {
+				for (Factory factory : factories) {
+					((SimpleFactory)factory).updateEffects();
+				}
+				AreaPotionEffect.updatePlayers();
+				ChatEffect.updatePlayers();
+			}
+		}, 0L, areaEffectUpdatePeriod);
+		//Schedule territory calculations
+		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+			@Override
+			public void run() {
+				for (Factory factory : factories) {
+					updateTerritoryCalculations();
+				}
+			}
+		}, 0L, territoryUpdatePeriod);		
 	}
+	
 	/*
-	 * Saves teh specifics of Production factories
+	 * Updates the territory calculation
+	 */
+	public void updateTerritoryCalculations() {
+		
+	}
+	
+	/*
+	 * Saves the specifics of Production factories
 	 */
 	@Override
-	protected void saveSpecifics(ObjectOutputStream oos, Factory baseFactory) {
+	protected  void saveSpecifics(ObjectOutputStream oos, Factory baseFactory) {
 		SimpleFactory simpleFactory = (SimpleFactory) baseFactory;
 		try {	
 			oos.writeUTF(simpleFactory.getFactoryType());
@@ -58,7 +90,7 @@ public class SimpleFactoryManager extends BaseFactoryManager {
 	 * Loads the specific attributes of a production factory
 	 */
 	@Override
-	protected Factory loadSpecifics(ObjectInputStream ois, Location location, Orientation orientation) throws IOException {
+	protected SimpleFactory loadSpecifics(ObjectInputStream ois, Location location, Orientation orientation) throws IOException {
 		try {
 			String factoryType = ois.readUTF();
 			int productionTimer = ois.readInt();

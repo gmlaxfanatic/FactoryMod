@@ -1,7 +1,6 @@
 package com.github.igotyou.FactoryMod;
 
 
-import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -10,6 +9,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import com.github.igotyou.FactoryMod.listeners.FactoryModListener;
 import com.github.igotyou.FactoryMod.listeners.RedstoneListener;
+import com.github.igotyou.FactoryMod.listeners.ReinforcementEffectListener;
 import com.github.igotyou.FactoryMod.managers.FactoryModManager;
 
 
@@ -24,10 +24,7 @@ public class FactoryModPlugin extends JavaPlugin
 	public static final String PRODUCTION_FACTORY_SAVES_FILE = "productionSaves"; // The production saves file name
 	public static final int TICKS_PER_SECOND = 20; //The number of ticks per second
 	public static final String PRINTING_FACTORY_SAVE_FILE = "pressSaves";
-	
-	public static int UPDATE_CYCLE;
 	public static int SAVE_CYCLE;
-	//public static Material CENTRAL_BLOCK_MATERIAL;
 	public static boolean RETURN_BUILD_MATERIALS;
 	public static boolean CITADEL_ENABLED;
 	public static Material FACTORY_INTERACTION_MATERIAL;
@@ -61,6 +58,7 @@ public class FactoryModPlugin extends JavaPlugin
 		{
 			getServer().getPluginManager().registerEvents(new FactoryModListener(manager), this);
 			getServer().getPluginManager().registerEvents(new RedstoneListener(manager),this);
+			getServer().getPluginManager().registerEvents(new ReinforcementEffectListener(manager), this);
 		}
 		catch(Exception e)
 		{
@@ -92,8 +90,6 @@ public class FactoryModPlugin extends JavaPlugin
 		FACTORY_INTERACTION_MATERIAL = Material.getMaterial(generalConfiguration.getString("factory_interaction_material","STICK"));
 		//Check if XP drops should be disabled
 		DISABLE_EXPERIENCE=generalConfiguration.getBoolean("disable_experience",false);
-		//How frequently factories are updated
-
 		//Period of days before a factory is removed after it falls into disrepair
 		DISREPAIR_PERIOD= generalConfiguration.getLong("disrepair_period",14)*24*60*60*1000;
 		//The length of time it takes a factory to go to 0% health

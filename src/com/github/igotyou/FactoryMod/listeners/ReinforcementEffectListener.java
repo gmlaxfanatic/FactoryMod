@@ -1,13 +1,24 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.github.igotyou.FactoryMod.listeners;
 
-/**
- *
- * @author Brian Landry
- */
-public class ReinforcementEffectListener {
-	
+import com.github.igotyou.FactoryMod.AreaEffect.ReinforcementEffect;
+import com.untamedears.citadel.CreateReinforcementEvent;
+
+import com.github.igotyou.FactoryMod.managers.FactoryModManager;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class ReinforcementEffectListener implements Listener {
+
+	private FactoryModManager factoryManager;
+
+	public ReinforcementEffectListener(FactoryModManager factoryManager) {
+		this.factoryManager = factoryManager;
+	}
+
+	@EventHandler
+	public void onCreateReinforcementEvent(CreateReinforcementEvent e) {
+		if(ReinforcementEffect.isAffected(e.getPlayer())) {
+			e.cancel();
+		}
+	}
 }
