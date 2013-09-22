@@ -28,8 +28,11 @@ public class Offset {
 	 * Rotates the positive offsets given an orientation
 	 */
 	public Offset orient(Orientation orientation) {
-		return new Offset(x*(orientation==Orientation.NE || orientation==Orientation.NW ? 1 : -1),y,
-			z*(orientation==Orientation.NE || orientation==Orientation.SE ? 1 : -1));
+		int newX=x*(orientation==Orientation.NW || orientation==Orientation.SE ? 0 : (orientation==Orientation.NE ? 1: -1))+
+			z*(orientation==Orientation.NE || orientation==Orientation.SW ? 0 : (orientation==Orientation.NW ? 1 : -1));
+		int newZ=x*(orientation==Orientation.NE || orientation==Orientation.SW ? 0 : (orientation==Orientation.NW ? 1 : -1))+
+			z*(orientation==Orientation.NW || orientation==Orientation.SE ? 0 : (orientation==Orientation.NE ? 1: -1));
+		return new Offset(newX,y,newZ);
 	}
 
 	/*

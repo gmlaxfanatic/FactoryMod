@@ -130,9 +130,9 @@ public class PrintingFactoryProperties extends ItemFactoryProperties implements 
 		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(configPrintingFactoryes.getString("structure","ItemFactory"));
 		ConfigurationSection interactionPointsConfiguration = configPrintingFactoryes.getConfigurationSection("interaction_points");
 		List<Offset> interactionPoints=new ArrayList<Offset>(3);
-		interactionPoints.set(0, new Offset(0,0,0));
-		interactionPoints.set(1, new Offset(1,0,0));
-		interactionPoints.set(2, new Offset(2,0,0));
+		interactionPoints.add(new Offset(0,0,0));
+		interactionPoints.add(new Offset(1,0,0));
+		interactionPoints.add(new Offset(2,0,0));
 		if(interactionPointsConfiguration!=null) {
 			if(interactionPointsConfiguration.contains("inventory")) {
 				interactionPoints.set(0, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("inventory")));

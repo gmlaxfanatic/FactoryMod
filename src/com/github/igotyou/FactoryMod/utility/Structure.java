@@ -61,7 +61,7 @@ public class Structure {
 					//Check if this is not a index contianing air which should be ignored
 					if(!(blocks[x][y][z]==0 && ignoreAir)) {
 						FactoryModPlugin.debugMessage("Predicted Block: "+Material.getMaterial(blocks[x][y][z]).toString()+". Actual Block: "+anchor.location.clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).getBlock().getType().toString()+". Location: "+anchor.location.clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).toString());
-						if(!similiarBlocks(blocks[x][y][z], (byte) anchor.location.clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).getBlock().getTypeId())) {
+						if(!similiarBlocks(blocks[x][y][z], (byte) anchor.location.clone().add(new Offset(x,y,z).orient(anchor.orientation).toVector()).getBlock().getTypeId())) {
 							return false;
 						}
 					}
