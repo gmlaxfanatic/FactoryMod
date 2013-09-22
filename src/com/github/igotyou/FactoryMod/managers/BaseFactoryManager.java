@@ -5,15 +5,23 @@
 package com.github.igotyou.FactoryMod.managers;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import static com.github.igotyou.FactoryMod.FactoryModPlugin.UPDATE_CYCLE;
+import com.github.igotyou.FactoryMod.Factorys.PrintingFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
+import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,14 +30,14 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 
 /**
  * Superclass for specific Factory managers to extend
  */
-
 public abstract class BaseFactoryManager implements FactoryManager {
-	
+
 	protected FactoryModPlugin plugin;
 	protected List<Factory> factories;
 	protected Map<String,FactoryProperties> allFactoryProperties;
@@ -40,34 +48,32 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	protected Set<Material> interactionMaterials;
 	//For efficiency in factory creation Each unique structure points to a creation point
 	//used by that structure, which in turn points to the properites which use those offsets
-	protected Map<Structure,Map<Offset,Set<FactoryProperties>>> structures=new HashMap<Structure,Map<Offset,Set<FactoryProperties>>>();
+	protected Map<Structure, Map<Offset, Set<FactoryProperties>>> structures = new HashMap<Structure, Map<Offset, Set<FactoryProperties>>>();
 
-	public BaseFactoryManager(FactoryModPlugin plugin, ConfigurationSection configuration)
-	{
-		this.plugin=plugin;
-		this.updatePeriod = configuration.getInt("update_period",20);
+	public BaseFactoryManager(FactoryModPlugin plugin, ConfigurationSection configuration) {
+		this.plugin = plugin;
+		this.updatePeriod = configuration.getInt("update_period", 20);
 		factories = new ArrayList<Factory>();
-		allFactoryProperties = new HashMap<String,FactoryProperties>();
+		allFactoryProperties = new HashMap<String, FactoryProperties>();
 		materials = new HashSet<Material>();
-		interactionMaterials=new HashSet<Material>();
+		interactionMaterials = new HashSet<Material>();
 	}
-	
+
+	public int getUpdatePeriod() {
+		return updatePeriod;
+	}
 	protected void updateManager() {
 		updateMaterials();
 		updateInteractionMaterials();
 		updateStructures();
 		updateFactorys();
 	}
-	
-	public void updateFactorys() 
-	{
-		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable()
-		{
+
+	public void updateFactorys() {
+		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
 			@Override
-			public void run()
-			{
-				for (Factory factory:factories)
-				{
+			public void run() {
+				for (Factory factory : factories) {
 					factory.update();
 				}
 			}
@@ -77,35 +83,30 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	 * Finds a factory whose three dimensional binding box is contains the 
 	 * given location. If no factory is found null is returned
 	 */
-	public Factory factoryAtLocation(Location factoryLocation) 
-	{
-		for (Factory factory : factories)
-		{			
-			if(factory.getAnchor().containedIn(factoryLocation, factory.getStructure().getDimensions())) {
+
+	public Factory factoryAtLocation(Location factoryLocation) {
+		for (Factory factory : factories) {
+			if (factory.getAnchor().containedIn(factoryLocation, factory.getStructure().getDimensions())) {
 				return factory;
 			}
 		}
 		return null;
 	}
-	
+
 	/*
 	 * Removes all record of the factory from the manager
 	 */
-	public void removeFactory(Factory factory) 
-	{
+	public void removeFactory(Factory factory) {
 		factories.remove(factory);
 	}
-	
+
 	/*
 	 * Add the given factory to the list of factories
 	 */
-	public void addFactory(Factory factory) 
-	{
+	public void addFactory(Factory factory) {
 		factories.add(factory);
 	}
-	
 
-	
 	/*
 	 * Atempt to create a factory given the location as the creation point.
 	 * Checks that a potential structure exists, if it does it calls a 
@@ -113,21 +114,21 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	 * special subconditions for the factory creation
 	 */
 	public abstract InteractionResponse createFactory(FactoryProperties properties, Anchor anchor);
-	
-	public InteractionResponse createFactory(Location location){
-		InteractionResponse response = new InteractionResponse(InteractionResult.IGNORE,"Not a viable structure");
+
+	public InteractionResponse createFactory(Location location) {
+		InteractionResponse response = new InteractionResponse(InteractionResult.IGNORE, "Not a viable structure");
 		FactoryModPlugin.debugMessage("BaseFactoryManager creating factory...");
-		for(Structure structure:structures.keySet()) {
-			Map<Offset,Set<FactoryProperties>> offsets=structures.get(structure);
-			for(Offset offset:offsets.keySet()) {
+		for (Structure structure : structures.keySet()) {
+			Map<Offset, Set<FactoryProperties>> offsets = structures.get(structure);
+			for (Offset offset : offsets.keySet()) {
 				Set<Anchor> potentialAnchors = offset.getPotentialAnchors(location);
-				FactoryModPlugin.debugMessage("Searching Potential anchors: "+potentialAnchors.size());
-				for(Anchor potentialAnchor:potentialAnchors) {
-					if(structure.exists(potentialAnchor)) {
+				FactoryModPlugin.debugMessage("Searching Potential anchors: " + potentialAnchors.size());
+				for (Anchor potentialAnchor : potentialAnchors) {
+					if (structure.exists(potentialAnchor)) {
 						FactoryModPlugin.debugMessage("Found anchor, testing create conditions for various property files");
-						for(FactoryProperties factoryProperties:offsets.get(offset)) {
+						for (FactoryProperties factoryProperties : offsets.get(offset)) {
 							response = createFactory(factoryProperties, potentialAnchor);
-							if(response != null && response.getInteractionResult()==InteractionResult.SUCCESS) {
+							if (response != null && response.getInteractionResult() == InteractionResult.SUCCESS) {
 								return response;
 							}
 						}
@@ -137,48 +138,49 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		}
 		return response;
 	}
-	
+
 	/*
 	 * Get the possible interactoin material types possible for this manager 
 	 */
 	public Set<Material> getInteractionMaterials() {
 		return interactionMaterials;
 	}
-	
+
 	/*
 	 * Updates the possible inteaction materials for this manager
 	 */
 	protected void updateInteractionMaterials() {
 		interactionMaterials.clear();
-		for(FactoryProperties factoryProperties:allFactoryProperties.values()) {
+		for (FactoryProperties factoryProperties : allFactoryProperties.values()) {
 			interactionMaterials.addAll(factoryProperties.getInteractionMaterials());
 		}
 	}
-	
+
 	/*
 	 * Get all materials potentially a part of a factory
 	 */
 	public Set<Material> getMaterials() {
 		return materials;
 	}
-	
+
 	/*
 	 * Updates materials potentially used by factories in this manager
 	 */
 	protected void updateMaterials() {
 		materials.clear();
-		for(FactoryProperties factoryProperties:allFactoryProperties.values()) {
+		for (FactoryProperties factoryProperties : allFactoryProperties.values()) {
 			materials.addAll(factoryProperties.getStructure().getMaterials());
 		}
 	}
+
 	protected void updateStructures() {
-		for(FactoryProperties factoryProperties:allFactoryProperties.values()) {
+		for (FactoryProperties factoryProperties : allFactoryProperties.values()) {
 			Structure structure = factoryProperties.getStructure();
-			if(!structures.containsKey(structure)){
-				structures.put(structure,new HashMap<Offset,Set<FactoryProperties>>());
+			if (!structures.containsKey(structure)) {
+				structures.put(structure, new HashMap<Offset, Set<FactoryProperties>>());
 			}
-			Map<Offset,Set<FactoryProperties>> offsets = structures.get(structure);
-			if(!offsets.containsKey(factoryProperties.getCreationPoint())) {
+			Map<Offset, Set<FactoryProperties>> offsets = structures.get(structure);
+			if (!offsets.containsKey(factoryProperties.getCreationPoint())) {
 				offsets.put(factoryProperties.getCreationPoint(), new HashSet<FactoryProperties>());
 			}
 			offsets.get(factoryProperties.getCreationPoint()).add(factoryProperties);
@@ -187,17 +189,142 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	/*
 	 * Checks if a factory exists at the given location
 	 */
+
 	public boolean factoryExistsAt(Location location) {
-		return factoryAtLocation(location)!=null;
+		return factoryAtLocation(location) != null;
 	}
-	
+
 	/*
 	 * Checks if a whole factory exists at the given location
 	 */
-	public boolean factoryWholeAt(Location factoryLocation) 
-	{
+	public boolean factoryWholeAt(Location factoryLocation) {
 		Factory Factory = factoryAtLocation(factoryLocation);
 		return Factory != null ? Factory.isWhole() : false;
 	}
+
+	@Override
+	public void update() {
+		save();
+	}
 	
+	
+
+	/*
+	 * Saves the manager
+	 */
+	public void onDisable() {
+		save();
+	}
+
+	/*
+	 * Saves the general properties of the factory
+	 */
+	public void save() {
+		String filename = getSavesFileName() + ".txt";
+		try {
+			save(new File(plugin.getDataFolder(), filename));
+		} catch (IOException exception) {
+			throw new RuntimeException("Failed to save to " + filename, exception);
+		}
+	}
+
+	/*
+	 * Saves the general properties of the factory
+	 */
+	protected void save(File file) throws IOException {
+		try {
+			File newFile = new File(file.getAbsolutePath() + ".new");
+			File bakFile = new File(file.getAbsolutePath() + ".bak");
+
+			FileOutputStream fileOutputStream = new FileOutputStream(file);
+			ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
+			int version = 2;
+			oos.writeInt(2);
+			oos.writeInt(factories.size());
+			for (Factory baseFactory : factories) {
+				oos.writeUTF(baseFactory.getAnchor().location.getWorld().getName());
+
+				oos.writeInt(baseFactory.getAnchor().location.getBlockX());
+				oos.writeInt(baseFactory.getAnchor().location.getBlockY());
+				oos.writeInt(baseFactory.getAnchor().location.getBlockZ());
+
+				oos.writeInt(baseFactory.getAnchor().orientation.id);
+
+				saveSpecifics(oos, baseFactory);
+			}
+			oos.flush();
+			fileOutputStream.close();
+
+			if (bakFile.exists()) {
+				bakFile.delete();
+			}
+
+			if (file.exists() && !file.renameTo(bakFile)) {
+				throw new IOException("Failed to rename " + file.getAbsolutePath() + " to " + bakFile.getAbsolutePath());
+			}
+
+			if (!newFile.renameTo(file)) {
+				throw new IOException("Failed to rename " + newFile.getAbsolutePath() + " to " + file.getAbsolutePath());
+			}
+		} catch (IOException exception) {
+			throw new RuntimeException("Failed to save to " + file.getAbsolutePath(), exception);
+		}
+
+
+
+	}
+
+	/*
+	 * Hook to save specific variables of the subfactories
+	 */
+	protected void saveSpecifics(ObjectOutputStream oos, Factory baseFactory) {
+	}
+	
+	/*
+	 * Loads the factorys
+	 */
+	
+	public void load() {
+		String filename = getSavesFileName() + ".txt";
+		load(new File(plugin.getDataFolder(), filename));
+	}
+	public void load(File file){
+		try {
+			FileInputStream fileInputStream = new FileInputStream(file);
+			ObjectInputStream ois = new ObjectInputStream(fileInputStream);
+			int version = ois.readInt();
+			if(version==1) {
+				load1(file);
+			}
+			else {
+				assert(version == 2);
+				int count = ois.readInt();
+				int i = 0;
+				for (i = 0; i < count; i++)
+				{
+					String worldName = ois.readUTF();
+					World world = plugin.getServer().getWorld(worldName);
+					Location location = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
+					Orientation orientation = Anchor.Orientation.getOrientation(ois.readInt());
+					
+					addFactory(loadSpecifics(ois, location, orientation));
+				}
+
+			}
+			fileInputStream.close();
+			
+		}
+		catch (FileNotFoundException exception) {
+			FactoryModPlugin.sendConsoleMessage(file.getName() + " does not exist! Creating file!");
+		} catch (IOException exception) {
+			throw new RuntimeException("Failed to load " + file.getPath(), exception);
+		}
+	}
+	
+	/*
+	 * Hook for loading specifics of subclasses
+	 */
+	protected abstract Factory loadSpecifics(ObjectInputStream ois, Location location, Orientation orientation) throws IOException;
+		
+	protected abstract void load1(File file);
 }

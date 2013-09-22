@@ -37,28 +37,13 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 		updateManager();
 	}
 	
-	public void save(File file) throws IOException 
-	{
-		//Takes difference between last repair update and current one and scales repair accordingly
-		updateRepair(System.currentTimeMillis()-repairTime);
-		repairTime=System.currentTimeMillis();
-		FileOutputStream fileOutputStream = new FileOutputStream(file);
-		ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
-		int version = 2;
-		oos.writeInt(2);
-		oos.writeInt(factories.size());
-		for (Factory baseFactory : factories)
-		{
-			PrintingFactory printingFactory=(PrintingFactory) baseFactory;
-		
-			oos.writeUTF(printingFactory.getAnchor().location.getWorld().getName());
-						
-			oos.writeInt(printingFactory.getAnchor().location.getBlockX());
-			oos.writeInt(printingFactory.getAnchor().location.getBlockY());
-			oos.writeInt(printingFactory.getAnchor().location.getBlockZ());
-			
-			oos.writeInt(printingFactory.getAnchor().orientation.id);
-			
+	/*
+	 * Saves the specifics of printing presses
+	 */
+	@Override
+	protected void saveSpecifics(ObjectOutputStream oos, Factory baseFactory) {
+		PrintingFactory printingFactory = (PrintingFactory) baseFactory;
+		try {
 			oos.writeBoolean(printingFactory.getActive());
 			oos.writeInt(printingFactory.getMode().getId());
 			oos.writeInt(printingFactory.getProductionTimer());
@@ -70,74 +55,62 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 			oos.writeInt(printingFactory.getContainedBindings());
 			oos.writeInt(printingFactory.getContainedSecurityMaterials());
 			oos.writeInt(printingFactory.getLockedResultCode());
-			
+
 			int[] processQueue = printingFactory.getProcessQueue();
 			oos.writeInt(processQueue.length);
 			for (int entry : processQueue) {
 				oos.writeInt(entry);
 			}
 		}
-		oos.flush();
-		fileOutputStream.close();
-	}
-
-	public void load(File file) throws IOException 
-	{
-		try {
-			FileInputStream fileInputStream = new FileInputStream(file);
-			ObjectInputStream ois = new ObjectInputStream(fileInputStream);
-			int version = ois.readInt();
-			if(version==1) {
-				load1(file);
-			}
-			else {
-				assert(version == 2);
-				repairTime=System.currentTimeMillis();
-				int count = ois.readInt();
-				int i = 0;
-				for (i = 0; i < count; i++)
-				{
-					String worldName = ois.readUTF();
-					World world = plugin.getServer().getWorld(worldName);
-					Location location = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
-					Orientation orientation = Orientation.getOrientation(ois.readInt());
-					boolean active = ois.readBoolean();
-					OperationMode mode = PrintingFactory.OperationMode.byId(ois.readInt());
-					int productionTimer = ois.readInt();
-					int energyTimer = ois.readInt();
-					double currentRepair = ois.readDouble();
-					long timeDisrepair  = ois.readLong();
-					int containedPaper = ois.readInt();
-					int containedBindings = ois.readInt();
-					int containedSecurityMaterials = ois.readInt();
-					int lockedResultCode = ois.readInt();
-
-					int queueLength = ois.readInt();
-					int[] processQueue = new int[queueLength];
-					int j;
-					for (j = 0; j < queueLength; j++) {
-						processQueue[j] = ois.readInt();
-					}
-
-					PrintingFactory printingFactory = new PrintingFactory(new Anchor(orientation,location),
-							active, productionTimer,
-							energyTimer, currentRepair, timeDisrepair,
-							mode,
-							printingFactoryProperties,
-							containedPaper, containedBindings, containedSecurityMaterials,
-							processQueue, lockedResultCode);
-					addFactory(printingFactory);
-				}
-
-			}
-			fileInputStream.close();
-			
-		} catch (IOException e) {
+		catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 	}
-			
-	public void load1(File file) throws IOException 
+	
+	/*
+	 * Loads the specific attributes of a printing press
+	 */
+	@Override
+	protected Factory loadSpecifics(ObjectInputStream ois, Location location, Orientation orientation) throws IOException {
+		try {
+			boolean active = ois.readBoolean();
+			PrintingFactory.OperationMode mode = PrintingFactory.OperationMode.byId(ois.readInt());
+			int productionTimer = ois.readInt();
+			int energyTimer = ois.readInt();
+			double currentRepair = ois.readDouble();
+			long timeDisrepair  = ois.readLong();
+			int containedPaper = ois.readInt();
+			int containedBindings = ois.readInt();
+			int containedSecurityMaterials = ois.readInt();
+			int lockedResultCode = ois.readInt();
+
+			int queueLength = ois.readInt();
+			int[] processQueue = new int[queueLength];
+			int j;
+			for (j = 0; j < queueLength; j++) {
+				processQueue[j] = ois.readInt();
+			}
+
+			PrintingFactory printingFactory = new PrintingFactory(new Anchor(orientation,location),
+					active, productionTimer,
+					energyTimer, currentRepair, timeDisrepair,
+					mode,
+					printingFactoryProperties,
+					containedPaper, containedBindings, containedSecurityMaterials,
+					processQueue, lockedResultCode);
+		}
+		catch(IOException e) {
+			throw e;
+		}
+		return null;
+	}
+	
+	/*
+	 * Loads version 1 of the file system
+	 */
+	@Override
+	public void load1(File file) 
 	{
 		try {
 			repairTime=System.currentTimeMillis();

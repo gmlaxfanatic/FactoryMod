@@ -16,12 +16,17 @@ public interface FactoryManager
 /**
 * Saves the machine objects list of this manager to file
 */
-	public void save(File file) throws IOException;
+	public void save();
 
 /**
 * Loads machine objects list of this manager from file
 */
-	public void load(File file) throws IOException;
+	public void load();
+	
+	/*
+	 * Updates the manager saving the factories and updating the repair
+	 */
+	public void update();
 
 /**
 * Updates all the machines from this manager's machine object list
@@ -70,4 +75,13 @@ public interface FactoryManager
  * Returns a set of interaction materials associated with factories used in this manager
  */
 	public Set<Material> getInteractionMaterials();
+	/*
+	 * Gets the update period in ticks
+	 */
+	public int getUpdatePeriod();
+	
+	/*
+	 * Disables the manager
+	 */
+	public void onDisable();
 }

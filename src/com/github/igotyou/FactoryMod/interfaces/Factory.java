@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.github.igotyou.FactoryMod.interfaces;
 
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
@@ -11,10 +7,6 @@ import com.github.igotyou.FactoryMod.utility.Structure;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-/**
- *
- * @author Brian
- */
 public interface Factory {
 		
 	public Location getLocation();

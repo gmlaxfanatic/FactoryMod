@@ -50,4 +50,20 @@ public abstract class ItemFactoryManager extends BaseFactoryManager{
 			}
 		}
 	}
+	
+	public void update() {
+		//Takes difference between last repair update and current one and scales repair accordingly
+		updateRepair(System.currentTimeMillis()-repairTime);
+		repairTime=System.currentTimeMillis();
+		save();
+	}
+	
+	/*
+	 * Updates repair and saves the manager
+	 */
+	public void onDisable() {
+		//Takes difference between last repair update and current one and scales repair accordingly
+		updateRepair(System.currentTimeMillis()-repairTime);
+		save();
+	}
 }
