@@ -221,7 +221,7 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 				return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + printingProperties.getName());
 			}
 		}
-		return new InteractionResponse(InteractionResult.FAILURE, "Not enough materials in chest!");
+		return new InteractionResponse(InteractionResult.FAILURE, "Incorrect Materials! They must match exactly.");
 	}
 	
 	public PrintingFactory factoryAtLocation(Location factoryLocation) 

@@ -23,13 +23,13 @@ import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-import com.github.igotyou.FactoryMod.utility.Offset;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 public class ProductionFactoryManager  extends ItemFactoryManager {
 	
@@ -209,7 +209,11 @@ public class ProductionFactoryManager  extends ItemFactoryManager {
 			addFactory(productionFactory);
 			return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + productionFactory.getProductionFactoryProperties().getName());
 		}
-		FactoryModPlugin.debugMessage("Creation materials not present");
+		FactoryModPlugin.debugMessage("Creation materials not present for "+productionProperties.getName());
+		FactoryModPlugin.debugMessage("Creation materials: "+productionProperties.getInputs().toString());
+		for(ItemStack itemStack:inventory.getContents()){
+			if(itemStack!=null) FactoryModPlugin.debugMessage("Material Present: "+ itemStack.toString());
+		}
 		return new InteractionResponse(InteractionResult.FAILURE, "Incorrect Materials! They must match exactly.");
 	}
 

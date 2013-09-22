@@ -65,7 +65,7 @@ public class ItemFactoryProperties implements FactoryProperties{
 	}
 	
 	public Offset getInventoryOffset() {
-		return interactionPoints.get(0);
+		return interactionPoints.get(2);
 	}
 	
 	public Offset getCenterOffset() {
@@ -73,6 +73,6 @@ public class ItemFactoryProperties implements FactoryProperties{
 	}
 	
 	public Offset getPowerSourceOffset() {
-		return interactionPoints.get(2);
+		return interactionPoints.get(0);
 	}
 }

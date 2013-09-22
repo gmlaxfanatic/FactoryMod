@@ -305,15 +305,17 @@ public class FactoryModManager
 			factory.interactionResponse(player, block.getLocation());
 		}
 		else {
+			InteractionResponse response=new InteractionResponse(InteractionResult.IGNORE, "Error");
 			for(FactoryManager factoryManager:possibleManagers) {
 				//Atempt to create a factory given the location as the creation point 
-				InteractionResponse response = factoryManager.createFactory(block.getLocation());
+				response = factoryManager.createFactory(block.getLocation());
 				if(response.getInteractionResult()==InteractionResult.SUCCESS) {
 					InteractionResponse.messagePlayerResult(player, response);
 					FactoryModPlugin.debugMessage("Factory Created");
-					break;
+					return;
 				}
 			}
+			InteractionResponse.messagePlayerResult(player, response);
 		}
 	}
 	
