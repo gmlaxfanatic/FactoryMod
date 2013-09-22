@@ -1,13 +1,15 @@
 package com.github.igotyou.FactoryMod.AreaEffect;
 
 import com.github.igotyou.FactoryMod.interfaces.AreaEffect;
-import java.util.HashSet;
+import com.github.igotyou.FactoryMod.interfaces.Factory;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 
 public class ReinforcementEffect implements AreaEffect{
-	private static Set<Player> affectedPlayers = new HashSet<Player>(50);
+	private static Map<Factory,Set<Player>> affectedPlayers = new HashMap<Factory,Set<Player>>();
 	private int radius;
 	
 	public ReinforcementEffect(int radius) {
@@ -18,9 +20,8 @@ public class ReinforcementEffect implements AreaEffect{
 		affectedPlayers.clear();
 	}
 	
-	@Override
-	public void apply(Player player) {
-		affectedPlayers.add(player);
+	public void apply(Factory factory, Set<Player> players) {
+		affectedPlayers.put(factory, players);
 	}
 	
 	@Override
@@ -28,9 +29,14 @@ public class ReinforcementEffect implements AreaEffect{
 		return radius;
 	}
 	
-	public static void executeEffect(Player player) {
-		if(affectedPlayers.contains(player)) {
-			//TODO: Cancel reinforcement placement
-		}
+	public void disable(Factory factory) {
+		affectedPlayers.remove(factory);
+	}
+	
+	/*
+	 * Imports the configuration for this effect
+	 */	
+	public static void initialize(ConfigurationSection configurationSection) {
+		getServer().getPluginManager().registerEvents(new ReinforcementListener(this), FactoryModPlugin.);
 	}
 }

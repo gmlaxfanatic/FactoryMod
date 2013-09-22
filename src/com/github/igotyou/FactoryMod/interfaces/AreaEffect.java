@@ -11,15 +11,11 @@ import org.bukkit.entity.Player;
 public interface AreaEffect {
 	
 	/*
-	 * Applies the given effect to a player
-	 */
-	public void apply(Player player);
-	/*
 	 * Gets the radius of the effect
 	 */
 	public int getRadius();
 	/*
 	 * Removes the record for the factory
 	 */
-	public void disable(SimpleFactory areaFactory);
+	public void disable(Factory factory);
 }

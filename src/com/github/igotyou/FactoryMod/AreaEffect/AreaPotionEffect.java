@@ -12,6 +12,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class AreaPotionEffect extends PotionEffect implements AreaEffect{
 	private final int radius;
+	private static int updatePeriod;
 	
 	public AreaPotionEffect (PotionEffectType type, int duration, int amplifier, boolean ambient) {
 		super(type,duration,amplifier,ambient);
@@ -52,5 +53,13 @@ public class AreaPotionEffect extends PotionEffect implements AreaEffect{
 		int amplifier = configurationSection.getInt("amplifier");
 		boolean ambient = configurationSection.getBoolean("ambient");
 		return new PotionEffect(effectType,duration,amplifier,ambient);
+	}
+	
+	/*
+	 * Imports the configuration for this effect
+	 */	
+	public static void initialize(ConfigurationSection configurationSection) {
+		ConfigurationSection potionConfiguration = configurationSection.getConfigurationSection("potion_effect");
+		updatePeriod = potionConfiguration.getInt("update_period", 100);
 	}
 }
