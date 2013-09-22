@@ -9,7 +9,6 @@ import java.io.ObjectOutputStream;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
@@ -23,6 +22,7 @@ import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.InventoryHolder;
 
 
 public class PrintingFactoryManager  extends ItemFactoryManager {
@@ -32,6 +32,7 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 	public PrintingFactoryManager (FactoryModPlugin plugin, ConfigurationSection printingConfiguration)
 	{
 		super(plugin, printingConfiguration);
+		printingFactoryProperties = PrintingFactoryProperties.fromConfig(plugin, printingConfiguration);
 		allFactoryProperties.put("PrintingFactoryProperties",PrintingFactoryProperties.fromConfig(plugin, printingConfiguration));
 		updateManager();
 	}
@@ -209,14 +210,15 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 	@Override
 	public InteractionResponse createFactory(FactoryProperties properties, Anchor anchor) 
 	{
-		Inventory inventory = ((Chest)anchor.getBlock(properties.getCreationPoint()).getState()).getInventory();
-		if (printingFactoryProperties.getConstructionMaterials().allIn(inventory))
+		PrintingFactoryProperties printingProperties = (PrintingFactoryProperties) properties;
+		Inventory inventory = ((InventoryHolder)anchor.getLocationOfOffset(printingProperties.getInventoryOffset()).getBlock().getState()).getInventory();
+		if (printingProperties.getConstructionMaterials().allIn(inventory))
 		{
-			PrintingFactory production = new PrintingFactory(anchor, false, printingFactoryProperties);
-			if (printingFactoryProperties.getConstructionMaterials().removeFrom(production.getInventory()))
+			PrintingFactory production = new PrintingFactory(anchor, false, printingProperties);
+			if (printingProperties.getConstructionMaterials().removeFrom(production.getInventory()))
 			{
 				addFactory(production);
-				return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + printingFactoryProperties.getName());
+				return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + printingProperties.getName());
 			}
 		}
 		return new InteractionResponse(InteractionResult.FAILURE, "Not enough materials in chest!");

@@ -27,8 +27,8 @@ import com.github.igotyou.FactoryMod.utility.Offset;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import org.bukkit.World;
-import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 public class ProductionFactoryManager  extends ItemFactoryManager {
@@ -201,10 +201,10 @@ public class ProductionFactoryManager  extends ItemFactoryManager {
 	public InteractionResponse createFactory(FactoryProperties properties, Anchor anchor) {
 		ProductionFactoryProperties productionProperties = (ProductionFactoryProperties)properties;
 		ItemList<NamedItemStack> inputs =  productionProperties.getInputs();
-		Offset creationPoint = productionProperties.getCreationPoint();
-		if(inputs.exactlyIn(((Chest)anchor.getBlock(creationPoint).getState()).getInventory()))
+		Inventory inventory = ((InventoryHolder)anchor.getLocationOfOffset(productionProperties.getInventoryOffset()).getBlock().getState()).getInventory();
+		if(inputs.exactlyIn(inventory))
 		{
-			inputs.removeFrom(((InventoryHolder)anchor.getBlock(creationPoint)).getInventory());
+			inputs.removeFrom(inventory);
 			ProductionFactory productionFactory = new ProductionFactory(anchor, (ProductionFactoryProperties) properties);
 			addFactory(productionFactory);
 			return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + productionFactory.getProductionFactoryProperties().getName());
