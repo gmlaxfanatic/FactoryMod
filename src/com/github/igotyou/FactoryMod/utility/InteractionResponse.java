@@ -1,17 +1,13 @@
 package com.github.igotyou.FactoryMod.utility;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-/**
- * InteractionResponse.java
- * Purpose: Object used for sending back interaction results with error/success messages
- *
- * @author MrTwiggy
- * @version 0.1 1/14/13
- */
+
 public class InteractionResponse 
 {
 	public static enum InteractionResult
@@ -25,15 +21,24 @@ public class InteractionResponse
 	
 	private final InteractionResult interactionResult; //The result of this interaction attempt
 	private final String interactionMessage; //The message to send to player(s) after interaction attempt
+	private final Location location;
 	
 	/**
 	 * Constructor
 	 */
 	public InteractionResponse(InteractionResult interactionResult,
-			String interactionMessage)
-	{
+		String interactionMessage) {
 		this.interactionResult = interactionResult;
 		this.interactionMessage = interactionMessage;
+		this.location=null;
+	}
+	
+	public InteractionResponse(InteractionResult interactionResult,
+		String interactionMessage,
+		Location location) {
+		this.interactionResult = interactionResult;
+		this.interactionMessage = interactionMessage;
+		this.location=location;
 	}
 	
 	/**
@@ -61,10 +66,35 @@ public class InteractionResponse
 		{
 			player.sendMessage(interactionResponse.getInteractionMessage());
 		}
+		InteractionResponse interactionResponse = interactionResponses.get(0);
+		interactionResponse.getMessageSound().playSound(interactionResponse.location!=null ? interactionResponse.location : player.getLocation(), player);
+		
 	}
-	
 	/**
-	 * Returns the appropriate color for interaction messages based on success/failure
+	 * Returns the appropriate sound for the interaction message based on its type
+	 */
+	public Sound getMessageSound() {
+		switch (interactionResult)
+		{
+		case SUCCESS:
+			List<String> successSoundNames = new ArrayList<String>();
+			successSoundNames.add("liquid.swim");
+			successSoundNames.add("mob.irongolem.hit");
+			successSoundNames.add("mob.zombie.metal");
+			successSoundNames.add("mob.blaze.hit");
+			return new Sound(successSoundNames);
+		case FAILURE:
+			List<String> failuireSoundNames = new ArrayList<String>();
+			failuireSoundNames.add("note.pling");
+			return new Sound(failuireSoundNames);
+		default:
+			List<String> defaultSoundNames = new ArrayList<String>();
+			defaultSoundNames.add("note.pling");
+			return new Sound(defaultSoundNames);
+		}
+	}
+	/**
+	 * Returns the appropriate color for interaction messages based on type
 	 */
 	private ChatColor getMessageColor()
 	{
