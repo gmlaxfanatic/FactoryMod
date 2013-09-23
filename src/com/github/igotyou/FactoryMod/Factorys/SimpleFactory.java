@@ -12,11 +12,18 @@ import com.github.igotyou.FactoryMod.properties.SimpleFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
+import com.untamedears.citadel.Citadel;
+import com.untamedears.citadel.access.AccessDelegate;
+import com.untamedears.citadel.entity.Faction;
+import com.untamedears.citadel.entity.FactionMember;
+import com.untamedears.citadel.entity.IReinforcement;
 import com.untamedears.citadel.entity.PlayerReinforcement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -120,7 +127,14 @@ public class SimpleFactory extends BaseFactory {
 	 * Gets the inventory of the powersource used for this factory
 	 */
 	private Inventory getPowerSourceInventory() {
-		return ((InventoryHolder) anchor.getLocationOfOffset(getProperties().getInventory()).getBlock().getState()).getInventory();
+		return ((InventoryHolder) getPowerSourceLocation().getBlock().getState()).getInventory();
+	}
+	
+	/*
+	 * gets the location of the power source of the factory
+	 */
+	private Location getPowerSourceLocation() {
+		return anchor.getLocationOfOffset(getProperties().getInventory());
 	}
 
 	/*
@@ -135,6 +149,7 @@ public class SimpleFactory extends BaseFactory {
 	 */
 	public void updateEffects() {
 		Map<Integer, Set<AreaEffect>> areaEffects = getProperties().getAreaEffects();
+		Set<Player> group = getGroup();
 		for (Integer radius : areaEffects.keySet()) {
 			Set<Player> players = new HashSet<Player>();
 			//Replicates Mojang implementation of Beacons, unsure of the requirement of -2 and +2
@@ -147,9 +162,11 @@ public class SimpleFactory extends BaseFactory {
 					for (Entity entity : anchor.location.getWorld().getChunkAt(x, z).getEntities()) {
 						if (entity instanceof Player) {
 							Player player = (Player) entity;
-							if (xMin < player.getLocation().getBlockX() && xMax > player.getLocation().getBlockX() && zMin < player.getLocation().getBlockZ() && zMax > player.getLocation().getBlockZ()) {
-								if ((!FactoryModPlugin.CITADEL_ENABLED || FactoryModPlugin.CITADEL_ENABLED && !isReinforced(anchor.location))
-									|| (((PlayerReinforcement) getReinforcement(anchor.location)).isAccessible(player))) {
+							if (xMin < player.getLocation().getBlockX()
+								&& xMax > player.getLocation().getBlockX()
+								&& zMin < player.getLocation().getBlockZ()
+								&& zMax > player.getLocation().getBlockZ()) {
+								if (group.contains(player)||group.size()==0) {
 									players.add(player);
 								}
 							}
@@ -158,40 +175,56 @@ public class SimpleFactory extends BaseFactory {
 				}
 			}
 			for (AreaEffect areaEffect : areaEffects.get(radius)) {
-				updateAreaEffect(areaEffect,players);
+				updateAreaEffect(areaEffect, players);
 			}
 		}
 	}
 	/*
+	 * Gets the set of allowed playersgroup which owns the factory
+	 */
+	public Set<Player> getGroup() {
+		Set<Player> players = new HashSet<Player>();
+		IReinforcement rein = AccessDelegate.getDelegate(getPowerSourceLocation().getBlock()).getReinforcement();
+		if (!(rein instanceof PlayerReinforcement)){
+			PlayerReinforcement prein = (PlayerReinforcement)rein;
+			Faction group = prein.getOwner();
+			Set<FactionMember> factionMembers = Citadel.getGroupManager().getMembersOfGroup(group.getName());
+			for(FactionMember factionMemeber : factionMembers) {
+				players.add(Bukkit.getServer().getPlayer(factionMemeber.getMemberName()));
+			}
+		}
+		return players;
+		
+	}
+	
+	/*
 	 * Generates the outputs produced by this factory
 	 */
-
 	protected void generateProducts() {
 	}
+	
 	/*
 	 * Updates the Effect depending on what class it is
 	 */
 
 	private void updateAreaEffect(AreaEffect areaEffect, Set<Player> players) {
-		if(areaEffect instanceof ReinforcementEffect) {
+		if (areaEffect instanceof ReinforcementEffect) {
 			ReinforcementEffect.apply(this, players);
-		}
-		else if(areaEffect instanceof AreaPotionEffect) {
+		} else if (areaEffect instanceof AreaPotionEffect) {
 			AreaPotionEffect.apply(this, players);
-		}
-		else if(areaEffect instanceof ChatEffect) {
+		} else if (areaEffect instanceof ChatEffect) {
 			ChatEffect.apply(this, players);
 		}
-		
+
 	}
-	
+
 	/*
 	 * Get data for the chat effect
 	 */
 	public List<String> getChatEffectData() {
 		return null;
 	}
-	
+
 	@Override
 	public void blockBreakResponse() {
 		powerOff();
