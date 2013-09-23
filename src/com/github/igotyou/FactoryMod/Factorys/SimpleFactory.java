@@ -3,8 +3,6 @@ package com.github.igotyou.FactoryMod.Factorys;
 import com.github.igotyou.FactoryMod.AreaEffect.AreaPotionEffect;
 import com.github.igotyou.FactoryMod.AreaEffect.ChatEffect;
 import com.github.igotyou.FactoryMod.AreaEffect.ReinforcementEffect;
-import static com.untamedears.citadel.Utility.isReinforced;
-import static com.untamedears.citadel.Utility.getReinforcement;
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.AreaEffect;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
@@ -18,6 +16,7 @@ import com.untamedears.citadel.entity.Faction;
 import com.untamedears.citadel.entity.FactionMember;
 import com.untamedears.citadel.entity.IReinforcement;
 import com.untamedears.citadel.entity.PlayerReinforcement;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +27,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 
 public class SimpleFactory extends BaseFactory {
 
@@ -42,8 +43,11 @@ public class SimpleFactory extends BaseFactory {
 		super(anchor, FactoryCategory.AREA, factoryProperties);
 		this.currentEnergyTime = currentEnergyTime;
 		this.currentProductionTime = currentProductionTime;
+		indicatePowerOn();
 	}
-
+	/*
+	 * Performs an update of the factory
+	 */
 	@Override
 	public void update() {
 		if (!isWhole()) {
@@ -78,7 +82,7 @@ public class SimpleFactory extends BaseFactory {
 	 * Attempts to consume fuel from the powerSource
 	 */
 	protected boolean consumeFuel() {
-		Inventory powerSourceInventory = getPowerSourceInventory();
+		Inventory powerSourceInventory = getInventory();
 		ItemList<NamedItemStack> fuel = getProperties().getFuel();
 		if (fuel.allIn(powerSourceInventory)) {
 			fuel.removeFrom(powerSourceInventory);
@@ -103,6 +107,7 @@ public class SimpleFactory extends BaseFactory {
 	 * Power off the SimpleFactory, completely deleting it
 	 */
 	protected void powerOff() {
+		indicatePowerOff();
 		for (AreaEffect areaEffect : getProperties().getAllAreaEffects()) {
 			areaEffect.disable(this);
 		}
@@ -126,14 +131,14 @@ public class SimpleFactory extends BaseFactory {
 	/*
 	 * Gets the inventory of the powersource used for this factory
 	 */
-	private Inventory getPowerSourceInventory() {
-		return ((InventoryHolder) getPowerSourceLocation().getBlock().getState()).getInventory();
+	private Inventory getInventory() {
+		return ((InventoryHolder) getInventoryLocation().getBlock().getState()).getInventory();
 	}
 	
 	/*
 	 * gets the location of the power source of the factory
 	 */
-	private Location getPowerSourceLocation() {
+	private Location getInventoryLocation() {
 		return anchor.getLocationOfOffset(getProperties().getInventory());
 	}
 
@@ -184,13 +189,15 @@ public class SimpleFactory extends BaseFactory {
 	 */
 	public Set<Player> getGroup() {
 		Set<Player> players = new HashSet<Player>();
-		IReinforcement rein = AccessDelegate.getDelegate(getPowerSourceLocation().getBlock()).getReinforcement();
-		if (!(rein instanceof PlayerReinforcement)){
-			PlayerReinforcement prein = (PlayerReinforcement)rein;
-			Faction group = prein.getOwner();
-			Set<FactionMember> factionMembers = Citadel.getGroupManager().getMembersOfGroup(group.getName());
-			for(FactionMember factionMemeber : factionMembers) {
-				players.add(Bukkit.getServer().getPlayer(factionMemeber.getMemberName()));
+		if(FactoryModPlugin.CITADEL_ENABLED) {
+			IReinforcement rein = AccessDelegate.getDelegate(getInventoryLocation().getBlock()).getReinforcement();
+			if (!(rein instanceof PlayerReinforcement)){
+				PlayerReinforcement prein = (PlayerReinforcement)rein;
+				Faction group = prein.getOwner();
+				Set<FactionMember> factionMembers = Citadel.getGroupManager().getMembersOfGroup(group.getName());
+				for(FactionMember factionMemeber : factionMembers) {
+					players.add(Bukkit.getServer().getPlayer(factionMemeber.getMemberName()));
+				}
 			}
 		}
 		return players;
@@ -201,6 +208,7 @@ public class SimpleFactory extends BaseFactory {
 	 * Generates the outputs produced by this factory
 	 */
 	protected void generateProducts() {
+		getProperties().getOutputs().putIn(getInventory());
 	}
 	
 	/*
@@ -222,7 +230,12 @@ public class SimpleFactory extends BaseFactory {
 	 * Get data for the chat effect
 	 */
 	public List<String> getChatEffectData() {
-		return null;
+		for(ItemStack itemStack:getInventory().getContents()) {
+			if(itemStack.hasItemMeta()&&itemStack.getItemMeta() instanceof BookMeta) {
+				return ((BookMeta) itemStack.getItemMeta()).getPages();
+			}
+		}
+		return Arrays.asList("No book to broadcast!");
 	}
 
 	@Override

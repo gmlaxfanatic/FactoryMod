@@ -2,9 +2,6 @@ package com.github.igotyou.FactoryMod.utility;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
-import static com.untamedears.citadel.Utility..isReinforced;
-import static com.untamedears.citadel.Utility.isReinforced;
-import static com.untamedears.citadel.Utility.getReinforcement;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashMap;
@@ -170,27 +167,5 @@ public class Structure {
 	
 	public int[] getDimensions() {
 		return new int[]{blocks.length,blocks[0].length,blocks[0][0].length};
-	}
-	
-	/*
-	 * Gets the counts for the number of reinforced blocks for
-	 * each reinforcement group which is a part of the structure
-	 */
-	public Map<String,Integer> getCitadelGroups(Anchor anchor) {
-		Map<String,Integer> citadelGroups = new HashMap();
-		/*for(int x = 0; x < blocks.length; x++) {
-			for(int y = 0; y<blocks[x].length; y++) {
-				for(int z = 0; z < blocks[x][y].length; z++)
-				{
-					//Check if this is not a index contianing air which should be ignored
-					if(!(blocks[x][y][z]==0 && ignoreAir)) {
-						if(FactoryModPlugin.CITADEL_ENABLED && !isReinforced(anchor.location)) {
-							if(citadelGroups.containsKey(getReinforcement(anchor.location.clone().add(new Offset(x,y,z).orient(anchor.orientation).toVector())).))
-						}
-					}
-				}
-			}
-		}*/
-		return citadelGroups;
 	}
 }
