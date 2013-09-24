@@ -35,12 +35,12 @@ public class SimpleFactory extends BaseFactory {
 	private int currentEnergyTime;
 	private int currentProductionTime;
 
-	public SimpleFactory(Anchor anchor, SimpleFactoryProperties simpleFactoryProperties) {
-		this(anchor, simpleFactoryProperties, simpleFactoryProperties.getEnergyTime(), 0);
+	public SimpleFactory(Anchor anchor, String factoryType) {
+		this(anchor, factoryType, ((SimpleFactoryProperties) FactoryModPlugin.getManager().getManager(FactoryCategory.AREA).getProperties(factoryType)).getEnergyTime(), 0);
 	}
 
-	public SimpleFactory(Anchor anchor, FactoryProperties factoryProperties, int currentEnergyTime, int currenProductionTime) {
-		super(anchor, FactoryCategory.AREA, factoryProperties);
+	public SimpleFactory(Anchor anchor, String factoryType, int currentEnergyTime, int currentProductionTime) {
+		super(anchor, FactoryCategory.AREA, factoryType);
 		this.currentEnergyTime = currentEnergyTime;
 		this.currentProductionTime = currentProductionTime;
 		indicatePowerOn();
@@ -83,7 +83,7 @@ public class SimpleFactory extends BaseFactory {
 	 */
 	protected boolean consumeFuel() {
 		Inventory powerSourceInventory = getInventory();
-		ItemList<NamedItemStack> fuel = getProperties().getFuel();
+		ItemList<NamedItemStack> fuel = getFactoryProperties().getFuel();
 		if (fuel.allIn(powerSourceInventory)) {
 			fuel.removeFrom(powerSourceInventory);
 			return true;
@@ -108,7 +108,7 @@ public class SimpleFactory extends BaseFactory {
 	 */
 	protected void powerOff() {
 		indicatePowerOff();
-		for (AreaEffect areaEffect : getProperties().getAllAreaEffects()) {
+		for (AreaEffect areaEffect : getFactoryProperties().getAllAreaEffects()) {
 			areaEffect.disable(this);
 		}
 		FactoryModPlugin.getManager().getManager(factoryCategory).removeFactory(this);
@@ -118,14 +118,14 @@ public class SimpleFactory extends BaseFactory {
 	 * Returns the time one unit of fuel lasts in ticks
 	 */
 	public int getEnergyTime() {
-		return getProperties().getEnergyTime();
+		return getFactoryProperties().getEnergyTime();
 	}
 
 	/*
 	 * Returns the time between proudction in ticks
 	 */
 	public int getProductionTime() {
-		return getProperties().getProductionTime();
+		return getFactoryProperties().getProductionTime();
 	}
 
 	/*
@@ -139,32 +139,33 @@ public class SimpleFactory extends BaseFactory {
 	 * gets the location of the power source of the factory
 	 */
 	private Location getInventoryLocation() {
-		return anchor.getLocationOfOffset(getProperties().getInventory());
+		return anchor.getLocationOfOffset(getFactoryProperties().getInventory());
 	}
 
 	/*
 	 * Gets a correctly caste properties file
 	 */
-	protected SimpleFactoryProperties getProperties() {
-		return ((SimpleFactoryProperties) factoryProperties);
+	@Override
+	protected SimpleFactoryProperties getFactoryProperties() {
+		return (SimpleFactoryProperties) super.getFactoryProperties();
 	}
 
 	/*
 	 * Updates the effects and players effected
 	 */
 	public void updateEffects() {
-		Map<Integer, Set<AreaEffect>> areaEffects = getProperties().getAreaEffects();
+		Map<Integer, Set<AreaEffect>> areaEffects = getFactoryProperties().getAreaEffects();
 		Set<Player> group = getGroup();
 		for (Integer radius : areaEffects.keySet()) {
 			Set<Player> players = new HashSet<Player>();
 			//Replicates Mojang implementation of Beacons, unsure of the requirement of -2 and +2
-			int xMin = anchor.location.getBlockX() - 2 - radius;
-			int xMax = anchor.location.getBlockX() + 2 + radius;
-			int zMin = anchor.location.getBlockZ() - 2 - radius;
-			int zMax = anchor.location.getBlockZ() + 2 + radius;
+			int xMin = anchor.getLocation().getBlockX() - 2 - radius;
+			int xMax = anchor.getLocation().getBlockX() + 2 + radius;
+			int zMin = anchor.getLocation().getBlockZ() - 2 - radius;
+			int zMax = anchor.getLocation().getBlockZ() + 2 + radius;
 			for (int x = xMin; x <= xMax; x += 16) {
 				for (int z = zMin; z <= zMax; z += 16) {
-					for (Entity entity : anchor.location.getWorld().getChunkAt(x, z).getEntities()) {
+					for (Entity entity : anchor.getLocation().getWorld().getChunkAt(x, z).getEntities()) {
 						if (entity instanceof Player) {
 							Player player = (Player) entity;
 							if (xMin < player.getLocation().getBlockX()
@@ -208,7 +209,7 @@ public class SimpleFactory extends BaseFactory {
 	 * Generates the outputs produced by this factory
 	 */
 	protected void generateProducts() {
-		getProperties().getOutputs().putIn(getInventory());
+		getFactoryProperties().getOutputs().putIn(getInventory());
 	}
 	
 	/*

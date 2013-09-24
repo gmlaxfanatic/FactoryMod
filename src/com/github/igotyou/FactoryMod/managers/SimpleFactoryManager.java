@@ -32,7 +32,6 @@ import org.bukkit.inventory.InventoryHolder;
  */
 public class SimpleFactoryManager extends BaseFactoryManager {
 
-	private String savesFileName;
 	protected int areaEffectUpdatePeriod;
 	protected int territoryUpdatePeriod;
 
@@ -70,47 +69,6 @@ public class SimpleFactoryManager extends BaseFactoryManager {
 	}
 	
 	/*
-	 * Saves the specifics of Production factories
-	 */
-	@Override
-	protected  void saveSpecifics(ObjectOutputStream oos, Factory baseFactory) {
-		SimpleFactory simpleFactory = (SimpleFactory) baseFactory;
-		try {	
-			oos.writeUTF(simpleFactory.getFactoryType());
-			oos.writeInt(simpleFactory.getProductionTime());
-			oos.writeInt(simpleFactory.getEnergyTime());
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	}
-	
-	/*
-	 * Loads the specific attributes of a production factory
-	 */
-	@Override
-	protected SimpleFactory loadSpecifics(ObjectInputStream ois, Location location, Orientation orientation) throws IOException {
-		try {
-			String factoryType = ois.readUTF();
-			int productionTimer = ois.readInt();
-			int energyTimer = ois.readInt();
-
-			if (allFactoryProperties.containsKey(factoryType)) {
-				return new SimpleFactory(
-					new Anchor(orientation, location),
-					(SimpleFactoryProperties) allFactoryProperties.get(factoryType),
-					energyTimer,
-					productionTimer);
-			}
-		}
-		catch(IOException e) {
-			throw e;
-		}
-		return null;
-	}
-	
-	/*
 	 * Unsupported Legacy load
 	 */
 	@Override
@@ -139,18 +97,13 @@ public class SimpleFactoryManager extends BaseFactoryManager {
 		Inventory inventory = ((InventoryHolder) anchor.getLocationOfOffset(creationPoint).getBlock().getState()).getInventory();
 		if (fuel.allIn(inventory)) {
 			fuel.removeFrom(inventory);
-			SimpleFactory areaFactory = new SimpleFactory(anchor, (SimpleFactoryProperties) properties);
+			SimpleFactory areaFactory = new SimpleFactory(anchor, properties.getName());
 			addFactory(areaFactory);
 			return new InteractionResponse(InteractionResponse.InteractionResult.SUCCESS, "Successfully created " + areaFactoryProperties.getName());
 		}
 		FactoryModPlugin.debugMessage("Creation materials not present");
 		return new InteractionResponse(InteractionResponse.InteractionResult.FAILURE, "Incorrect Materials! They must match exactly.");
 	}
-
-	public String getSavesFileName() {
-		return savesFileName;
-	}
-
 	/*
 	 * Returns simple factory properties given a factoryID
 	 */
