@@ -141,6 +141,7 @@ public class ProductionFactoryManager extends ItemFactoryManager {
 	/*
 	 * Returns of the ProductionProperites for a particular factory
 	 */
+	@Override
 	public ProductionFactoryProperties getProperties(String title) {
 		return (ProductionFactoryProperties) super.getProperties(title);
 	}
