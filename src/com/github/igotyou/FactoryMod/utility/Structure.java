@@ -50,7 +50,7 @@ public class Structure {
 	public boolean exists(Anchor anchor)
 	{
 		FactoryModPlugin.debugMessage("Blocks size. x:"+blocks.length+", y:"+blocks[0].length+", z:"+blocks[0][0].length);
-		FactoryModPlugin.debugMessage("Testing for exisistance at anchor: "+anchor.location.getBlockX()+", "+anchor.location.getY()+", "+ anchor.location.getZ());
+		FactoryModPlugin.debugMessage("Testing for exisistance at anchor: "+anchor.getLocation().getBlockX()+", "+anchor.getLocation().getY()+", "+ anchor.getLocation().getZ());
 		for(int x = 0; x < blocks.length; x++) {
 			FactoryModPlugin.debugMessage("Testing X for the "+x+" time.");
 			for(int y = 0; y<blocks[x].length; y++) {
@@ -59,8 +59,8 @@ public class Structure {
 					FactoryModPlugin.debugMessage("Testing Block: "+blocks[x][y][z]);
 					//Check if this is not a index contianing air which should be ignored
 					if(!(blocks[x][y][z]==0 && ignoreAir)) {
-						FactoryModPlugin.debugMessage("Predicted Block: "+Material.getMaterial(blocks[x][y][z]).toString()+". Actual Block: "+anchor.location.clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).getBlock().getType().toString()+". Location: "+anchor.location.clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).toString());
-						if(!similiarBlocks(blocks[x][y][z], (byte) anchor.location.clone().add(new Offset(x,y,z).orient(anchor.orientation).toVector()).getBlock().getTypeId())) {
+						FactoryModPlugin.debugMessage("Predicted Block: "+Material.getMaterial(blocks[x][y][z]).toString()+". Actual Block: "+anchor.getLocation().clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).getBlock().getType().toString()+". Location: "+anchor.getLocation().clone().add(x*anchor.getXModifier(),y,z*anchor.getZModifier()).toString());
+						if(!similiarBlocks(blocks[x][y][z], (byte) anchor.getLocation().clone().add(new Offset(x,y,z).orient(anchor.orientation).toVector()).getBlock().getTypeId())) {
 							return false;
 						}
 					}
@@ -81,7 +81,7 @@ public class Structure {
 		return block == 61 && otherBlock == 62 || block == 62 && otherBlock == 61 ||block==otherBlock;
 	}
 	/*
-	 * Checks if a given location is contained within structure
+	 * TODO: Checks if a given location is contained within structure
 	 */
 	public boolean locationContainedInStructure(Anchor anchor, Location location) {
 		return true;

@@ -51,7 +51,7 @@ public class Offset {
 		for(Orientation orientation:Orientation.values()) {
 			Offset orientatedOffset = this.orient(orientation);
 			anchors.add(new Anchor(orientation,location.clone().subtract(orientatedOffset.toVector())));
-			FactoryModPlugin.debugMessage("Orientation "+orientation.name()+". "+new Anchor(orientation,location.clone().subtract(orientatedOffset.toVector())).location.toString());
+			FactoryModPlugin.debugMessage("Orientation "+orientation.name()+". "+new Anchor(orientation,location.clone().subtract(orientatedOffset.toVector())).getLocation().toString());
 		}
 		return anchors;
 	}

@@ -4,6 +4,8 @@
  */
 package com.github.igotyou.FactoryMod.utility;
 
+import java.io.Serializable;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
@@ -11,7 +13,7 @@ import org.bukkit.block.Block;
  * Represents a location with a orientation from which offsets
  * can be calculated to achieve absolute positions
  */
-public class Anchor {
+public class Anchor implements Serializable{
 	//Describes the oritentation of the structure
 	public enum Orientation
 	{
@@ -33,12 +35,30 @@ public class Anchor {
 	}
 	
 	public final Orientation orientation;
-	public final Location location;
+	public final int x;
+	public final int y;
+	public final int z;
+	public final String worldName;
+	private transient Location location;
+	
 	
 	public Anchor(Orientation orientation, Location location) {
 
 		this.orientation=orientation;
-		this.location=location;
+		x=location.getBlockX();
+		y=location.getBlockY();
+		z=location.getBlockZ();
+		worldName=location.getWorld().getName();
+	}
+	
+	/*
+	 * gets the location of the objest
+	 */
+	public Location getLocation() {
+		if(location==null) {
+			location = new Location(Bukkit.getServer().getWorld(worldName),x,y,z);
+		}
+		return location;
 	}
 	
 	/*

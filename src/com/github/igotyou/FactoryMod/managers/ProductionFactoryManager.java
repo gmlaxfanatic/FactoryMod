@@ -45,50 +45,6 @@ public class ProductionFactoryManager extends ItemFactoryManager {
 	}
 
 	/*
-	 * Saves teh specifics of Production factories
-	 */
-	@Override
-	protected void saveSpecifics(ObjectOutputStream oos, Factory baseFactory) {
-		ProductionFactory productionFactory = (ProductionFactory) baseFactory;
-		try {
-			oos.writeUTF(productionFactory.getFactoryType());
-			oos.writeBoolean(productionFactory.getActive());
-			oos.writeInt(productionFactory.getProductionTimer());
-			oos.writeInt(productionFactory.getEnergyTimer());
-			oos.writeDouble(productionFactory.getCurrentRepair());
-			oos.writeLong(productionFactory.getTimeDisrepair());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	/*
-	 * Loads the specific attributes of a production factory
-	 */
-	@Override
-	protected Factory loadSpecifics(ObjectInputStream ois, Location location, Orientation orientation) throws IOException {
-		try {
-			boolean active = ois.readBoolean();
-			String factoryType = ois.readUTF();
-			int productionTimer = ois.readInt();
-			int energyTimer = ois.readInt();
-			int currentRecipeNumber = ois.readInt();
-			double currentRepair = ois.readDouble();
-			long timeDisrepair = ois.readLong();
-
-			if (allFactoryProperties.containsKey(factoryType)) {
-				return new ProductionFactory(new Anchor(orientation, location),
-					(ProductionFactoryProperties) allFactoryProperties.get(factoryType), active, productionTimer,
-					energyTimer, currentRecipeNumber, currentRepair, timeDisrepair);
-			}
-		} catch (IOException e) {
-			throw e;
-		}
-		return null;
-	}
-
-	/*
 	 * Legacy load
 	 */
 	@Override
@@ -143,7 +99,7 @@ public class ProductionFactoryManager extends ItemFactoryManager {
 						}
 					}
 
-					ProductionFactory production = new ProductionFactory(new Anchor(orientation, inventoryLocation), (ProductionFactoryProperties) allFactoryProperties.get(subFactoryType), active, productionTimer, energyTimer, currentRecipeNumber, currentRepair, timeDisrepair);
+					ProductionFactory production = new ProductionFactory(new Anchor(orientation, inventoryLocation), active, subFactoryType, productionTimer, energyTimer, currentRecipeNumber, currentRepair, timeDisrepair);
 					addFactory(production);
 				}
 			}
@@ -176,9 +132,9 @@ public class ProductionFactoryManager extends ItemFactoryManager {
 		{
 			inputs.removeFrom(inventory);
 
-			ProductionFactory productionFactory = new ProductionFactory(anchor, (ProductionFactoryProperties) properties);
+			ProductionFactory productionFactory = new ProductionFactory(anchor, properties.getName());
 			addFactory(productionFactory);
-			return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + productionFactory.getProductionFactoryProperties().getName());
+			return new InteractionResponse(InteractionResult.SUCCESS, "Successfully created " + properties.getName());
 		}
 		FactoryModPlugin.debugMessage("Creation materials not present for "+productionProperties.getName());
 		FactoryModPlugin.debugMessage("Creation materials: "+productionProperties.getInputs().toString());
@@ -196,7 +152,7 @@ public class ProductionFactoryManager extends ItemFactoryManager {
 	 * Returns of the ProductionProperites for a particular factory
 	 */
 	public ProductionFactoryProperties getProperties(String title) {
-		return (ProductionFactoryProperties) allFactoryProperties.get(title);
+		return (ProductionFactoryProperties) super.getProperties(title);
 	}
 
 	public ProductionRecipe getProductionRecipe(String identifier) {

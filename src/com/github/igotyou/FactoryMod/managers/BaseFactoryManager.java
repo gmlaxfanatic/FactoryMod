@@ -39,6 +39,7 @@ import org.bukkit.configuration.ConfigurationSection;
 public abstract class BaseFactoryManager implements FactoryManager {
 
 	protected FactoryModPlugin plugin;
+	protected String savesFilename;
 	protected List<Factory> factories;
 	protected Map<String,FactoryProperties> allFactoryProperties;
 	protected int updatePeriod;
@@ -53,6 +54,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	public BaseFactoryManager(FactoryModPlugin plugin, ConfigurationSection configuration) {
 		this.plugin = plugin;
 		this.updatePeriod = configuration.getInt("update_period", 20);
+		this.savesFilename = configuration.getString("save_filename","defaultSaves");
 		factories = new ArrayList<Factory>();
 		allFactoryProperties = new HashMap<String, FactoryProperties>();
 		materials = new HashSet<Material>();
@@ -203,6 +205,10 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		Factory Factory = factoryAtLocation(factoryLocation);
 		return Factory != null ? Factory.isWhole() : false;
 	}
+	
+	public FactoryProperties getProperties(String title) {
+		return allFactoryProperties.get(title);
+	}
 
 	@Override
 	public void update() {
@@ -222,7 +228,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	 * Saves the general properties of the factory
 	 */
 	public void save() {
-		String filename = getSavesFileName() + ".txt";
+		String filename = savesFilename + ".txt";
 		try {
 			save(new File(plugin.getDataFolder(), filename));
 		} catch (IOException exception) {
@@ -243,16 +249,8 @@ public abstract class BaseFactoryManager implements FactoryManager {
 			int version = 2;
 			oos.writeInt(2);
 			oos.writeInt(factories.size());
-			for (Factory baseFactory : factories) {
-				oos.writeUTF(baseFactory.getAnchor().location.getWorld().getName());
-
-				oos.writeInt(baseFactory.getAnchor().location.getBlockX());
-				oos.writeInt(baseFactory.getAnchor().location.getBlockY());
-				oos.writeInt(baseFactory.getAnchor().location.getBlockZ());
-
-				oos.writeInt(baseFactory.getAnchor().orientation.id);
-
-				saveSpecifics(oos, baseFactory);
+			for (Factory factory : factories) {
+				oos.writeObject(factory);
 			}
 			oos.flush();
 			fileOutputStream.close();
@@ -275,19 +273,13 @@ public abstract class BaseFactoryManager implements FactoryManager {
 
 
 	}
-
-	/*
-	 * Hook to save specific variables of the subfactories
-	 */
-	protected void saveSpecifics(ObjectOutputStream oos, Factory baseFactory) {
-	}
 	
 	/*
 	 * Loads the factorys
 	 */
 	
 	public void load() {
-		String filename = getSavesFileName() + ".txt";
+		String filename = savesFilename + ".txt";
 		load(new File(plugin.getDataFolder(), filename));
 	}
 	public void load(File file){
@@ -304,29 +296,24 @@ public abstract class BaseFactoryManager implements FactoryManager {
 				int i = 0;
 				for (i = 0; i < count; i++)
 				{
-					String worldName = ois.readUTF();
-					World world = plugin.getServer().getWorld(worldName);
-					Location location = new Location(world, ois.readInt(), ois.readInt(), ois.readInt());
-					Orientation orientation = Anchor.Orientation.getOrientation(ois.readInt());
-					
-					addFactory(loadSpecifics(ois, location, orientation));
+					addFactory((Factory)ois.readObject());
 				}
 
 			}
 			fileInputStream.close();
-			
 		}
 		catch (FileNotFoundException exception) {
 			FactoryModPlugin.sendConsoleMessage(file.getName() + " does not exist! Creating file!");
 		} catch (IOException exception) {
 			throw new RuntimeException("Failed to load " + file.getPath(), exception);
 		}
+		catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/*
-	 * Hook for loading specifics of subclasses
-	 */
-	protected abstract Factory loadSpecifics(ObjectInputStream ois, Location location, Orientation orientation) throws IOException;
-		
+	 * Hook for legacy file suppoert
+	 */	
 	protected abstract void load1(File file);
 }

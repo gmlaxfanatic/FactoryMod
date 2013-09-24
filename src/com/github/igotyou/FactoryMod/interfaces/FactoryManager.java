@@ -59,11 +59,6 @@ public interface FactoryManager
 	public void removeFactory(Factory factory);
 
 /**
-* Returns the saves file name for this manager
-*/
-	public String getSavesFileName();
-	
-/**
  * Returns the properties of a particular factory
  */
 	public FactoryProperties getProperties(String title);

@@ -38,75 +38,6 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 	}
 	
 	/*
-	 * Saves the specifics of printing presses
-	 */
-	@Override
-	protected void saveSpecifics(ObjectOutputStream oos, Factory baseFactory) {
-		PrintingFactory printingFactory = (PrintingFactory) baseFactory;
-		try {
-			oos.writeBoolean(printingFactory.getActive());
-			oos.writeInt(printingFactory.getMode().getId());
-			oos.writeInt(printingFactory.getProductionTimer());
-			oos.writeInt(printingFactory.getEnergyTimer());
-			oos.writeDouble(printingFactory.getCurrentRepair());
-			oos.writeLong(printingFactory.getTimeDisrepair());
-
-			oos.writeInt(printingFactory.getContainedPaper());
-			oos.writeInt(printingFactory.getContainedBindings());
-			oos.writeInt(printingFactory.getContainedSecurityMaterials());
-			oos.writeInt(printingFactory.getLockedResultCode());
-
-			int[] processQueue = printingFactory.getProcessQueue();
-			oos.writeInt(processQueue.length);
-			for (int entry : processQueue) {
-				oos.writeInt(entry);
-			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	}
-	
-	/*
-	 * Loads the specific attributes of a printing press
-	 */
-	@Override
-	protected Factory loadSpecifics(ObjectInputStream ois, Location location, Orientation orientation) throws IOException {
-		try {
-			boolean active = ois.readBoolean();
-			PrintingFactory.OperationMode mode = PrintingFactory.OperationMode.byId(ois.readInt());
-			int productionTimer = ois.readInt();
-			int energyTimer = ois.readInt();
-			double currentRepair = ois.readDouble();
-			long timeDisrepair  = ois.readLong();
-			int containedPaper = ois.readInt();
-			int containedBindings = ois.readInt();
-			int containedSecurityMaterials = ois.readInt();
-			int lockedResultCode = ois.readInt();
-
-			int queueLength = ois.readInt();
-			int[] processQueue = new int[queueLength];
-			int j;
-			for (j = 0; j < queueLength; j++) {
-				processQueue[j] = ois.readInt();
-			}
-
-			PrintingFactory printingFactory = new PrintingFactory(new Anchor(orientation,location),
-					active, productionTimer,
-					energyTimer, currentRepair, timeDisrepair,
-					mode,
-					printingFactoryProperties,
-					containedPaper, containedBindings, containedSecurityMaterials,
-					processQueue, lockedResultCode);
-		}
-		catch(IOException e) {
-			throw e;
-		}
-		return null;
-	}
-	
-	/*
 	 * Loads version 1 of the file system
 	 */
 	@Override
@@ -169,7 +100,6 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 						active, productionTimer,
 						energyTimer, currentRepair, timeDisrepair,
 						mode,
-						printingFactoryProperties,
 						containedPaper, containedBindings, containedSecurityMaterials,
 						processQueue, lockedResultCode);
 				addFactory(production);
@@ -187,7 +117,7 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 		Inventory inventory = ((InventoryHolder)anchor.getLocationOfOffset(printingProperties.getInventoryOffset()).getBlock().getState()).getInventory();
 		if (printingProperties.getConstructionMaterials().allIn(inventory))
 		{
-			PrintingFactory production = new PrintingFactory(anchor, false, printingProperties);
+			PrintingFactory production = new PrintingFactory(anchor, false);
 			if (printingProperties.getConstructionMaterials().removeFrom(production.getInventory()))
 			{
 				addFactory(production);
@@ -202,15 +132,11 @@ public class PrintingFactoryManager  extends ItemFactoryManager {
 		return (PrintingFactory) super.factoryAtLocation(factoryLocation);
 	}
 
-	public String getSavesFileName() 
-	{
-		return FactoryModPlugin.PRINTING_FACTORY_SAVE_FILE;
-	}
 	/*
 	 * Returns of PrintingFactoryProperites
 	 */
-	public PrintingFactoryProperties getProperties(String title)
+	/*public PrintingFactoryProperties getProperties(String title)
 	{
 		return printingFactoryProperties;
-	}
+	}*/
 }

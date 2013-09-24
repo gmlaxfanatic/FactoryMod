@@ -22,7 +22,6 @@ import com.github.igotyou.FactoryMod.utility.PrettyLore;
 
 public class PrintingFactory extends ItemFactory {
 	
-	private PrintingFactoryProperties printingFactoryProperties;
 	private OperationMode mode;
 	public OperationMode getMode() {
 		return mode;
@@ -35,10 +34,9 @@ public class PrintingFactory extends ItemFactory {
 	private int processQueueOffset;
 	private int lockedResultCode;
 
-	public PrintingFactory(Anchor anchor, boolean active, PrintingFactoryProperties printingFactoryProperties) {
-		super(anchor, active, FactoryCategory.PRINTING, printingFactoryProperties);
+	public PrintingFactory(Anchor anchor, boolean active) {
+		super(anchor, active, FactoryCategory.PRINTING, "");
 		this.mode = OperationMode.REPAIR;
-		this.printingFactoryProperties = printingFactoryProperties;
 		this.containedPaper = 0;
 		this.containedBindings = 0;
 		this.containedSecurityMaterials = 0;
@@ -51,15 +49,13 @@ public class PrintingFactory extends ItemFactory {
 			boolean active,
 			int currentProductionTimer, int currentEnergyTimer,
 			double currentMaintenance, long timeDisrepair, OperationMode mode,
-			PrintingFactoryProperties printingFactoryProperties,
 			int containedPaper, int containedBindings, int containedSecurityMaterials,
 			int[] processQueue, int lockedResultCode) {
 		super(anchor, active,
-				FactoryCategory.PRINTING, printingFactoryProperties, currentProductionTimer,
+				FactoryCategory.PRINTING, "", currentProductionTimer,
 				currentEnergyTimer, currentMaintenance, timeDisrepair);
 		this.mode = mode;
 		this.active = active;
-		this.printingFactoryProperties = printingFactoryProperties;
 		this.containedPaper = containedPaper;
 		this.containedBindings = containedBindings;
 		this.containedSecurityMaterials = containedSecurityMaterials;
@@ -74,10 +70,14 @@ public class PrintingFactory extends ItemFactory {
 	public int getLockedResultCode() {
 		return lockedResultCode;
 	}
+	@Override
+	protected PrintingFactoryProperties getFactoryProperties() {
+		return (PrintingFactoryProperties) super.getFactoryProperties();
+	}	
 
 	@Override
 	public ItemList<NamedItemStack> getFuel() {
-		return printingFactoryProperties.getFuel();
+		return getFactoryProperties().getFuel();
 	}
 	
 	public int getContainedPaper() {
@@ -94,7 +94,7 @@ public class PrintingFactory extends ItemFactory {
 
 	@Override
 	public double getEnergyTime() {
-		return printingFactoryProperties.getEnergyTime();
+		return getFactoryProperties().getEnergyTime();
 	}
 
 	@Override
@@ -106,9 +106,9 @@ public class PrintingFactory extends ItemFactory {
 				if (plates != null) {
 					pageCount = Math.max(1, ((BookMeta) plates.getItemMeta()).getPageCount());
 				}
-				return printingFactoryProperties.getSetPlateTime() * pageCount;
+				return getFactoryProperties().getSetPlateTime() * pageCount;
 			case REPAIR:
-				return printingFactoryProperties.getRepairTime();
+				return getFactoryProperties().getRepairTime();
 			default:
 				// Continuous recipes -> 1 year limit at 1 update per second
 				return 3600 * 24 * 365;
@@ -123,7 +123,7 @@ public class PrintingFactory extends ItemFactory {
 			NamedItemStack plates = getPlateResult();
 			if (plates != null) {
 				int pageCount = ((BookMeta) plates.getItemMeta()).getPageCount();
-				inputs.addAll(printingFactoryProperties.getPlateMaterials().getMultiple(pageCount));
+				inputs.addAll(getFactoryProperties().getPlateMaterials().getMultiple(pageCount));
 			}
 			break;
 		}
@@ -149,7 +149,7 @@ public class PrintingFactory extends ItemFactory {
 		ItemList<NamedItemStack> inputs = new ItemList<NamedItemStack>();
 		switch(mode) {
 		case REPAIR:
-			inputs.addAll(printingFactoryProperties.getRepairMaterials());
+			inputs.addAll(getFactoryProperties().getRepairMaterials());
 			break;
 		}
 		return inputs;
@@ -157,7 +157,7 @@ public class PrintingFactory extends ItemFactory {
 
 	@Override
 	public int getMaxRepair() {
-		return printingFactoryProperties.getMaxRepair();
+		return getFactoryProperties().getMaxRepair();
 	}
 	
 	@Override
@@ -166,7 +166,7 @@ public class PrintingFactory extends ItemFactory {
 		this.containedPaper = 0;
 		this.containedBindings = 0;
 		this.containedSecurityMaterials = 0;
-		int outputDelay = printingFactoryProperties.getPageLead();
+		int outputDelay = getFactoryProperties().getPageLead();
 		this.processQueue = new int[outputDelay];
 		this.processQueueOffset = 0;
 		
@@ -221,27 +221,27 @@ public class PrintingFactory extends ItemFactory {
 		}
 		
 		// Load materials
-		ItemList<NamedItemStack> pages = printingFactoryProperties.getPageMaterials();
+		ItemList<NamedItemStack> pages = getFactoryProperties().getPageMaterials();
 		boolean hasPages = pages.allIn(getInventory());
 		boolean inputStall = false;
 		if (hasPages) {
 			// Check bindings
-			int expectedBindings = (int) Math.floor((double) (containedPaper + printingFactoryProperties.getPagesPerLot()) / (double) getPrintResult().pageCount());
+			int expectedBindings = (int) Math.floor((double) (containedPaper + getFactoryProperties().getPagesPerLot()) / (double) getPrintResult().pageCount());
 			boolean hasBindings = true;
 			ItemList<NamedItemStack> allBindings = new ItemList<NamedItemStack>();
 			if (expectedBindings > containedBindings) {
 				int neededBindings = expectedBindings - containedBindings;
-				allBindings = printingFactoryProperties.getBindingMaterials().getMultiple(neededBindings);
+				allBindings = getFactoryProperties().getBindingMaterials().getMultiple(neededBindings);
 				hasBindings = allBindings.allIn(getInventory());
 			}
 			
 			if (hasBindings) {
 				pages.removeFrom(getInventory());
-				containedPaper += printingFactoryProperties.getPagesPerLot();
+				containedPaper += getFactoryProperties().getPagesPerLot();
 				
 				while (containedBindings < expectedBindings) {
-					if (printingFactoryProperties.getBindingMaterials().allIn(getInventory())) {
-						printingFactoryProperties.getBindingMaterials().removeFrom(getInventory());
+					if (getFactoryProperties().getBindingMaterials().allIn(getInventory())) {
+						getFactoryProperties().getBindingMaterials().removeFrom(getInventory());
 						containedBindings += 1;
 					}
 				}
@@ -297,11 +297,11 @@ public class PrintingFactory extends ItemFactory {
 		}
 		
 		// Load materials
-		ItemList<NamedItemStack> pages = printingFactoryProperties.getPamphletMaterials();
+		ItemList<NamedItemStack> pages = getFactoryProperties().getPamphletMaterials();
 		boolean hasPages = pages.allIn(getInventory());
 		if (hasPages) {
 			pages.removeFrom(getInventory());
-			processQueue[processQueueOffset] = printingFactoryProperties.getPamphletsPerLot();
+			processQueue[processQueueOffset] = getFactoryProperties().getPamphletsPerLot();
 		} else {
 			processQueue[processQueueOffset] = 0;
 			stopIfEmpty();
@@ -326,30 +326,30 @@ public class PrintingFactory extends ItemFactory {
 		}
 		
 		// Load materials
-		ItemList<NamedItemStack> pages = printingFactoryProperties.getPamphletMaterials();
+		ItemList<NamedItemStack> pages = getFactoryProperties().getPamphletMaterials();
 		boolean hasPages = pages.allIn(getInventory());
 		boolean inputStall = false;
 		if (hasPages) {
 			// Check security materials
-			int expectedExtras = (int) Math.ceil((double) containedPaper + printingFactoryProperties.getPamphletsPerLot());
+			int expectedExtras = (int) Math.ceil((double) containedPaper + getFactoryProperties().getPamphletsPerLot());
 			boolean hasExtras = true;
 			ItemList<NamedItemStack> allSecurityMaterials = new ItemList<NamedItemStack>();
 			if (expectedExtras > containedSecurityMaterials) {
 				int neededExtras = expectedExtras - containedSecurityMaterials;
-				int neededExtraLots = (int) Math.ceil((double) neededExtras / (double) printingFactoryProperties.getSecurityNotesPerLot());
-				allSecurityMaterials = printingFactoryProperties.getSecurityMaterials().getMultiple(neededExtraLots);
+				int neededExtraLots = (int) Math.ceil((double) neededExtras / (double) getFactoryProperties().getSecurityNotesPerLot());
+				allSecurityMaterials = getFactoryProperties().getSecurityMaterials().getMultiple(neededExtraLots);
 				hasExtras = allSecurityMaterials.allIn(getInventory());
 			}
 			
 			if (hasExtras) {
 				pages.removeFrom(getInventory());
-				containedPaper += printingFactoryProperties.getPamphletsPerLot();
+				containedPaper += getFactoryProperties().getPamphletsPerLot();
 				
 				// Load security materials if security notes
 				while (containedSecurityMaterials < containedPaper) {
-					if (printingFactoryProperties.getSecurityMaterials().allIn(getInventory())) {
-						printingFactoryProperties.getSecurityMaterials().removeFrom(getInventory());
-						containedSecurityMaterials += printingFactoryProperties.getSecurityNotesPerLot();
+					if (getFactoryProperties().getSecurityMaterials().allIn(getInventory())) {
+						getFactoryProperties().getSecurityMaterials().removeFrom(getInventory());
+						containedSecurityMaterials += getFactoryProperties().getSecurityNotesPerLot();
 					}
 				}
 			} else {
@@ -425,10 +425,10 @@ public class PrintingFactory extends ItemFactory {
 		List<InteractionResponse> responses=new ArrayList<InteractionResponse>();
 		String status=active ? "On" : "Off";
 		//Name: Status with XX% health.
-		int maxRepair = printingFactoryProperties.getMaxRepair();
+		int maxRepair = getFactoryProperties().getMaxRepair();
 		boolean maintenanceActive = maxRepair!=0;
 		int health =(!maintenanceActive) ? 100 : (int) Math.round(100*(1-currentRepair/(maxRepair)));
-		responses.add(new InteractionResponse(InteractionResult.SUCCESS, printingFactoryProperties.getName()+": "+status+" with "+String.valueOf(health)+"% health."));
+		responses.add(new InteractionResponse(InteractionResult.SUCCESS, getFactoryProperties().getName()+": "+status+" with "+String.valueOf(health)+"% health."));
 		//RecipeName: X seconds(Y ticks)[ - XX% done.]
 		responses.add(new InteractionResponse(InteractionResult.SUCCESS, mode.getDescription()));
 		//[Inputs: amount Name, amount Name.]
@@ -446,7 +446,7 @@ public class PrintingFactory extends ItemFactory {
 		{
 			int amountAvailable=getRepairs().amountAvailable(getInventory());
 			int amountRepaired=amountAvailable>currentRepair ? (int) Math.ceil(currentRepair) : amountAvailable;
-			int percentRepaired=(int) (( (double) amountRepaired)/printingFactoryProperties.getMaxRepair()*100);
+			int percentRepaired=(int) (( (double) amountRepaired)/getFactoryProperties().getMaxRepair()*100);
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Will repair "+String.valueOf(percentRepaired)+"% of the factory with "+getRepairs().getMultiple(amountRepaired).toString()+"."));
 		}
 		return responses;
