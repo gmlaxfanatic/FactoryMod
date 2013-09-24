@@ -1,0 +1,107 @@
+#Anywhere with a "-1" there can be multiple repeated entries of this type
+(NamedItemStack): #Encapsulated in various places below
+  Common Name: #Name displayed to the user
+    material: MATERIAL_NAME (Official bukkit material name) - Required
+    amount: 1 (number of a particular item)
+    durability: 0 (damage value, 0 represents max durability, negative represents greater than max)
+    data: 0 (data value of the item stack)
+    TypeOfMeta: #ItemMeta (Default), PotionEffectMeta, FireworkEffectMeta
+     display_name: (display name of the item, null by default)
+     lore: (lore of the item, null by default)
+     PotionEffect1: #If PotionEffectMeta
+       duration: 
+       amplifier:
+       ambient:
+
+general:
+  copy_defaults: false
+  central_block: WORKBENCH
+  save_period: 15
+  return_build_materials: false
+  citadel_enabled: false
+  factory_interaction_material: STICK
+  disable_experience: true
+crafting:
+  disable:
+    -  (NamedItemStack)-1 for which crafting of the Bukkit ID:durability is diasabled
+    -  (NamedItemStack)-2 for which crafting of the Bukkit ID:durability is diasabled
+  enable:
+    Shapless Recipe Name:
+      inputs:
+        (NamedItemStack)-1:
+        (NamedItemStack)-2:
+      outputs:
+        (NamedItemStack)-3:
+        (NamedItemStack)-4:
+    Shaped Recipe Name:
+      inputs:
+        abbreviation-1:
+          (NamedItemStack)-1:
+        abbreviation-2:
+          (NamedItemStack)-2:
+      outputs:
+        abbreviation-3:
+          (NamedItemStack)-3:
+        abbreviation-4:
+          (NamedItemStack)-4:
+      shape:
+        -(abbreviation-1)(abbreviation-2)
+        -(abbreviation-1)(abbreviation-2)
+prouduction:
+  save_file: #filename for saved factories (Default productionSaves.txt)
+  update_period: Period of ticks between which factories are updated, (Default of 20 ticks)
+  repair_period: Period between repair amount updates, default 5 minutes
+  disrepair_period: Period of time after which a factory that was in disrepair is destroyed, default14 days
+  factories:
+    factory-1:
+      Title: #Unique identifier without spaces for the factory 
+        name: Displayed name to user
+        fuel: #Interval of fuel required to fuel recipe
+          (NamedItemStack)-1: Default of 1 charcoal
+        fuel-time: Ticks it takes to consume an interval of the fuel
+        inputs: #Inputs required to construct the factory
+          (NamedItemStack)-1: Default of none
+        recipes: #Recipes contained in the factory
+          -Title-1
+        repair_material: #Single interval of itemstacks required to repair the factory
+          (NamedItemStack)-1: Default of 1 charcoal
+        repair_multiple: Number of multiples of the repair_material required to fully repair the factory, default of 1
+  recipes:
+    recipe-1:
+      Title: #Unique identifier without spaces for the factory 
+        name: Displayed name to user
+        inputs: #Inputs required for the recipe
+          (NamedItemStack)-1: Default of none
+        upgrades: #Items which may be modified by this recipe
+          (NamedItemStack)-1: Default of none
+        outputs: #Outputs produced by this recipe
+          (NamedItemStack)-1: Default of none
+        enchantments: #Default of none
+          Enchantment-1:
+            type: (Offificial bukkit enchantment name, Require)
+            level: 1 (level of the enchantment
+            probability: 1 (0-1 probability of the enchantment being applied)
+printing:
+  save_file: #filename for saved factories (Default pressSaves.txt)
+effect:
+  save_file: #filename for saved factories (Default effectSaves.txt)
+  update_period: Period of ticks between which factories are updated, (Default of 20 ticks)
+  effect_update_period: Period of ticks between which the effects of a factory are update (defualt 60 ticks)
+  factories:
+    Title: #Unique identifier without spaces for the factory 
+      name: Displayed name to user
+      fuel: #Interval of fuel required to fuel recipe
+        (NamedItemStack)-1: Default of 1 charcoal
+      fuel-time: Ticks it takes to consume an interval of the fuel
+      inputs: #Inputs required to construct the factory
+        (NamedItemStack)-1: Default of none
+      area_effects:
+        PotionType1: #Type of effect (potion, reinforcement, chat)
+          radius: radius over which the effect occurs (Default of 50 blocks)
+          amplifier: Default of 1
+          ambient: Default of false
+        Reinforcement:
+          radius:
+        Chat:
+          radius:
+territory:
