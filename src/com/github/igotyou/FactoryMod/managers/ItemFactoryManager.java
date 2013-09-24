@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.github.igotyou.FactoryMod.managers;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
@@ -13,14 +9,18 @@ import org.bukkit.configuration.ConfigurationSection;
 /**
  * Superclass for specific ItemFactory managers to extend
  */
+public abstract class ItemFactoryManager extends BaseFactoryManager {
 
-public abstract class ItemFactoryManager extends BaseFactoryManager{
-	
 	protected long repairTime;
-	
-	public ItemFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection)
-	{
+	protected final long disrepairPeriod;
+	protected final long repairPeriod;
+
+	public ItemFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection) {
 		super(plugin, configurationSection);
+		//Period of days before a factory is removed after it falls into disrepair
+		disrepairPeriod = configurationSection.getLong("disrepair_period", 14) * 24 * 60 * 60 * 1000;
+		//The length of time it takes a factory to go to 0% health
+		repairPeriod = configurationSection.getLong("repair_period", 28) * 24 * 60 * 60 * 1000;
 	}
 
 	/*
@@ -33,37 +33,33 @@ public abstract class ItemFactoryManager extends BaseFactoryManager{
 	 * operational, where as the time in disrepair to removal is solely based
 	 * on real world clocks.
 	 */
-	public void updateRepair(long time)
-	{
-		for (Factory itemFactory: factories)
-		{
-			((ItemFactory) itemFactory).updateRepair(time/((double)FactoryModPlugin.REPAIR_PERIOD));
+	public void updateRepair(long time) {
+		for (Factory itemFactory : factories) {
+			((ItemFactory) itemFactory).updateRepair(time / ((double) repairPeriod));
 		}
-		long currentTime=System.currentTimeMillis();
-		Iterator<Factory> itr=factories.iterator();
-		while(itr.hasNext())
-		{
+		long currentTime = System.currentTimeMillis();
+		Iterator<Factory> itr = factories.iterator();
+		while (itr.hasNext()) {
 			ItemFactory itemFactory = (ItemFactory) itr.next();
-			if(currentTime>(itemFactory.getTimeDisrepair()+FactoryModPlugin.DISREPAIR_PERIOD))
-			{
+			if (currentTime > (itemFactory.getTimeDisrepair() + disrepairPeriod)) {
 				itr.remove();
 			}
 		}
 	}
-	
+
 	public void update() {
 		//Takes difference between last repair update and current one and scales repair accordingly
-		updateRepair(System.currentTimeMillis()-repairTime);
-		repairTime=System.currentTimeMillis();
+		updateRepair(System.currentTimeMillis() - repairTime);
+		repairTime = System.currentTimeMillis();
 		save();
 	}
-	
+
 	/*
 	 * Updates repair and saves the manager
 	 */
 	public void onDisable() {
 		//Takes difference between last repair update and current one and scales repair accordingly
-		updateRepair(System.currentTimeMillis()-repairTime);
+		updateRepair(System.currentTimeMillis() - repairTime);
 		save();
 	}
 }

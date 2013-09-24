@@ -45,11 +45,11 @@ public class ProductionFactory extends ItemFactory {
 	protected ProductionFactoryProperties getFactoryProperties() {
 		return (ProductionFactoryProperties) super.getFactoryProperties();
 	}
-	
+
 	protected ProductionRecipe getCurrentRecipe() {
 		return getRecipes().get(currentRecipeNumber);
 	}
-	
+
 	@Override
 	public boolean checkHasMaterials() {
 		return getCurrentRecipe().hasMaterials(getInventory());
@@ -71,7 +71,7 @@ public class ProductionFactory extends ItemFactory {
 		//Is the factory off
 		if (!active) {
 			//is the recipe is initiaed
-			if (getRecipes().size()<=currentRecipeNumber) {
+			if (getRecipes().size() <= currentRecipeNumber) {
 				//if we are at the end of the recipe array loop around
 				if (currentRecipeNumber == getRecipes().size() - 1) {
 					setRecipeToNumber(0);
@@ -105,8 +105,6 @@ public class ProductionFactory extends ItemFactory {
 		return getFactoryProperties().getFuel();
 	}
 
-
-
 	/**
 	 * sets the recipe to the supplied index
 	 *
@@ -119,7 +117,6 @@ public class ProductionFactory extends ItemFactory {
 			currentRecipeNumber = 0;
 		}
 	}
-
 
 	protected List<ProductionRecipe> getRecipes() {
 		return getFactoryProperties().getRecipes();
@@ -134,7 +131,7 @@ public class ProductionFactory extends ItemFactory {
 		int health = (getFactoryProperties().getRepair() == 0) ? 100 : (int) Math.round(100 * (1 - currentRepair / (getFactoryProperties().getRepair())));
 		responses.add(new InteractionResponse(InteractionResult.SUCCESS, getFactoryProperties().getName() + ": " + status + " with " + String.valueOf(health) + "% health."));
 		//RecipeName: X seconds(Y ticks)[ - XX% done.]
-		responses.add(new InteractionResponse(InteractionResult.SUCCESS, getCurrentRecipe().getRecipeName() + ": " + getCurrentRecipe().getProductionTime() + " seconds(" + getCurrentRecipe().getProductionTime() * FactoryModPlugin.TICKS_PER_SECOND + " ticks)" + percentDone));
+		responses.add(new InteractionResponse(InteractionResult.SUCCESS, getCurrentRecipe().getRecipeName() + ": " + getCurrentRecipe().getProductionTime() + " seconds(" + getCurrentRecipe().getProductionTime() * 20 + " ticks)" + percentDone));
 		//[Inputs: amount Name, amount Name.]
 		if (!getCurrentRecipe().getInputs().isEmpty()) {
 			responses.add(new InteractionResponse(InteractionResult.SUCCESS, "Input: " + getCurrentRecipe().getInputs().toString() + "."));

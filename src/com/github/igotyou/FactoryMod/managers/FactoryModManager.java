@@ -12,6 +12,8 @@ import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
+import com.github.igotyou.FactoryMod.listeners.FactoryModListener;
+import com.github.igotyou.FactoryMod.listeners.RedstoneListener;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import static com.untamedears.citadel.Utility.getReinforcement;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 public class FactoryModManager {
@@ -47,7 +50,6 @@ public class FactoryModManager {
 	public void initializeManagers() {
 		factoryManagers = new ArrayList<FactoryManager>();
 		listeners = new ArrayList<Listener>();
-
 		initializeStructureManager();
 		initializeCraftingManager();
 		initializeProductionManager();
@@ -66,18 +68,24 @@ public class FactoryModManager {
 	 * Initializes the Production Manager
 	 */
 	private void initializeProductionManager() {
-		ProductionFactoryManager productionManager = new ProductionFactoryManager(plugin, plugin.getConfig().getConfigurationSection("production"));
-		factoryManagers.add(productionManager);
-		categoryToManager.put(FactoryCategory.PRODUCTION, productionManager);
+		ConfigurationSection productionConfiguration = plugin.getConfig().getConfigurationSection("production");
+		if (productionConfiguration != null) {
+			ProductionFactoryManager productionManager = new ProductionFactoryManager(plugin, productionConfiguration);
+			factoryManagers.add(productionManager);
+			categoryToManager.put(FactoryCategory.PRODUCTION, productionManager);
+		}
 	}
 
 	/**
 	 * Initializes the Printing Manager
 	 */
 	private void initializePrintingManager() {
-		PrintingFactoryManager printingManager = new PrintingFactoryManager(plugin, plugin.getConfig().getConfigurationSection("printing"));
-		factoryManagers.add(printingManager);
-		categoryToManager.put(FactoryCategory.PRINTING, printingManager);
+		ConfigurationSection printingConfiguration = plugin.getConfig().getConfigurationSection("production");
+		if (printingConfiguration != null) {
+			PrintingFactoryManager printingManager = new PrintingFactoryManager(plugin, printingConfiguration);
+			factoryManagers.add(printingManager);
+			categoryToManager.put(FactoryCategory.PRINTING, printingManager);
+		}
 	}
 
 	/**
@@ -96,7 +104,6 @@ public class FactoryModManager {
 		}
 	}
 
-	
 	/**
 	 * Loads all managers
 	 */
@@ -105,7 +112,7 @@ public class FactoryModManager {
 			manager.load();
 		}
 	}
-	
+
 	public StructureManager getStructureManager() {
 		return structureManager;
 	}
@@ -118,7 +125,7 @@ public class FactoryModManager {
 			@Override
 			public void run() {
 				FactoryModPlugin.sendConsoleMessage("Saving Factory data...");
-				for(FactoryManager factoryManager:factoryManagers) {
+				for (FactoryManager factoryManager : factoryManagers) {
 					factoryManager.update();
 				}
 			}
@@ -203,13 +210,12 @@ public class FactoryModManager {
 		if (factory != null) {
 			FactoryModPlugin.debugMessage("Factory at location");
 			factory.interactionResponse(player, block.getLocation());
-		}
-		else {
-			InteractionResponse response=new InteractionResponse(InteractionResult.IGNORE, "Error");
-			for(FactoryManager factoryManager:possibleManagers) {
+		} else {
+			InteractionResponse response = new InteractionResponse(InteractionResult.IGNORE, "Error");
+			for (FactoryManager factoryManager : possibleManagers) {
 				//Atempt to create a factory given the location as the creation point 
 				response = factoryManager.createFactory(block.getLocation());
-				if(response.getInteractionResult()==InteractionResult.SUCCESS) {
+				if (response.getInteractionResult() == InteractionResult.SUCCESS) {
 					InteractionResponse.messagePlayerResult(player, response);
 					FactoryModPlugin.debugMessage("Factory Created");
 					return;
@@ -247,5 +253,14 @@ public class FactoryModManager {
 			factory.blockBreakResponse();
 		}
 
+	}
+
+	public void registerEvents(FactoryModPlugin factoryModPlugin) {
+		try {
+			factoryModPlugin.getServer().getPluginManager().registerEvents(new FactoryModListener(FactoryModPlugin.manager), factoryModPlugin);
+			factoryModPlugin.getServer().getPluginManager().registerEvents(new RedstoneListener(FactoryModPlugin.manager), factoryModPlugin);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

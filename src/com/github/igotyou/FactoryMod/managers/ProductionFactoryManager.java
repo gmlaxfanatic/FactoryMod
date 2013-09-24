@@ -3,7 +3,6 @@ package com.github.igotyou.FactoryMod.managers;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,19 +12,14 @@ import org.bukkit.Location;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.ProductionFactory;
-import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.properties.ProductionFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
 import com.github.igotyou.FactoryMod.utility.Anchor;
-import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -144,13 +138,10 @@ public class ProductionFactoryManager extends ItemFactoryManager {
 		return new InteractionResponse(InteractionResult.FAILURE, "Incorrect Materials! They must match exactly.");
 	}
 
-	public String getSavesFileName() {
-		return FactoryModPlugin.PRODUCTION_FACTORY_SAVES_FILE;
-	}
-
 	/*
 	 * Returns of the ProductionProperites for a particular factory
 	 */
+	@Override
 	public ProductionFactoryProperties getProperties(String title) {
 		return (ProductionFactoryProperties) super.getProperties(title);
 	}

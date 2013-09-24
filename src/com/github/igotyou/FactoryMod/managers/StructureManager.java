@@ -23,24 +23,15 @@ public class StructureManager {
 	public StructureManager(FactoryModPlugin plugin)
 	{
 		this.plugin = plugin;
-		structures = importStructures(plugin.getConfig().getList("structures", new ArrayList()));
 	}
 	/*
-	 * Imports all schematic files in the schematic directory
+	 * Gets the structure associated with the schematic filename
 	 */
-	private Map<String,Structure> importStructures(List uncastFilenames) {
-		Map<String,Structure> structures = new HashMap<String,Structure>();
-		List<String> filenames=uncastFilenames;
-		for(String filename:filenames) {
+	public Structure getStructure(String filename) {
+		if(!structures.containsKey(filename)) {
 			plugin.saveResource("schematics/"+filename+".schematic", true);
 			structures.put(filename,Structure.parseSchematic(new File(plugin.getDataFolder(),"schematics/"+filename+".schematic")));
 		}
-		return structures;
-	}
-	/*
-	 * Gets the structure associated with the schematic name
-	 */
-	public Structure getStructure(String name) {
-		return structures.get(name);
+		return structures.get(filename);
 	}
 }
