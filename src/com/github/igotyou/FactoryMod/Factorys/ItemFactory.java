@@ -41,11 +41,11 @@ public abstract class ItemFactory extends BaseFactory {
 	
 	public ItemFactory(Anchor anchor,
 		boolean active,
-		FactoryCategory factoryType,
-		FactoryProperties factoryProperties) {
+		FactoryCategory factoryCategory,
+		String factoryType) {
 		super(anchor,
-			factoryType,
-			factoryProperties);
+			factoryCategory,
+			factoryType);
 		this.active=active;
 		this.currentRepair=0.0;
 		this.timeDisrepair=3155692597470L;//Year 2070, default starting value
@@ -53,15 +53,15 @@ public abstract class ItemFactory extends BaseFactory {
 	
 	public ItemFactory(Anchor anchor,
 		boolean active,
-		FactoryCategory factoryType,
-		FactoryProperties factoryProperties,
+		FactoryCategory factoryCategory,
+		String factoryType,
 		int currentProductionTimer,
 		int currentEnergyTimer,	
 		double currentMaintenance,
 		long timeDisrepair) {
 		super(anchor,			
-			factoryType,
-			factoryProperties);
+			factoryCategory,
+			factoryType);
 		this.active = active;
 		this.currentEnergyTimer = currentEnergyTimer;
 		this.currentProductionTimer = currentProductionTimer;
@@ -394,7 +394,7 @@ public abstract class ItemFactory extends BaseFactory {
 	 */
 	public Location getCenterLocation() 
 	{
-		return anchor.getLocationOfOffset(((ItemFactoryProperties)factoryProperties).getCenterOffset());
+		return anchor.getLocationOfOffset((getFactoryProperties()).getCenterOffset());
 	}
 
 	/**
@@ -402,7 +402,7 @@ public abstract class ItemFactory extends BaseFactory {
 	 */
 	public Location getInventoryLocation() 
 	{
-		return anchor.getLocationOfOffset(((ItemFactoryProperties)factoryProperties).getInventoryOffset());
+		return anchor.getLocationOfOffset((getFactoryProperties()).getInventoryOffset());
 	}
 
 	/**
@@ -410,8 +410,13 @@ public abstract class ItemFactory extends BaseFactory {
 	 */
 	public Location getPowerSourceLocation() 
 	{
-		return anchor.getLocationOfOffset(((ItemFactoryProperties)factoryProperties).getPowerSourceOffset());
+		return anchor.getLocationOfOffset((getFactoryProperties()).getPowerSourceOffset());
 	}
+	
+	protected ItemFactoryProperties getFactoryProperties() {
+		return (ItemFactoryProperties) getFactoryProperties();
+	}
+	
 	
 	/**
 	 * Checks if there is enough fuel Available for at least once energy cycle
@@ -423,8 +428,8 @@ public abstract class ItemFactory extends BaseFactory {
 	}
 
 	/**
-	 * Called by the block listener when the player(or a entity) destroys the fatory
-	 * Drops the build materials if the config says it shouls
+	 * Called by the block listener when the player(or a entity) destroys the factory
+	 * Drops the build materials if the config says it should
 	 */
 	public void blockBreakResponse()
 	{

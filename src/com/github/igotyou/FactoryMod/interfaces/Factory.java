@@ -1,13 +1,13 @@
 package com.github.igotyou.FactoryMod.interfaces;
-
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import com.github.igotyou.FactoryMod.utility.Structure;
+import java.io.Serializable;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-public interface Factory {
+public interface Factory extends Serializable {
 		
 	public Location getLocation();
 	
