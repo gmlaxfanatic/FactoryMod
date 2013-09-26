@@ -5,10 +5,10 @@
     amount: 1 (number of a particular item)
     durability: 0 (damage value, 0 represents max durability, negative represents greater than max)
     data: 0 (data value of the item stack)
-    TypeOfMeta: #ItemMeta (Default), PotionEffectMeta, FireworkEffectMeta
+    type: #ItemMeta (Default), PotionEffectMeta, FireworkEffectMeta
      display_name: (display name of the item, null by default)
      lore: (lore of the item, null by default)
-     PotionEffect1: #If PotionEffectMeta
+     potion_effect1: #If PotionEffectMeta
        duration: 
        amplifier:
        ambient:
@@ -96,8 +96,8 @@ effect:
       inputs: #Inputs required to construct the factory
         (NamedItemStack)-1: Default of none
       area_effects:
-        PotionType1: #Type of effect (potion, reinforcement, chat)
-          radius: radius over which the effect occurs (Default of 50 blocks)
+        PotionEffectType1: #Aribitrary name, can't be repeated
+          radius: radius over which the effect occurs (No default)
           amplifier: Default of 1
           ambient: Default of false
         Reinforcement:

@@ -1,6 +1,7 @@
 
 package com.github.igotyou.FactoryMod.AreaEffect;
 
+import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.AreaEffect;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import java.util.HashMap;
@@ -75,24 +76,28 @@ public class AreaPotionEffect extends PotionEffect implements AreaEffect{
 		Set<AreaPotionEffect> areaEffects = new HashSet<AreaPotionEffect>();
 		if(configurationSection!=null)
 		{
-			for(String areaEffectName:configurationSection.getKeys(false))
+			for(String areaEffectType:configurationSection.getKeys(false))
 			{
-				areaEffects.add(AreaPotionEffect.fromConfig(configurationSection.getConfigurationSection(areaEffectName)));
+				try {
+					areaEffects.add(AreaPotionEffect.fromConfig(configurationSection.getConfigurationSection(areaEffectType),areaEffectType));
+				}
+				catch (IllegalArgumentException e) {
+					FactoryModPlugin.sendConsoleMessage("Error importing area effect "+areaEffectType);
+				}
 			}
 		}
 		return areaEffects;
 	}
 	
-	public static AreaPotionEffect fromConfig(ConfigurationSection configurationSection) {
-		PotionEffect potionEffect=potionEffectFromConfig(configurationSection);
-		int radius = configurationSection.getInt("radius", 1);
-		return new AreaPotionEffect(radius,potionEffect.getType(),potionEffect.getDuration(),potionEffect.getAmplifier(),potionEffect.isAmbient());
-	}
-	public static PotionEffect potionEffectFromConfig(ConfigurationSection configurationSection) {
-		PotionEffectType effectType = PotionEffectType.getByName(configurationSection.getString("PotionEffect1"));
-		int duration = configurationSection.getInt("duration");
-		int amplifier = configurationSection.getInt("amplifier");
-		boolean ambient = configurationSection.getBoolean("ambient");
-		return new PotionEffect(effectType,duration,amplifier,ambient);
+	public static AreaPotionEffect fromConfig(ConfigurationSection configurationSection, String potionEffectTypeName) throws IllegalArgumentException{
+		PotionEffectType potionEffectType = PotionEffectType.getByName(potionEffectTypeName);
+		if(configurationSection==null || potionEffectType==null) {
+			throw new IllegalArgumentException();
+		}
+		int radius = configurationSection.getInt("radius");
+		int duration = configurationSection.getInt("duration", 60);
+		int amplifier = configurationSection.getInt("amplifier", 1);
+		boolean ambient = configurationSection.getBoolean("ambient", false);
+		return new AreaPotionEffect(radius,potionEffectType,duration,amplifier,ambient);
 	}
 }
