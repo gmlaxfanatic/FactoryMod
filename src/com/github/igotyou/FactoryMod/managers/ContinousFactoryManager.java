@@ -33,34 +33,7 @@ public abstract class ContinousFactoryManager extends BaseFactoryManager {
 		super(plugin, configurationSection);
 		initConfig(configurationSection);
 		updateManager();
-		
-		/*
-		//Schedule territory calculations
-		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-			@Override
-			public void run() {
-				for (Factory factory : factories) {
-					updateTerritoryCalculations();
-				}
-			}
-		}, 0L, territoryUpdatePeriod);	*/	
 	}
-	
-	/*
-	 * Updates the territory calculation
-	 */
-	public void updateTerritoryCalculations() {
-		
-	}
-	
-	/*
-	 * Unsupported Legacy load
-	 */
-	@Override
-	public void load1(File file){
-		
-	}
-
 	/*
 	 * Initializes the configuration for continous factories
 	 */
@@ -88,14 +61,5 @@ public abstract class ContinousFactoryManager extends BaseFactoryManager {
 		}
 		FactoryModPlugin.debugMessage("Creation materials not present");
 		return new InteractionResponse(InteractionResponse.InteractionResult.FAILURE, "Incorrect Materials! They must match exactly.");
-	}
-	
-
-	
-	/*
-	 * Returns continous factory properties given a factoryID
-	 */
-	public ContinousFactoryProperties getProperties(String factoryID) {
-		return (ContinousFactoryProperties) allFactoryProperties.get(factoryID);
 	}
 }

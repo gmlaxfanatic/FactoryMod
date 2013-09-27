@@ -315,5 +315,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	/*
 	 * Hook for legacy file suppoert
 	 */	
-	protected abstract void load1(File file);
+	protected void load1(File file){
+		
+	}
 }
