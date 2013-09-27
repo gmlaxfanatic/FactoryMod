@@ -40,7 +40,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 
 	protected FactoryModPlugin plugin;
 	protected String savesFilename;
-	protected List<Factory> factories;
+	protected Set<Factory> factories;
 	protected Map<String,FactoryProperties> allFactoryProperties;
 	protected int updatePeriod;
 	//Initally generated set of possible materials and interaction
@@ -55,7 +55,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		this.plugin = plugin;
 		this.updatePeriod = configuration.getInt("update_period", 20);
 		this.savesFilename = configuration.getString("save_filename","defaultSaves");
-		factories = new ArrayList<Factory>();
+		factories = new HashSet<Factory>();
 		allFactoryProperties = new HashMap<String, FactoryProperties>();
 		materials = new HashSet<Material>();
 		interactionMaterials = new HashSet<Material>();

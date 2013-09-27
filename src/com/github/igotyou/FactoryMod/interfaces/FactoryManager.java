@@ -1,6 +1,6 @@
 package com.github.igotyou.FactoryMod.interfaces;
 
-import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
+import com.github.igotyou.FactoryMod.Factorys.RecipeFactory;
 import java.io.File;
 import java.io.IOException;
 

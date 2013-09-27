@@ -13,7 +13,7 @@ import com.github.igotyou.FactoryMod.utility.Structure;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrintingFactoryProperties extends ItemFactoryProperties implements FactoryProperties{
+public class PrintingFactoryProperties extends RecipeFactoryProperties implements FactoryProperties{
 
 	private ItemList<NamedItemStack> constructionMaterials;
 	private ItemList<NamedItemStack> plateMaterials;
@@ -127,7 +127,7 @@ public class PrintingFactoryProperties extends ItemFactoryProperties implements 
 		int pageLead = configPrintingFactoryes.getInt("page_lead",12);
 		int setPageTime = configPrintingFactoryes.getInt("set_page_time",20);
 		int repairTime = configPrintingFactoryes.getInt("repair_time",12);
-		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(configPrintingFactoryes.getString("structure","ItemFactory"));
+		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(configPrintingFactoryes.getString("structure","RecipeFactory"));
 		ConfigurationSection interactionPointsConfiguration = configPrintingFactoryes.getConfigurationSection("interaction_points");
 		List<Offset> interactionPoints=new ArrayList<Offset>(3);
 		interactionPoints.add(new Offset(0,0,0));

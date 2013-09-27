@@ -18,7 +18,7 @@ import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
-import com.github.igotyou.FactoryMod.properties.ItemFactoryProperties;
+import com.github.igotyou.FactoryMod.properties.RecipeFactoryProperties;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
@@ -31,7 +31,7 @@ import java.util.Arrays;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 
-public abstract class ItemFactory extends BaseFactory {
+public abstract class RecipeFactory extends BaseFactory {
 	public static final BlockFace[] REDSTONE_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
 	protected int currentProductionTimer = 0;//The "production timer", which trachs for how long the factory has been producing the selected recipe
 	protected int currentEnergyTimer = 0;//Time since last energy consumption(if there's no lag, it's in seconds)
@@ -39,7 +39,7 @@ public abstract class ItemFactory extends BaseFactory {
 	protected long timeDisrepair;//The time at which the factory went into disrepair
 	protected boolean active; // Whether factory is currently active
 	
-	public ItemFactory(Anchor anchor,
+	public RecipeFactory(Anchor anchor,
 		boolean active,
 		FactoryCategory factoryCategory,
 		String factoryType) {
@@ -51,7 +51,7 @@ public abstract class ItemFactory extends BaseFactory {
 		this.timeDisrepair=3155692597470L;//Year 2070, default starting value
 	}
 	
-	public ItemFactory(Anchor anchor,
+	public RecipeFactory(Anchor anchor,
 		boolean active,
 		FactoryCategory factoryCategory,
 		String factoryType,
@@ -413,8 +413,8 @@ public abstract class ItemFactory extends BaseFactory {
 		return anchor.getLocationOfOffset((getFactoryProperties()).getPowerSourceOffset());
 	}
 	
-	protected ItemFactoryProperties getFactoryProperties() {
-		return (ItemFactoryProperties) getFactoryProperties();
+	protected RecipeFactoryProperties getFactoryProperties() {
+		return (RecipeFactoryProperties) getFactoryProperties();
 	}
 	
 	

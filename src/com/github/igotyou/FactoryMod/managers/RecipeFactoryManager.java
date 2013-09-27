@@ -1,21 +1,21 @@
 package com.github.igotyou.FactoryMod.managers;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
+import com.github.igotyou.FactoryMod.Factorys.RecipeFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import java.util.Iterator;
 import org.bukkit.configuration.ConfigurationSection;
 
 /**
- * Superclass for specific ItemFactory managers to extend
+ * Superclass for specific RecipeFactory managers to extend
  */
-public abstract class ItemFactoryManager extends BaseFactoryManager {
+public abstract class RecipeFactoryManager extends BaseFactoryManager {
 
 	protected long repairTime;
 	protected final long disrepairPeriod;
 	protected final long repairPeriod;
 
-	public ItemFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection) {
+	public RecipeFactoryManager(FactoryModPlugin plugin, ConfigurationSection configurationSection) {
 		super(plugin, configurationSection);
 		//Period of days before a factory is removed after it falls into disrepair
 		disrepairPeriod = configurationSection.getLong("disrepair_period", 14) * 24 * 60 * 60 * 1000;
@@ -34,14 +34,14 @@ public abstract class ItemFactoryManager extends BaseFactoryManager {
 	 * on real world clocks.
 	 */
 	public void updateRepair(long time) {
-		for (Factory itemFactory : factories) {
-			((ItemFactory) itemFactory).updateRepair(time / ((double) repairPeriod));
+		for (Factory recipeFactory : factories) {
+			((RecipeFactory) recipeFactory).updateRepair(time / ((double) repairPeriod));
 		}
 		long currentTime = System.currentTimeMillis();
 		Iterator<Factory> itr = factories.iterator();
 		while (itr.hasNext()) {
-			ItemFactory itemFactory = (ItemFactory) itr.next();
-			if (currentTime > (itemFactory.getTimeDisrepair() + disrepairPeriod)) {
+			RecipeFactory recipeFactory = (RecipeFactory) itr.next();
+			if (currentTime > (recipeFactory.getTimeDisrepair() + disrepairPeriod)) {
 				itr.remove();
 			}
 		}

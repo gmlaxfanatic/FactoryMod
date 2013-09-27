@@ -21,7 +21,7 @@ import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResu
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.InventoryHolder;
 
-public class PrintingFactoryManager extends ItemFactoryManager {
+public class PrintingFactoryManager extends RecipeFactoryManager {
 
 	public PrintingFactoryProperties printingFactoryProperties;
 
