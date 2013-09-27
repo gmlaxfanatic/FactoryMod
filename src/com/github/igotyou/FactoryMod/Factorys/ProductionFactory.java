@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 import org.bukkit.inventory.Inventory;
 
-public class ProductionFactory extends ItemFactory {
+public class ProductionFactory extends RecipeFactory {
 
 	private int currentRecipeNumber = 0;//the array index of the current recipe
 

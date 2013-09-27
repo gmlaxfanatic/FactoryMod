@@ -20,7 +20,7 @@ import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.PrettyLore;
 
-public class PrintingFactory extends ItemFactory {
+public class PrintingFactory extends RecipeFactory {
 	
 	private OperationMode mode;
 	public OperationMode getMode() {

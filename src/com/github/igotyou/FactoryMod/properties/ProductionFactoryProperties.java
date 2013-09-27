@@ -18,7 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 
-public class ProductionFactoryProperties extends ItemFactoryProperties implements FactoryProperties
+public class ProductionFactoryProperties extends RecipeFactoryProperties implements FactoryProperties
 {
 	private ItemList<NamedItemStack> inputs;
 	private List<ProductionRecipe> recipes;
@@ -91,7 +91,7 @@ public class ProductionFactoryProperties extends ItemFactoryProperties implement
 		ProductionRecipe repairRecipe=new ProductionRecipe(title+"REPAIR","Repair Factory",1,repairs);
 		productionManager.addProductionRecipe(title+"REPAIR",repairRecipe);
 		factoryRecipes.add(repairRecipe);
-		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(factoryConfiguration.getString("structure","ItemFactory"));
+		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(factoryConfiguration.getString("structure","RecipeFactory"));
 		ConfigurationSection interactionPointsConfiguration = factoryConfiguration.getConfigurationSection("interaction_points");
 		List<Offset> interactionPoints=new ArrayList<Offset>(3);
 		interactionPoints.add(new Offset(0,0,0));

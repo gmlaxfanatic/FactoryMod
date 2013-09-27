@@ -25,7 +25,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-public class ProductionFactoryManager extends ItemFactoryManager {
+public class ProductionFactoryManager extends RecipeFactoryManager {
 
 	public Map<String, ProductionRecipe> productionRecipes;
 

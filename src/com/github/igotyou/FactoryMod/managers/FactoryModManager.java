@@ -9,7 +9,7 @@ import org.bukkit.event.Listener;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
-import com.github.igotyou.FactoryMod.Factorys.ItemFactory;
+import com.github.igotyou.FactoryMod.Factorys.RecipeFactory;
 import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.interfaces.FactoryManager;
 import com.github.igotyou.FactoryMod.listeners.FactoryModListener;
@@ -169,7 +169,7 @@ public class FactoryModManager {
 	 * Removes a factory at the given location if it exists
 	 */
 
-	public void remove(ItemFactory factory) {
+	public void remove(RecipeFactory factory) {
 		for (FactoryManager factoryManager : factoryManagers) {
 			factoryManager.removeFactory(factory);
 		}
