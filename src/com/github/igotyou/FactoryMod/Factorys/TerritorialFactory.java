@@ -3,7 +3,7 @@ package com.github.igotyou.FactoryMod.Factorys;
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 
-public class TerritorialFactory extends ContinousFactory {
+public class TerritorialFactory extends ContinuousFactory {
 
 	protected int currentProductionTime;
 

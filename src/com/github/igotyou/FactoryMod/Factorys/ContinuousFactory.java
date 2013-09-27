@@ -3,7 +3,7 @@ package com.github.igotyou.FactoryMod.Factorys;
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import com.github.igotyou.FactoryMod.interfaces.AreaEffect;
-import com.github.igotyou.FactoryMod.properties.ContinousFactoryProperties;
+import com.github.igotyou.FactoryMod.properties.ContinuousFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
@@ -25,18 +25,18 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-public class ContinousFactory extends BaseFactory {
+public class ContinuousFactory extends BaseFactory {
 
 	private int currentEnergyTime;
 
-	public ContinousFactory(Anchor anchor, String factoryType, FactoryCategory factoryCategory) {
+	public ContinuousFactory(Anchor anchor, String factoryType, FactoryCategory factoryCategory) {
 		this(anchor,
 			factoryType,
 			factoryCategory,
-			((ContinousFactoryProperties) FactoryModPlugin.getManager().getManager(factoryCategory).getProperties(factoryType)).getEnergyTime());
+			((ContinuousFactoryProperties) FactoryModPlugin.getManager().getManager(factoryCategory).getProperties(factoryType)).getEnergyTime());
 	}
 
-	public ContinousFactory(Anchor anchor, String factoryType,FactoryCategory factoryCategory, int currentEnergyTime) {
+	public ContinuousFactory(Anchor anchor, String factoryType,FactoryCategory factoryCategory, int currentEnergyTime) {
 		super(anchor, factoryCategory, factoryType);
 		this.currentEnergyTime = currentEnergyTime;
 		indicatePowerOn();
@@ -97,7 +97,7 @@ public class ContinousFactory extends BaseFactory {
 	}
 
 	/*
-	 * Power off the ContinousFactory, completely deleting it
+	 * Power off the ContinuousFactory, completely deleting it
 	 */
 
 	protected void powerOff() {
@@ -135,8 +135,8 @@ public class ContinousFactory extends BaseFactory {
 	 * Gets a correctly caste properties file
 	 */
 	@Override
-	protected ContinousFactoryProperties getFactoryProperties() {
-		return (ContinousFactoryProperties) super.getFactoryProperties();
+	protected ContinuousFactoryProperties getFactoryProperties() {
+		return (ContinuousFactoryProperties) super.getFactoryProperties();
 	}
 
 	/*

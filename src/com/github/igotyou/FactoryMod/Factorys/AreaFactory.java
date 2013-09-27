@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-public class AreaFactory extends ContinousFactory {
+public class AreaFactory extends ContinuousFactory {
 
 	public AreaFactory(Anchor anchor, String factoryType) {
 		super(anchor, factoryType, FactoryCategory.AREA);
