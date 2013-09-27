@@ -17,7 +17,7 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
-public class SimpleFactoryProperties extends BaseFactoryProperties {
+public class ContinousFactoryProperties extends BaseFactoryProperties {
 
 	Map<Integer, Set<AreaEffect>> areaEffects;
 	protected int energyTime;
@@ -25,7 +25,7 @@ public class SimpleFactoryProperties extends BaseFactoryProperties {
 	protected ItemList<NamedItemStack> fuel;
 	protected ItemList<NamedItemStack> outputs;
 
-	public SimpleFactoryProperties(
+	public ContinousFactoryProperties(
 		String factoryID,
 		String name, 
 		Structure structure, 
@@ -86,21 +86,21 @@ public class SimpleFactoryProperties extends BaseFactoryProperties {
 	}
 	
 	/*
-	 * Imports all of the simple factory properties from a configuration section
+	 * Imports all of the continous factory properties from a configuration section
 	 */
-	public static Map<String, FactoryProperties> simplePropertiesFromConfig(ConfigurationSection configurationSection) {
-		Map<String, FactoryProperties> simpleFactoryProperties=new HashMap<String, FactoryProperties>();
+	public static Map<String, FactoryProperties> continousPropertiesFromConfig(ConfigurationSection configurationSection) {
+		Map<String, FactoryProperties> continousFactoryProperties=new HashMap<String, FactoryProperties>();
 		for(String title:configurationSection.getKeys(false))
 		{
-			simpleFactoryProperties.put(title, SimpleFactoryProperties.fromConfig(title, configurationSection.getConfigurationSection(title)));
+			continousFactoryProperties.put(title, ContinousFactoryProperties.fromConfig(title, configurationSection.getConfigurationSection(title)));
 		}
-		return simpleFactoryProperties;
+		return continousFactoryProperties;
 	}
 	
 	/*
-	 * Imports a single simple factory properties from a configuration section
+	 * Imports a single continous factory properties from a configuration section
 	 */
-	protected static SimpleFactoryProperties fromConfig(String factoryID, ConfigurationSection configurationSection) {
+	protected static ContinousFactoryProperties fromConfig(String factoryID, ConfigurationSection configurationSection) {
 		factoryID=factoryID.replaceAll(" ","_");
 		String factoryName=configurationSection.getString("name","Default Name");
 		//Uses overpowered getItems method for consistency, should always return a list of size=1
@@ -125,7 +125,7 @@ public class SimpleFactoryProperties extends BaseFactoryProperties {
 			}
 		}
 		
-		return new SimpleFactoryProperties(factoryID, factoryName, structure, interactionPoints,inputs, outputs, fuel, energyTime, productionTime);
+		return new ContinousFactoryProperties(factoryID, factoryName, structure, interactionPoints,inputs, outputs, fuel, energyTime, productionTime);
 		
 		
 	}

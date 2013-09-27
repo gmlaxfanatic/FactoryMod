@@ -86,7 +86,10 @@ public class NamedItemStack extends ItemStack {
 					namedItemStack.setItemMeta(itemMeta);
 				}
 			}
+			return namedItemStack;
 		}
+		return null;
+		
 	}
 
 	public static PotionMeta potionEffectFromConfig(ConfigurationSection configurationSection) {

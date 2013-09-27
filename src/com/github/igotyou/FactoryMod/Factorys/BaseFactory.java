@@ -19,7 +19,8 @@ public abstract class BaseFactory implements Factory {
 
 		PRODUCTION,
 		PRINTING,
-		AREA
+		AREA,
+		TERRITORIAL
 	}
 	protected Anchor anchor;
 	protected FactoryCategory factoryCategory; // The category of this factory
