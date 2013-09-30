@@ -94,8 +94,6 @@ public class ContinuousFactoryProperties extends BaseFactoryProperties {
 		ItemList<NamedItemStack> fuel=ItemList.fromConfig(configurationSection.getConfigurationSection("fuel"));
 		int energyTime=configurationSection.getInt("fuel_time",2);
 		ItemList<NamedItemStack> inputs=ItemList.fromConfig(configurationSection.getConfigurationSection("inputs"));
-		//ItemList<NamedItemStack> outputs=ItemList.fromConfig(configurationSection.getConfigurationSection("outputs"));
-		//int productionTime=configurationSection.getInt("productionTime",2);
 		return new ContinuousFactoryProperties(baseFactoryProperties.factoryID, baseFactoryProperties.name, baseFactoryProperties.structure, baseFactoryProperties.interactionPoints,inputs, fuel, energyTime);	
 	}
 }

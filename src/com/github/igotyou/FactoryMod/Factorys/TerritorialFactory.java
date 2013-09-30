@@ -18,26 +18,9 @@ public class TerritorialFactory extends ContinuousFactory {
 	}
 
 	/*
-	 * Updates the production state of the factory
-	 */
-	protected void updateProduction() {
-		if (currentProductionTime >= getProductionTime()) {
-			currentProductionTime = 0;
-			generateProducts();
-		}
-	}
-
-	/*
 	 * Updates the effects and players effected
 	 */
 	@Override
 	public void updateSpecifics() {
-	}
-
-	/*
-	 * Returns the time between proudction in ticks
-	 */
-	public int getProductionTime() {
-		return getFactoryProperties().getProductionTime();
 	}
 }

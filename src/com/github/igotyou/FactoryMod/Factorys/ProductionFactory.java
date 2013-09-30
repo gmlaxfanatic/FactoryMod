@@ -1,10 +1,5 @@
 package com.github.igotyou.FactoryMod.Factorys;
 
-import org.bukkit.Location;
-
-import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.interfaces.Recipe;
-import com.github.igotyou.FactoryMod.managers.ProductionFactoryManager;
 import com.github.igotyou.FactoryMod.properties.ProductionFactoryProperties;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.recipes.ProductionRecipe;
@@ -13,12 +8,8 @@ import com.github.igotyou.FactoryMod.utility.InteractionResponse;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-import com.github.igotyou.FactoryMod.utility.Structure;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import org.bukkit.inventory.Inventory;
 
 public class ProductionFactory extends RecipeFactory {
 

@@ -36,7 +36,7 @@ public class ContinuousFactory extends BaseFactory {
 			((ContinuousFactoryProperties) FactoryModPlugin.getManager().getManager(factoryCategory).getProperties(factoryType)).getEnergyTime());
 	}
 
-	public ContinuousFactory(Anchor anchor, String factoryType,FactoryCategory factoryCategory, int currentEnergyTime) {
+	public ContinuousFactory(Anchor anchor, String factoryType, FactoryCategory factoryCategory, int currentEnergyTime) {
 		super(anchor, factoryCategory, factoryType);
 		this.currentEnergyTime = currentEnergyTime;
 		indicatePowerOn();
@@ -64,12 +64,11 @@ public class ContinuousFactory extends BaseFactory {
 	 */
 	public void updateSpecifics() {
 	}
-	
+
 	/*
 	 * Updates the energy state of the factory, returns false if fuel is needed
 	 * and is not present
 	 */
-
 	protected boolean updateEnergy() {
 		if (currentEnergyTime >= getEnergyTime()) {
 			if (consumeFuel()) {
@@ -99,7 +98,6 @@ public class ContinuousFactory extends BaseFactory {
 	/*
 	 * Power off the ContinuousFactory, completely deleting it
 	 */
-
 	protected void powerOff() {
 		indicatePowerOff();
 		for (AreaEffect areaEffect : getFactoryProperties().getAllAreaEffects()) {
@@ -114,8 +112,6 @@ public class ContinuousFactory extends BaseFactory {
 	public int getEnergyTime() {
 		return getFactoryProperties().getEnergyTime();
 	}
-
-
 
 	/*
 	 * Gets the inventory of the powersource used for this factory
@@ -158,14 +154,6 @@ public class ContinuousFactory extends BaseFactory {
 		return players;
 
 	}
-
-	/*
-	 * Generates the outputs produced by this factory
-	 */
-	protected void generateProducts() {
-		getFactoryProperties().getOutputs().putIn(getInventory());
-	}
-
 
 	@Override
 	public void blockBreakResponse() {

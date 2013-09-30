@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.github.igotyou.FactoryMod.properties;
 
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
@@ -11,68 +7,62 @@ import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 
-/**
- *
- * @author Brian
- */
-public class RecipeFactoryProperties implements FactoryProperties{
-	protected String factoryID;//Unique name of the factory
-	protected Structure structure;
-	protected List<Offset> interactionPoints;
+public class RecipeFactoryProperties extends BaseFactoryProperties {
+
 	protected ItemList<NamedItemStack> fuel;
 	protected int repair;
 	protected int energyTime;
-	protected String name;
 
-	public RecipeFactoryProperties(String factoryID, Structure structure, List<Offset> interactionPoints, ItemList<NamedItemStack>  fuel, int repair, int energyTime, String name) {
-		this.factoryID=factoryID;
-		this.structure=structure;
-		this.interactionPoints=interactionPoints;
-		this.fuel=fuel;
-		this.repair=repair;
-		this.energyTime=energyTime;
-		this.name=name;
+	public RecipeFactoryProperties(String factoryID, String name, Structure structure, Map<String, Offset> interactionPoints, ItemList<NamedItemStack> fuel, int repair, int energyTime) {
+		super(factoryID, structure, interactionPoints, name);
+
+		this.fuel = fuel;
+		this.repair = repair;
+		this.energyTime = energyTime;
+	}
+	
+	public ItemList<NamedItemStack> getFuel() {
+		return fuel;
 	}
 
-	public int getEnergyTime()
-	{
+	public int getRepair() {
+		return repair;
+	}
+	
+	public int getEnergyTime() {
 		return energyTime;
 	}
-	
-	public String getName()
-	{
-		return name;
-	}
-	
-	public Structure getStructure() {
-		return structure;
-	}
-	
-	public List<Offset> getInteractionPoints() {
-		return interactionPoints;
-	}
-	
-	public Set<Material> getInteractionMaterials() {
-		return structure.materialsOfOffsets(interactionPoints);
-	}
-	
-		
+
 	public Offset getCreationPoint() {
 		return interactionPoints.get(1);
 	}
-	
+
 	public Offset getInventoryOffset() {
 		return interactionPoints.get(2);
 	}
-	
+
 	public Offset getCenterOffset() {
 		return interactionPoints.get(1);
 	}
-	
+
 	public Offset getPowerSourceOffset() {
 		return interactionPoints.get(0);
+	}
+
+	protected static RecipeFactoryProperties fromConfig(String factoryID, ConfigurationSection configurationSection) {
+		BaseFactoryProperties baseFactoryProperties = BaseFactoryProperties.fromConfig(factoryID, configurationSection);
+		ItemList<NamedItemStack> fuel = ItemList.fromConfig(configurationSection.getConfigurationSection("fuel"));
+		if (fuel.isEmpty()) {
+			fuel = new ItemList<NamedItemStack>();
+			fuel.add(new NamedItemStack(Material.getMaterial("COAL"), 1, (short) 1, "Charcoal"));
+		}
+		int energyTime = configurationSection.getInt("fuel_time", 2);
+		int repair = configurationSection.getInt("repair_multiple", 0);
+		return new RecipeFactoryProperties(baseFactoryProperties.factoryID, baseFactoryProperties.name, baseFactoryProperties.structure, baseFactoryProperties.interactionPoints, fuel, repair, energyTime);
 	}
 }

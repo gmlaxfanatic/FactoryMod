@@ -1,6 +1,7 @@
 package com.github.igotyou.FactoryMod.properties;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
+import com.github.igotyou.FactoryMod.Factorys.BaseFactory;
 import java.util.List;
 
 import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
@@ -17,97 +18,53 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
+public class ProductionFactoryProperties extends RecipeFactoryProperties {
 
-public class ProductionFactoryProperties extends RecipeFactoryProperties implements FactoryProperties
-{
 	private ItemList<NamedItemStack> inputs;
 	private List<ProductionRecipe> recipes;
-	
-	public ProductionFactoryProperties(String factoryID, Structure structure, List<Offset> interactionPoints, ItemList<NamedItemStack> inputs, List<ProductionRecipe> recipes,
-			ItemList<NamedItemStack> fuel, int energyTime, String name,int repair)
-	{
-		super(factoryID, structure, interactionPoints, fuel, repair, energyTime, name);
+
+	public ProductionFactoryProperties(String factoryID, String name, Structure structure, Map<String, Offset> interactionPoints, ItemList<NamedItemStack> inputs, List<ProductionRecipe> recipes,
+		ItemList<NamedItemStack> fuel, int energyTime, int repair) {
+		super(factoryID, name, structure, interactionPoints, fuel, repair, energyTime);
 		this.inputs = inputs;
 		this.recipes = recipes;
-		
+
 	}
 
-	public int getRepair()
-	{
-		return repair;
-	}
-
-	public ItemList<NamedItemStack> getInputs() 
-	{
+	public ItemList<NamedItemStack> getInputs() {
 		return inputs;
 	}
-	
-	public List<ProductionRecipe> getRecipes()
-	{
+
+	public List<ProductionRecipe> getRecipes() {
 		return recipes;
 	}
-	
-	public ItemList<NamedItemStack> getFuel()
-	{
-		return fuel;
-	}
 
-	
 	/*
 	 * Parse a ProductionFactoryProperties from a ConfigurationSection
 	 */
-	public static Map<String, FactoryProperties> productionPropertiesFromConfig(ConfigurationSection factoriesConfiguration, ProductionFactoryManager productionManager)
-	{
-		Map<String, FactoryProperties> productionProperties=new HashMap<String, FactoryProperties>();
-		for(String title:factoriesConfiguration.getKeys(false))
-		{
-			productionProperties.put(title, ProductionFactoryProperties.productionPropertyFromConfig(title, factoriesConfiguration.getConfigurationSection(title),productionManager));
+	public static Map<String, FactoryProperties> productionPropertiesFromConfig(ConfigurationSection factoriesConfiguration, ProductionFactoryManager productionManager) {
+		Map<String, FactoryProperties> productionProperties = new HashMap<String, FactoryProperties>();
+		for (String title : factoriesConfiguration.getKeys(false)) {
+			productionProperties.put(title, ProductionFactoryProperties.fromConfig(title, factoriesConfiguration.getConfigurationSection(title), productionManager));
 		}
 		return productionProperties;
 	}
-	
-	protected static ProductionFactoryProperties productionPropertyFromConfig(String title, ConfigurationSection factoryConfiguration, ProductionFactoryManager productionManager)
-	{
-		title=title.replaceAll(" ","_");
-		String factoryName=factoryConfiguration.getString("name","Default Name");
-		//Uses overpowered getItems method for consistency, should always return a list of size=1
-		//If no fuel is found, default to charcoal
-		ItemList<NamedItemStack> fuel=ItemList.fromConfig(factoryConfiguration.getConfigurationSection("fuel"));
-		if(fuel.isEmpty())
-		{
-			fuel=new ItemList<NamedItemStack>();
-			fuel.add(new NamedItemStack(Material.getMaterial("COAL"),1,(short)1,"Charcoal"));
+	/*
+	 * Imports a single Territorial factory properties from a configuration section
+	 */
+
+	protected static ProductionFactoryProperties fromConfig(String factoryID, ConfigurationSection configurationSection, ProductionFactoryManager productionManager) {
+		RecipeFactoryProperties recipeFactoryProperties = RecipeFactoryProperties.fromConfig(factoryID, configurationSection);
+		ItemList<NamedItemStack> inputs = ItemList.fromConfig(configurationSection.getConfigurationSection("inputs"));
+		List<ProductionRecipe> recipes = new ArrayList<ProductionRecipe>();
+		for (String outputRecipe : configurationSection.getStringList("recipes")) {
+			recipes.add(productionManager.getProductionRecipe(outputRecipe));
 		}
-		int fuelTime=factoryConfiguration.getInt("fuel_time",2);
-		ItemList<NamedItemStack> inputs=ItemList.fromConfig(factoryConfiguration.getConfigurationSection("inputs"));
-		ItemList<NamedItemStack> repairs=ItemList.fromConfig(factoryConfiguration.getConfigurationSection("repair_inputs"));
-		List<ProductionRecipe> factoryRecipes=new ArrayList<ProductionRecipe>();
-		for(String outputRecipe:factoryConfiguration.getStringList("recipes"))
-		{
-			factoryRecipes.add(productionManager.getProductionRecipe(outputRecipe));
-		}
-		int repair=factoryConfiguration.getInt("repair_multiple",0);
 		//Create repair recipe
-		ProductionRecipe repairRecipe=new ProductionRecipe(title+"REPAIR","Repair Factory",1,repairs);
-		productionManager.addProductionRecipe(title+"REPAIR",repairRecipe);
-		factoryRecipes.add(repairRecipe);
-		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(factoryConfiguration.getString("structure","RecipeFactory"));
-		ConfigurationSection interactionPointsConfiguration = factoryConfiguration.getConfigurationSection("interaction_points");
-		List<Offset> interactionPoints=new ArrayList<Offset>(3);
-		interactionPoints.add(new Offset(0,0,0));
-		interactionPoints.add(new Offset(1,0,0));
-		interactionPoints.add(new Offset(2,0,0));
-		if(interactionPointsConfiguration!=null) {
-			if(interactionPointsConfiguration.contains("inventory")) {
-				interactionPoints.set(0, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("inventory")));
-			}
-			if(interactionPointsConfiguration.contains("center")) {
-				interactionPoints.set(1, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("center")));
-			}
-			if(interactionPointsConfiguration.contains("power_source")) {
-				interactionPoints.set(2, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("power_source")));
-			}
-		}
-		return new ProductionFactoryProperties(title, structure, interactionPoints, inputs, factoryRecipes, fuel, fuelTime, factoryName, repair);
+		ItemList<NamedItemStack> repairs = ItemList.fromConfig(configurationSection.getConfigurationSection("repair_inputs"));
+		ProductionRecipe repairRecipe = new ProductionRecipe(factoryID + "REPAIR", "Repair Factory", 1, repairs);
+		productionManager.addProductionRecipe(factoryID + "REPAIR", repairRecipe);
+		recipes.add(repairRecipe);
+		return new ProductionFactoryProperties(recipeFactoryProperties.factoryID, recipeFactoryProperties.name, recipeFactoryProperties.structure, recipeFactoryProperties.interactionPoints, inputs, recipes, recipeFactoryProperties.fuel, recipeFactoryProperties.energyTime, recipeFactoryProperties.repair);
 	}
 }

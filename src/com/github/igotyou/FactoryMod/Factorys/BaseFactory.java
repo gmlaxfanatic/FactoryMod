@@ -76,10 +76,6 @@ public abstract class BaseFactory implements Factory {
 		return getStructure().exists(anchor);
 	}
 
-	public List<Offset> getInteractionPoints() {
-		return getFactoryProperties().getInteractionPoints();
-	}
-
 	@Override
 	public void interactionResponse(Player player, Location location) {
 	}

@@ -11,9 +11,11 @@ import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class PrintingFactoryProperties extends RecipeFactoryProperties implements FactoryProperties{
+public class PrintingFactoryProperties extends RecipeFactoryProperties{
 
 	private ItemList<NamedItemStack> constructionMaterials;
 	private ItemList<NamedItemStack> plateMaterials;
@@ -38,7 +40,7 @@ public class PrintingFactoryProperties extends RecipeFactoryProperties implement
 	public PrintingFactoryProperties(
 			String factoryID,
 			Structure structure,
-			List<Offset> interactionPoints,
+			Map<String,Offset> interactionPoints,
 			ItemList<NamedItemStack> fuel,
 			ItemList<NamedItemStack> constructionMaterials,
 			ItemList<NamedItemStack> repairMaterials,
@@ -54,7 +56,7 @@ public class PrintingFactoryProperties extends RecipeFactoryProperties implement
 			int pageLead, int setPlateTime, int repairTime
 			)
 	{
-		super(factoryID, structure, interactionPoints, fuel, repair, energyTime, name);
+		super(factoryID, name, structure, interactionPoints, fuel, repair, energyTime);
 		this.constructionMaterials = constructionMaterials;
 		this.repairMaterials = repairMaterials;
 		this.plateMaterials = plateMaterials;
@@ -129,19 +131,10 @@ public class PrintingFactoryProperties extends RecipeFactoryProperties implement
 		int repairTime = configPrintingFactoryes.getInt("repair_time",12);
 		Structure structure = FactoryModPlugin.getManager().getStructureManager().getStructure(configPrintingFactoryes.getString("structure","RecipeFactory"));
 		ConfigurationSection interactionPointsConfiguration = configPrintingFactoryes.getConfigurationSection("interaction_points");
-		List<Offset> interactionPoints=new ArrayList<Offset>(3);
-		interactionPoints.add(new Offset(0,0,0));
-		interactionPoints.add(new Offset(1,0,0));
-		interactionPoints.add(new Offset(2,0,0));
-		if(interactionPointsConfiguration!=null) {
-			if(interactionPointsConfiguration.contains("inventory")) {
-				interactionPoints.set(0, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("inventory")));
-			}
-			if(interactionPointsConfiguration.contains("center")) {
-				interactionPoints.set(2, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("center")));
-			}
-			if(interactionPointsConfiguration.contains("power_source")) {
-				interactionPoints.set(3, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection("power_source")));
+		Map<String, Offset> interactionPoints = new HashMap<String, Offset>();
+		if (interactionPointsConfiguration != null) {
+			for (String interactionPoint : interactionPointsConfiguration.getKeys(false)) {
+				interactionPoints.put(interactionPoint, Offset.fromConfig(interactionPointsConfiguration.getConfigurationSection(interactionPoint)));
 			}
 		}
 		return new PrintingFactoryProperties("printing_press", structure, interactionPoints,

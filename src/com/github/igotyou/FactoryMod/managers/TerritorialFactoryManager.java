@@ -24,7 +24,7 @@ public class TerritorialFactoryManager extends ContinuousFactoryManager {
 		super(plugin, configurationSection);
 		territoryMaps = new HashMap<String, TerritoryMap>();
 		territorialGroups = new HashMap<String, Set<Factory>>();
-		updateTerritoryCalculations();
+		initiateTerritoryCalculations();
 	}
 
 	/*
