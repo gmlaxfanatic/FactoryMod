@@ -4,9 +4,8 @@ import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.utility.Anchor.Orientation;
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.Location;
@@ -91,7 +90,7 @@ public class Structure {
 	 * Returns a set containing blocks that occur at the following offsets
 	 * Should add materials of comparable blocks ie lit furnance
 	 */
-	public Set<Material> materialsOfOffsets(List<Offset> offsets) {
+	public Set<Material> materialsOfOffsets(Collection<Offset> offsets) {
 		Set<Material> materials = new HashSet();
 		FactoryModPlugin.debugMessage("Offset Size:"+offsets.size());
 		for(Offset offset:offsets) {

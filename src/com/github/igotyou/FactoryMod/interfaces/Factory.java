@@ -28,4 +28,6 @@ public interface Factory extends Serializable {
 	public void blockBreakResponse();
 	
 	public abstract void update();
+	
+	public abstract String getFactoryType();
 }
