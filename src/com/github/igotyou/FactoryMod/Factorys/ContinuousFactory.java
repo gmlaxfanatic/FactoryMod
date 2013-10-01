@@ -1,8 +1,8 @@
 package com.github.igotyou.FactoryMod.Factorys;
 
+import com.github.igotyou.FactoryMod.AreaEffect.Area.AreaEffect;
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
-import com.github.igotyou.FactoryMod.interfaces.AreaEffect;
 import com.github.igotyou.FactoryMod.properties.ContinuousFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.ItemList;
@@ -13,17 +13,13 @@ import com.untamedears.citadel.entity.Faction;
 import com.untamedears.citadel.entity.FactionMember;
 import com.untamedears.citadel.entity.IReinforcement;
 import com.untamedears.citadel.entity.PlayerReinforcement;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 
 public class ContinuousFactory extends BaseFactory {
 
@@ -101,7 +97,7 @@ public class ContinuousFactory extends BaseFactory {
 	protected void powerOff() {
 		indicatePowerOff();
 		for (AreaEffect areaEffect : getFactoryProperties().getAllAreaEffects()) {
-			areaEffect.disable(this);
+			areaEffect.disable();
 		}
 		FactoryModPlugin.getManager().getManager(factoryCategory).removeFactory(this);
 	}

@@ -66,7 +66,7 @@ public class NamedItemStack extends ItemStack {
 			ItemMeta itemMeta;
 			switch (metaType) {
 				case "PotionEffectMeta":
-					itemMeta = potionEffectFromConfig(configItem.getConfigurationSection(metaType));
+					itemMeta = potionMetaFromConfig(configItem.getConfigurationSection(metaType));
 				case "ItemMeta":
 					itemMeta = namedItemStack.getItemMeta();
 				default:
@@ -89,10 +89,10 @@ public class NamedItemStack extends ItemStack {
 			return namedItemStack;
 		}
 		return null;
-		
+
 	}
 
-	public static PotionMeta potionEffectFromConfig(ConfigurationSection configurationSection) {
+	public static PotionMeta potionMetaFromConfig(ConfigurationSection configurationSection) {
 		if (configurationSection == null) {
 			return null;
 		}
@@ -101,16 +101,17 @@ public class NamedItemStack extends ItemStack {
 			if (key == "lore" || key == "displayName") {
 				continue;
 			}
-			ConfigurationSection effectConfiguration = configurationSection.getConfigurationSection(key);
-			PotionEffectType effectType = PotionEffectType.getByName(effectConfiguration.getString("PotionEffect1"));
-			if (effectType == null) {
-				continue;
-			}
-			int duration = effectConfiguration.getInt("duration", 60);
-			int amplifier = effectConfiguration.getInt("amplifier", 1);
-			boolean ambient = effectConfiguration.getBoolean("ambient", false);
-			potionMeta.addCustomEffect(new PotionEffect(effectType, duration, amplifier, ambient), false);
+			potionMeta.addCustomEffect(potionEffectFromConfig(configurationSection.getConfigurationSection(key)), false);
 		}
 		return potionMeta;
+	}
+
+	public static PotionEffect potionEffectFromConfig(ConfigurationSection configurationSection) {
+		PotionEffectType effectType = PotionEffectType.getByName(configurationSection.getString("potion_effect"));
+		int duration = configurationSection.getInt("duration", 60);
+		int amplifier = configurationSection.getInt("amplifier", 1);
+		boolean ambient = configurationSection.getBoolean("ambient", false);
+		return new PotionEffect(effectType, duration, amplifier, ambient);
+
 	}
 }

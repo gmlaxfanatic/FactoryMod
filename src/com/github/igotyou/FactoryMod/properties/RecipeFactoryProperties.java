@@ -1,14 +1,10 @@
 package com.github.igotyou.FactoryMod.properties;
 
-import com.github.igotyou.FactoryMod.interfaces.FactoryProperties;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import com.github.igotyou.FactoryMod.utility.Offset;
 import com.github.igotyou.FactoryMod.utility.Structure;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -39,19 +35,19 @@ public class RecipeFactoryProperties extends BaseFactoryProperties {
 	}
 
 	public Offset getCreationPoint() {
-		return interactionPoints.get(1);
+		return interactionPoints.get("center");
 	}
 
 	public Offset getInventoryOffset() {
-		return interactionPoints.get(2);
+		return interactionPoints.get("inventory");
 	}
 
 	public Offset getCenterOffset() {
-		return interactionPoints.get(1);
+		return interactionPoints.get("center");
 	}
 
 	public Offset getPowerSourceOffset() {
-		return interactionPoints.get(0);
+		return interactionPoints.get("power_source");
 	}
 
 	protected static RecipeFactoryProperties fromConfig(String factoryID, ConfigurationSection configurationSection) {

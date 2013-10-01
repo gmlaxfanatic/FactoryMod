@@ -7,6 +7,7 @@ import com.github.igotyou.FactoryMod.properties.ContinuousFactoryProperties;
 import com.github.igotyou.FactoryMod.properties.TerritoryFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
+import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.voronoi.TerritoryMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,10 +31,11 @@ public class TerritorialFactoryManager extends ContinuousFactoryManager {
 	/*
 	 * Inititates the territory calculations
 	 */
-	public void initiateTerritoryCalculations() {
+	private void initiateTerritoryCalculations() {
+		//Seperates the factories into their respective territorial groups
 		for (Factory factory : factories) {
 			String territorialGroup = getProperties(factory.getFactoryType()).getTerritorialGroup();
-			if (territorialGroup != "") {
+			if (!territorialGroup.equals("")) {
 				if (!territorialGroups.containsKey(territorialGroup)) {
 					territorialGroups.put(territorialGroup, new HashSet<Factory>());
 				}
@@ -41,7 +43,9 @@ public class TerritorialFactoryManager extends ContinuousFactoryManager {
 			}
 		}
 		for (String territorialGroup : territorialGroups.keySet()) {
-			territoryMaps.put(territorialGroup, new TerritoryMap(territorialGroups.get(territorialGroup)));
+			if (!territorialGroup.equals("")) {
+				territoryMaps.put(territorialGroup, new TerritoryMap(territorialGroups.get(territorialGroup)));
+			}
 		}
 	}
 
@@ -50,23 +54,25 @@ public class TerritorialFactoryManager extends ContinuousFactoryManager {
 	 */
 	public void updateTerritoryCalculation(Factory factory, boolean add) {
 		String territorialGroup = getProperties(factory.getFactoryType()).getTerritorialGroup();
-		if (territorialGroup == "") {
+		//Escapes if the default territorialGroup is used.
+		if (territorialGroup.equals("")) {
 			return;
 		}
 
-		if (!territorialGroups.containsKey(territorialGroup)) {
-			territorialGroups.put(territorialGroup, new HashSet<Factory>());
+		//Adds or removes the factory from the given territorial group
+		if (add) {
+			if (!territorialGroups.containsKey(territorialGroup)) {
+				territorialGroups.put(territorialGroup, new HashSet<Factory>());
+			}
+			territorialGroups.get(territorialGroup).add(factory);
+		} else {
+			territorialGroups.get(territorialGroup).remove(factory);
 		}
-		if(add) {
-		territorialGroups.get(territorialGroup).add(factory);
-		}
-		else {
-			territorialGroups.remove(factory);
-		}
+		//recalculates that factories territorialGroup
 		territoryMaps.put(territorialGroup, new TerritoryMap(territorialGroups.get(territorialGroup)));
-
 	}
 
+	@Override
 	public TerritoryFactoryProperties getProperties(String title) {
 		return (TerritoryFactoryProperties) allFactoryProperties.get(title);
 	}
@@ -74,18 +80,23 @@ public class TerritorialFactoryManager extends ContinuousFactoryManager {
 	/*
 	 * Gets an AreaEffect Factory
 	 */
+	@Override
 	public Factory getFactory(Anchor anchor, ContinuousFactoryProperties properties) {
 		return new TerritorialFactory(anchor, properties.getName());
 	}
 
+	@Override
 	public void removeFactory(Factory factory) {
 		this.removeFactory(factory);
-		updateTerritoryCalculation(factory,false);
+		updateTerritoryCalculation(factory, false);
 	}
 
+	@Override
 	public InteractionResponse createFactory(Location location) {
-		InteractionResponse interactionResponse = this.createFactory(location);
-		updateTerritoryCalculation(factoryAtLocation(location),true);
+		InteractionResponse interactionResponse = super.createFactory(location);
+		if (interactionResponse.getInteractionResult() == InteractionResult.SUCCESS) {
+			updateTerritoryCalculation(factoryAtLocation(location), true);
+		}
 		return interactionResponse;
 	}
 }

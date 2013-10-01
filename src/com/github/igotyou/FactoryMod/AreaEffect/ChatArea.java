@@ -1,32 +1,33 @@
 package com.github.igotyou.FactoryMod.AreaEffect;
 
 import com.github.igotyou.FactoryMod.Factorys.AreaFactory;
-import com.github.igotyou.FactoryMod.interfaces.AreaEffect;
-import com.github.igotyou.FactoryMod.interfaces.Factory;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.ChatPaginator;
 
-public class ChatArea {
+public class ChatArea extends Area {
 
-	private static Map<Factory, Set<Player>> playersByFactory = new HashMap<Factory, Set<Player>>();
-	private static Set<Player> affectedPlayers = new HashSet<Player>();
-	private static int chatIndex = 0;
+	private int chatIndex = 0;
 
-	public ChatArea() {
+	public ChatArea(Plugin plugin, int updatePeriodInTicks) {
+		Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+			@Override
+			public void run() {
+				updateEffects();
+			}
+		}, 0L, updatePeriodInTicks);
 	}
 
 	/*
 	 * Reapplies the affect onto the affected players
 	 */
-	public void updatePlayers() {
-		for (Factory factory : playersByFactory.keySet()) {
-			List<String> message = ((AreaFactory) factory).getChatEffectData();
-			for (Player player : playersByFactory.get(factory)) {
+	@Override
+	public void updateEffects() {
+		for (AreaEffect areaEffect : playersByEffect.keySet()) {
+			List<String> message = ((ChatAreaEffect) areaEffect).getMessage();
+			for (Player player : playersByEffect.get(areaEffect)) {
 				player.sendMessage(ChatPaginator.wordWrap(message.get(chatIndex % message.size()), ChatPaginator.GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH));
 			}
 		}
@@ -34,56 +35,19 @@ public class ChatArea {
 	}
 
 	/*
-	 * 
+	 * A chat effect object
 	 */
-	
-	public class ChatAreaEffect implements AreaEffect {
+	public class ChatAreaEffect extends AreaEffect {
 
-		private int radius;
+		protected final AreaFactory areaFactory;
 
-		public ChatAreaEffect(int radius) {
-			this.radius = radius;
+		public ChatAreaEffect(int radius, AreaFactory areaFactory) {
+			super(radius);
+			this.areaFactory = areaFactory;
 		}
 
-		/*
-		 * Get the readius of this affect
-		 */
-		@Override
-		public int getRadius() {
-			return radius;
-		}
-
-		/*
-		 * Disables the effects of a given factory
-		 */
-		@Override
-		public void disable(Factory factory) {
-			playersByFactory.remove(factory);
-			updateAffectedPlayers();
-		}
-
-		/*
-		 * Couples a factory with a list of affected players
-		 */
-		public void apply(Factory factory, Set<Player> players) {
-			playersByFactory.put(factory, players);
-			affectedPlayers.addAll(players);
-		}
-
-		/*
-		 * Checks if a player is affected by this areaEffect
-		 */
-		public boolean isAffected(Player player) {
-			return affectedPlayers.contains(player);
-		}
-
-		/*
-		 * Updates the affected players from the factories reference
-		 */
-		private void updateAffectedPlayers() {
-			for (Factory factory : playersByFactory.keySet()) {
-				affectedPlayers.addAll(playersByFactory.get(factory));
-			}
+		public List<String> getMessage() {
+			return areaFactory.getChatEffectData();
 		}
 	}
 }

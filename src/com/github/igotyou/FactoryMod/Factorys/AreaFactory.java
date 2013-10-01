@@ -1,7 +1,7 @@
 package com.github.igotyou.FactoryMod.Factorys;
 
+import com.github.igotyou.FactoryMod.AreaEffect.Area.AreaEffect;
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
-import com.github.igotyou.FactoryMod.interfaces.AreaEffect;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -56,7 +56,7 @@ public class AreaFactory extends ContinuousFactory {
 				}
 			}
 			for (AreaEffect areaEffect : areaEffects.get(radius)) {
-				areaEffect.apply(this, players);
+				areaEffect.apply(players);
 			}
 		}
 	}

@@ -41,7 +41,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	protected FactoryModPlugin plugin;
 	protected String savesFilename;
 	protected Set<Factory> factories;
-	protected Map<String,FactoryProperties> allFactoryProperties;
+	protected Map<String, FactoryProperties> allFactoryProperties;
 	protected int updatePeriod;
 	//Initally generated set of possible materials and interaction
 	//materials to speed up responses to interactions and construction.
@@ -54,17 +54,16 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	public BaseFactoryManager(FactoryModPlugin plugin, ConfigurationSection configuration) {
 		this.plugin = plugin;
 		this.updatePeriod = configuration.getInt("update_period", 20);
-		this.savesFilename = configuration.getString("save_filename","defaultSaves");
+		this.savesFilename = configuration.getString("save_filename", "defaultSaves");
 		factories = new HashSet<Factory>();
 		allFactoryProperties = new HashMap<String, FactoryProperties>();
 		materials = new HashSet<Material>();
 		interactionMaterials = new HashSet<Material>();
 	}
-	
+
 	public int getUpdatePeriod() {
 		return updatePeriod;
 	}
-	
 
 	protected void updateManager() {
 		updateMaterials();
@@ -77,11 +76,15 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
 			@Override
 			public void run() {
-				for (Factory factory : factories) {
-					factory.update();
-				}
+				runUpdates();
 			}
 		}, 0L, updatePeriod);
+	}
+
+	public void runUpdates() {
+		for (Factory factory : factories) {
+			factory.update();
+		}
 	}
 	/*
 	 * Finds a factory whose three dimensional binding box is contains the 
@@ -119,6 +122,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	 */
 	public abstract InteractionResponse createFactory(FactoryProperties properties, Anchor anchor);
 
+	@Override
 	public InteractionResponse createFactory(Location location) {
 		InteractionResponse response = new InteractionResponse(InteractionResult.IGNORE, "Not a viable structure");
 		FactoryModPlugin.debugMessage("BaseFactoryManager creating factory...");
@@ -205,7 +209,7 @@ public abstract class BaseFactoryManager implements FactoryManager {
 		Factory Factory = factoryAtLocation(factoryLocation);
 		return Factory != null ? Factory.isWhole() : false;
 	}
-	
+
 	public FactoryProperties getProperties(String title) {
 		return allFactoryProperties.get(title);
 	}
@@ -214,8 +218,6 @@ public abstract class BaseFactoryManager implements FactoryManager {
 	public void update() {
 		save();
 	}
-	
-	
 
 	/*
 	 * Saves the manager
@@ -273,49 +275,44 @@ public abstract class BaseFactoryManager implements FactoryManager {
 
 
 	}
-	
+
 	/*
 	 * Loads the factorys
 	 */
-	
 	public void load() {
 		String filename = savesFilename + ".txt";
 		load(new File(plugin.getDataFolder(), filename));
 	}
-	public void load(File file){
+
+	public void load(File file) {
 		try {
 			FileInputStream fileInputStream = new FileInputStream(file);
 			ObjectInputStream ois = new ObjectInputStream(fileInputStream);
 			int version = ois.readInt();
-			if(version==1) {
+			if (version == 1) {
 				load1(file);
-			}
-			else {
-				assert(version == 2);
+			} else {
+				assert (version == 2);
 				int count = ois.readInt();
 				int i = 0;
-				for (i = 0; i < count; i++)
-				{
-					addFactory((Factory)ois.readObject());
+				for (i = 0; i < count; i++) {
+					addFactory((Factory) ois.readObject());
 				}
 
 			}
 			fileInputStream.close();
-		}
-		catch (FileNotFoundException exception) {
+		} catch (FileNotFoundException exception) {
 			FactoryModPlugin.sendConsoleMessage(file.getName() + " does not exist! Creating file!");
 		} catch (IOException exception) {
 			throw new RuntimeException("Failed to load " + file.getPath(), exception);
-		}
-		catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/*
 	 * Hook for legacy file suppoert
-	 */	
-	protected void load1(File file){
-		
+	 */
+	protected void load1(File file) {
 	}
 }

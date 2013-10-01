@@ -109,7 +109,6 @@ public class ProductionFactoryManager extends RecipeFactoryManager {
 	private void initConfig(ConfigurationSection productionConfiguration) {
 		//Import recipes from config.yml
 		productionRecipes = ProductionRecipe.recipesFromConfig(productionConfiguration.getConfigurationSection("recipes"));
-		ProductionRecipe.loadAllScaledRecipes(productionRecipes);
 		//Import factory properties
 		allFactoryProperties = ProductionFactoryProperties.productionPropertiesFromConfig(productionConfiguration.getConfigurationSection("factories"), this);
 	}

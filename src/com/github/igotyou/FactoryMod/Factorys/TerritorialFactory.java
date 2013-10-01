@@ -1,6 +1,7 @@
 package com.github.igotyou.FactoryMod.Factorys;
 
 import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
+import com.github.igotyou.FactoryMod.properties.TerritoryFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 
 public class TerritorialFactory extends ContinuousFactory {
@@ -18,9 +19,30 @@ public class TerritorialFactory extends ContinuousFactory {
 	}
 
 	/*
-	 * Updates the effects and players effected
+	 * Updates the production of the factory
 	 */
+	
 	@Override
 	public void updateSpecifics() {
+		if (currentProductionTime >= getProductionTime()) {
+			currentProductionTime = 0;
+			getFactoryProperties().getOutputs().putIn(getInventory());
+		}
+		currentProductionTime++;
+	}
+
+	/*
+	 * Returns the time between proudction in ticks
+	 */
+	public int getProductionTime() {
+		return getFactoryProperties().getProductionTime();
+	}
+	
+	/*
+	 * Gets a correctly caste properties file
+	 */
+	@Override
+	protected TerritoryFactoryProperties getFactoryProperties() {
+		return (TerritoryFactoryProperties) super.getFactoryProperties();
 	}
 }
