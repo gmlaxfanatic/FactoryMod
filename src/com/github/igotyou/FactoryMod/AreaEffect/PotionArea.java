@@ -1,6 +1,9 @@
 package com.github.igotyou.FactoryMod.AreaEffect;
 
+import com.github.igotyou.FactoryMod.Factorys.AreaFactory;
+import com.github.igotyou.FactoryMod.utility.NamedItemStack;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
@@ -28,6 +31,17 @@ public class PotionArea extends Area {
 				potionEffect.apply(player);
 			}
 		}
+	}
+
+	/*
+	 * Imports a Reinforcement AreaEffect from the configuration
+	 */
+	@Override
+	public PotionAreaEffect fromConfig(ConfigurationSection configurationSection, AreaFactory areaFactory) {
+		AreaEffect areaEffect =super.fromConfig(configurationSection, areaFactory);
+		PotionEffect potionEffect = NamedItemStack.potionEffectFromConfig(configurationSection);
+		return new PotionAreaEffect(areaEffect.getRadius(),potionEffect);
+
 	}
 
 	public class PotionAreaEffect extends AreaEffect {

@@ -4,16 +4,16 @@ import com.github.igotyou.FactoryMod.Factorys.BaseFactory.FactoryCategory;
 import com.github.igotyou.FactoryMod.properties.TerritoryFactoryProperties;
 import com.github.igotyou.FactoryMod.utility.Anchor;
 
-public class TerritorialFactory extends ContinuousFactory {
+public class TerritoryFactory extends ContinuousFactory {
 
 	protected int currentProductionTime;
 
-	public TerritorialFactory(Anchor anchor, String factoryType) {
+	public TerritoryFactory(Anchor anchor, String factoryType) {
 		super(anchor, factoryType, FactoryCategory.TERRITORIAL);
 		currentProductionTime = 0;
 	}
 
-	public TerritorialFactory(Anchor anchor, String factoryType, int currentEnergyTime) {
+	public TerritoryFactory(Anchor anchor, String factoryType, int currentEnergyTime) {
 		super(anchor, factoryType, FactoryCategory.TERRITORIAL, currentEnergyTime);
 		currentProductionTime = 0;
 	}

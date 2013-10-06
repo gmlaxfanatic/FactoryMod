@@ -1,3 +1,4 @@
+#####################################################################
 #Anywhere with a "-1" there can be multiple repeated entries of this type
 (NamedItemStack): #Encapsulated in various places below
   Common Name: #Name displayed to the user
@@ -9,10 +10,11 @@
      display_name: (display name of the item, null by default)
      lore: (lore of the item, null by default)
      potion_effect1: #If PotionEffectMeta
-       duration: 
-       amplifier:
-       ambient:
-
+       potion_effect: Required
+       duration: default of 60
+       amplifier: default of 1
+       ambient: default of false
+####################################################################
 general:
   copy_defaults: false
   central_block: WORKBENCH
@@ -78,15 +80,66 @@ prouduction:
           (NamedItemStack)-1: Default of none
         enchantments: #Default of none
           Enchantment-1:
-            type: (Offificial bukkit enchantment name, Require)
+            type: (Official bukkit enchantment name, Require)
             level: 1 (level of the enchantment
             probability: 1 (0-1 probability of the enchantment being applied)
 printing:
   save_file: #filename for saved factories (Default pressSaves.txt)
-effect:
-  save_file: #filename for saved factories (Default effectSaves.txt)
+  fuel:
+    Charcoal:
+      material: 'COAL'
+      durability: 1
+  costs:
+     construction:
+        "Iron block":
+           material: 'IRON_BLOCK'
+           amount: 50
+     plates:
+        "Iron ingot":
+           material: 'IRON_INGOT'
+           amount: 4
+        "Gold nugget":
+           material: "GOLD_NUGGET"
+           amount: 1
+     repair:
+        "Iron block":
+           material: 'IRON_BLOCK'
+           amount: 5
+     binding: # Each
+        Leather:
+           material: 'LEATHER'
+           amount: 1
+     page_lot:
+        Paper:
+           material: 'PAPER'
+           amount: 16
+        Ink:
+           material: 'INK_SACK'
+           durability: 0
+           amount: 2
+     pages_per_lot: 16
+     pamphlet_lot:
+        Paper:
+           material: 'PAPER'
+           amount: 16
+        Ink:
+           material: 'INK_SACK'
+           durability: 0
+           amount: 2
+     pamphlets_per_lot: 24
+     security_lot:
+        "Gold nuggets":
+           material: 'GOLD_NUGGET'
+           amount: 1
+        "Cactus green":
+           material: 'INK_SACK'
+           durability: 2
+           amount: 6
+     security_notes_per_lot: 24
+area:
+  save_file: #filename for saved factories (Default areaSaves.txt)
   update_period: Period of ticks between which factories are updated, (Default of 20 ticks)
-  effect_update_period: Period of ticks between which the effects of a factory are update (defualt 60 ticks)
+  chat_area_period: Period of ticks between which the effects of a factory are update (defualt 1200 ticks)
   factories:
     Title: #Unique identifier without spaces for the factory 
       name: Displayed name to user
@@ -96,12 +149,28 @@ effect:
       inputs: #Inputs required to construct the factory
         (NamedItemStack)-1: Default of none
       area_effects:
-        PotionEffectType1: #Aribitrary name, can't be repeated
-          radius: radius over which the effect occurs (No default)
+        potion:
+          radius: Radius over which the effect occurs (default of 50)
+          potion_effect: Required
           amplifier: Default of 1
           ambient: Default of false
-        Reinforcement:
-          radius:
-        Chat:
-          radius:
+        reinforcement:
+          radius: Radius over which the effect occurs (default of 50)
+        chat:
+          radius: Radius over which the effect occurs (default of 50)
 territory:
+  save_file: #filename for saved factories (Default territorySaves.txt)
+  update_period: Period of ticks between which factories are updated, (Default of 20 ticks)
+  factories:
+    Title: #Unique identifier without spaces for the factory 
+      name: Displayed name to user
+      fuel: #Interval of fuel required to fuel recipe
+        (NamedItemStack)-1: Default of 1 charcoal
+      fuel-time: Ticks it takes to consume an interval of the fuel
+      inputs: #Inputs required to construct the factory
+        (NamedItemStack)-1: Default of none
+      outputs: #Outputs produced by this factory
+        (NamedItemStack)-1: Default of none
+      production_time: Cycle over which one set of the outputs is produced (in ticks), deault of 2
+      territory_group: group of factories which this factory scales with, deafult of ""
+      

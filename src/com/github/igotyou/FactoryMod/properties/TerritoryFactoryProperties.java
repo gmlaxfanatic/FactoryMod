@@ -11,7 +11,7 @@ public class TerritoryFactoryProperties extends ContinuousFactoryProperties {
 
 	protected ItemList<NamedItemStack> outputs;
 	protected int productionTime;
-	protected String territorialGroup;
+	protected String territoryGroup;
 
 	public TerritoryFactoryProperties(
 		String factoryID,
@@ -23,7 +23,7 @@ public class TerritoryFactoryProperties extends ContinuousFactoryProperties {
 		int energyTime,
 		ItemList<NamedItemStack> outputs,
 		int productionTime,
-		String territorialGroup) {
+		String territoryGroup) {
 		super(factoryID,
 			name,
 			structure,
@@ -33,7 +33,7 @@ public class TerritoryFactoryProperties extends ContinuousFactoryProperties {
 			energyTime);
 		this.outputs = outputs;
 		this.productionTime = productionTime;
-		this.territorialGroup=territorialGroup;
+		this.territoryGroup=territoryGroup;
 	}
 
 	public int getProductionTime() {
@@ -43,8 +43,8 @@ public class TerritoryFactoryProperties extends ContinuousFactoryProperties {
 	public ItemList<NamedItemStack> getOutputs() {
 		return outputs;
 	}
-	public String getTerritorialGroup() {
-		return territorialGroup;
+	public String getTerritoryGroup() {
+		return territoryGroup;
 	}
 	
 	/*

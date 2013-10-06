@@ -1,9 +1,11 @@
 package com.github.igotyou.FactoryMod.AreaEffect;
 
+import com.github.igotyou.FactoryMod.Factorys.AreaFactory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 public class Area {
@@ -36,6 +38,14 @@ public class Area {
 		return affectedPlayers.contains(player);
 	}
 
+	/*
+	 * Imports the effect from the configuration
+	 */
+	public AreaEffect fromConfig(ConfigurationSection configurationSection, AreaFactory areaFactory) {
+		int radius = configurationSection.getInt("radius", 50);
+		return new AreaEffect(radius);
+	}
+
 	public class AreaEffect {
 
 		protected final int radius;
@@ -58,11 +68,11 @@ public class Area {
 			playersByEffect.put(this, players);
 			affectedPlayers.addAll(players);
 		}
-		
+
 		/*
 		 * Removes this effect from the players
 		 */
-		public void disable(){
+		public void disable() {
 			playersByEffect.remove(this);
 			updateAffectedPlayers();
 		}

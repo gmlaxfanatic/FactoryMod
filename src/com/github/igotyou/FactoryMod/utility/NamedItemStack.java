@@ -21,13 +21,8 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-/**
- *
- * @author Brian Landry
- */
 public class NamedItemStack extends ItemStack {
 	//Name to be printed to the user, not necessarily the DisplayName
-
 	private final String commonName;
 
 	public NamedItemStack(final Material type, final int amount, final short damage, final String commonName) {

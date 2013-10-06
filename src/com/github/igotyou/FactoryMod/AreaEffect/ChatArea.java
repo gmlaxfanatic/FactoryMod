@@ -3,6 +3,7 @@ package com.github.igotyou.FactoryMod.AreaEffect;
 import com.github.igotyou.FactoryMod.Factorys.AreaFactory;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.ChatPaginator;
@@ -34,6 +35,16 @@ public class ChatArea extends Area {
 		chatIndex++;
 	}
 
+	/*
+	 * Imports a Reinforcement AreaEffect from the configuration
+	 */
+	@Override
+	public AreaEffect fromConfig(ConfigurationSection configurationSection, AreaFactory areaFactory) {
+		AreaEffect areaEffect = super.fromConfig(configurationSection, areaFactory);
+		return new ChatAreaEffect(areaEffect.getRadius(), areaFactory);
+
+	}
+	
 	/*
 	 * A chat effect object
 	 */
