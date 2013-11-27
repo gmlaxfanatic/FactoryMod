@@ -706,6 +706,7 @@ production_factories:
     recipes:
       - Smelt_Glass
       - Smelt_Sandstone
+      - Make_Bottles
     repair_multiple: 26
     repair_inputs:
       Sand:
@@ -3639,6 +3640,17 @@ production_recipes:
     outputs:
       Glass:
         material: GLASS
+        amount: 768
+  Make_Bottles:
+    name: Make Bottles
+    production_time: 52
+    inputs:
+      Sand:
+        material: SAND
+        amount: 256
+    outputs:
+      Glass:
+        material: GLASS_BOTTLE
         amount: 768
   Smelt_Nether_bricks:
     name: Smelt Nether bricks
