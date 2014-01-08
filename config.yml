@@ -1674,7 +1674,7 @@ production_factories:
         amount: 9
       Glowstone:
         material: GLOWSTONE
-        amount: 25
+        amount: 2
       Iron_Ingot:
         material: IRON_INGOT
         amount: 6
