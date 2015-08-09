@@ -2,6 +2,7 @@ package com.github.igotyou.FactoryMod.Factorys;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -18,14 +19,15 @@ import org.bukkit.material.MaterialData;
 
 import com.github.igotyou.FactoryMod.FactoryModPlugin;
 import com.github.igotyou.FactoryMod.FactoryObject;
-import com.github.igotyou.FactoryMod.interfaces.Factory;
+import com.github.igotyou.FactoryMod.recipes.EnchantmentOptions;
 import com.github.igotyou.FactoryMod.recipes.ProbabilisticEnchantment;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
+import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
+import com.github.igotyou.FactoryMod.utility.StringUtils;
 
-public abstract class BaseFactory extends FactoryObject implements Factory {
+public abstract class ABaseFactory extends FactoryObject implements IFactory {
 	public static final BlockFace[] REDSTONE_FACES = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
 
 	protected int currentProductionTimer = 0;//The "production timer", which trachs for how long the factory has been producing the selected recipe
@@ -33,7 +35,9 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 	protected double currentRepair;
 	protected long timeDisrepair;//The time at which the factory went into disrepair
 
-	public BaseFactory(Location factoryLocation,
+	private Logger log = Logger.getLogger(ABaseFactory.class.getName());
+
+	public ABaseFactory(Location factoryLocation,
 			Location factoryInventoryLocation, Location factoryPowerSource,
 			boolean active, FactoryType factoryType, String subFactoryType) {
 		super(factoryLocation, factoryInventoryLocation, factoryPowerSource, active,
@@ -42,7 +46,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 		this.timeDisrepair=3155692597470L;
 	}
 
-	public BaseFactory(Location factoryLocation,
+	public ABaseFactory(Location factoryLocation,
 			Location factoryInventoryLocation, Location factoryPowerSource,
 			boolean active, int tierLevel, FactoryType factoryType,
 			Inventory factoryInventory, String subFactoryType) {
@@ -52,7 +56,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 		this.timeDisrepair=3155692597470L;
 	}
 
-	public BaseFactory(Location factoryLocation,
+	public ABaseFactory(Location factoryLocation,
 			Location factoryInventoryLocation, Location factoryPowerSource,
 			FactoryType factoryType, String subFactoryType) {
 		super(factoryLocation, factoryInventoryLocation, factoryPowerSource,
@@ -61,7 +65,7 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 		this.timeDisrepair=3155692597470L;//Year 2070, default starting value
 	}
 	
-	public BaseFactory(Location factoryLocation,
+	public ABaseFactory(Location factoryLocation,
 			Location factoryInventoryLocation, Location factoryPowerSource,
 			FactoryType factoryType, boolean active, String subFactoryType,
 			int currentProductionTimer, int currentEnergyTimer,
@@ -112,6 +116,11 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 		}
 	}
 	
+    public boolean checkHasSpace() {
+    	ItemList<NamedItemStack> output = getOutputs();
+    	return output.testPutIn(getInventory());
+    }
+
 	public boolean checkHasMaterials() {
 		return getAllInputs().allIn(getInventory());
 	}
@@ -176,10 +185,13 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 						//[Requires one of the following: Amount Name, Amount Name.]
 						
 						ItemList<NamedItemStack> needAll=new ItemList<NamedItemStack>();
-						needAll.addAll(getAllInputs().getDifference(getInventory()));
+						ItemList<NamedItemStack> allInputs = getAllInputs();
+						needAll.addAll(allInputs.getDifference(getInventory()));
 						if(!needAll.isEmpty())
 						{
 							response.add(new InteractionResponse(InteractionResult.FAILURE,"You need all of the following: "+needAll.toString()+"."));
+						} else if (allInputs == null || allInputs.isEmpty()) {
+							log.warning("getAllInputs() returned null or empty; recipe is returning no expectation of input!");
 						}
 						return response;
 					}
@@ -223,9 +235,18 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 		getInputs().removeFrom(getInventory());
 	}
 	
+	/**
+	 * Implementations should override this to define any controls on enchantment.
+	 * 
+	 * @return an instance of EnchantmentOptions
+	 */
+	public EnchantmentOptions getEnchantmentOptions() {
+		return EnchantmentOptions.DEFAULT;
+	}
+	
 	public void produceOutputs() {
 		//Adds outputs to chest with appropriate enchantments
-		getOutputs().putIn(getInventory(),getEnchantments());
+		getOutputs().putIn(getInventory(),getEnchantments(), getEnchantmentOptions());
 	}
 
 	public ItemList<NamedItemStack> getAllInputs() {
@@ -425,23 +446,34 @@ public abstract class BaseFactory extends FactoryObject implements Factory {
 	 */
 	public boolean isFuelAvailable()
 	{
-		return getFuel().allIn(getPowerSourceInventory());
+		Inventory inv = getPowerSourceInventory();
+		if (inv == null) {
+			return false;
+		} else {
+			return getFuel().allIn(inv);
+		}
 	}
 
 	/**
-	 * Called by the block listener when the player(or a entity) destroys the fatory
-	 * Drops the build materials if the config says it shouls
+	 * Called by the block listener when the player(or a entity) destroys the factory
+	 * Drops the build materials if the config says it should
 	 */
 	public void destroy(Location destroyLocation)
 	{
+		FactoryModPlugin.sendConsoleMessage(new StringBuilder("Factory destroyed: ")
+			.append(subFactoryType)
+			.append(" at ")
+			.append(StringUtils.formatCoords(getCenterLocation()))
+			.toString());
+	
 		powerOff();
-		currentRepair=getMaxRepair();
-		timeDisrepair=System.currentTimeMillis();
+		currentRepair = getMaxRepair();
+		timeDisrepair = System.currentTimeMillis();
 	}
 	/*
 	 * Repairs the factory 
 	 */
-	private void repair(int amountRepaired)
+	protected void repair(int amountRepaired)
 	{
 		currentRepair-=amountRepaired;
 		if(currentRepair<0)

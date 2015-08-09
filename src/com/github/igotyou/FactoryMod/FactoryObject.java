@@ -2,12 +2,12 @@ package com.github.igotyou.FactoryMod;
 
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Furnace;
 import org.bukkit.inventory.Inventory;
 
-import com.github.igotyou.FactoryMod.interfaces.Properties;
-import java.util.Date;
+import com.github.igotyou.FactoryMod.properties.IFactoryProperties;
 
 //original file:
 /**
@@ -26,11 +26,14 @@ import java.util.Date;
  */
 public class FactoryObject
 {
-	//the diffrent factory types, NOTE: these are not the sub-factory types, these are the main types.
+	//the different factory types, NOTE: these are not the sub-factory types, these are the main types.
 	public enum FactoryType
 	{
 		PRODUCTION,
-		PRINTING_PRESS
+		PRINTING_PRESS,
+		REPAIR_FACTORY,
+		COMPACTOR,
+		NETHER_FACTORY
 	}
 	
 	
@@ -42,7 +45,7 @@ public class FactoryObject
 	protected Inventory factoryPowerInventory;//The inventory of the power source.
 	protected FactoryType factoryType; // The type this factory is
 	protected String subFactoryType;//the SUBfactory type(the ones loaded from the config file)
-	protected Properties factoryProperties; // The properties of this factory type and tier
+	protected IFactoryProperties factoryProperties; // The properties of this factory type and tier
 	protected boolean upgraded; // Whether the tier has recently upgraded
 	
 	/**
@@ -58,7 +61,7 @@ public class FactoryObject
 		this.factoryType = factoryType;
 		this.subFactoryType = subFactoryType;
 		this.upgraded = false;
-		if (this.isWhole())
+		if (this.isWhole(true))
 		{
 			initializeInventory();
 		}
@@ -78,7 +81,7 @@ public class FactoryObject
 		this.factoryType = factoryType;
 		this.subFactoryType = subFactoryType;
 		this.upgraded = false;
-		if (this.isWhole())
+		if (this.isWhole(true))
 		{
 			initializeInventory();
 		}
@@ -161,6 +164,10 @@ public class FactoryObject
 	 */
 	public Inventory getPowerSourceInventory()
 	{
+		if (!(factoryPowerSourceLocation.getBlock().getType() == Material.FURNACE || factoryPowerSourceLocation.getBlock().getType() == Material.BURNING_FURNACE))
+		{
+			return null;
+		}
 		Furnace furnaceBlock = (Furnace)factoryPowerSourceLocation.getBlock().getState();
 		factoryPowerInventory = furnaceBlock.getInventory();
 		return factoryPowerInventory;
@@ -186,21 +193,11 @@ public class FactoryObject
 	/**
 	 * returns true if all factory blocks are occupied with the correct blocks
 	 */
-	public boolean isWhole()
+	public boolean isWhole(boolean initCall)
 	{
-	//Check if power source exists
-	if(factoryPowerSourceLocation.getBlock().getType().getId()== 61 || factoryPowerSourceLocation.getBlock().getType().getId()== 62)
-	{
-		//Check inventory location
-		if(factoryInventoryLocation.getBlock().getType().getId()== 54) 	
-		{
-			//Check Interaction block location
-			if(factoryLocation.getBlock().getType().getId()==FactoryModPlugin.CENTRAL_BLOCK_MATERIAL.getId())
-			{
-				return true;
-			}
-		}
-	}
-	return false;
+		// Check the types of the known locations for power, inventory, and interaction for the expected materials
+		//TODO: check reinforcement groups?
+		return (factoryPowerSourceLocation.getBlock().getType() == Material.FURNACE || factoryPowerSourceLocation.getBlock().getType() == Material.BURNING_FURNACE)
+			&& (factoryInventoryLocation.getBlock().getType() == Material.CHEST) && (factoryLocation.getBlock().getType() == FactoryModPlugin.CENTRAL_BLOCK_MATERIAL);
 	}
 }

@@ -1,4 +1,5 @@
-name: FactoryMod
+name: ${project.name}
 main: com.github.igotyou.FactoryMod.FactoryModPlugin
 author: igotyou
-version: 1.0
+version: ${project.version}
+depend: [NameLayer, Citadel]

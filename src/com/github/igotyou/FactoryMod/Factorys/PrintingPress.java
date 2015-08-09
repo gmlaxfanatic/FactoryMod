@@ -3,6 +3,7 @@ package com.github.igotyou.FactoryMod.Factorys;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,20 +14,25 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.github.igotyou.FactoryMod.FactoryModPlugin;
-import com.github.igotyou.FactoryMod.FactoryObject;
-import com.github.igotyou.FactoryMod.interfaces.Factory;
 import com.github.igotyou.FactoryMod.properties.PrintingPressProperties;
 import com.github.igotyou.FactoryMod.utility.InteractionResponse;
+import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
 import com.github.igotyou.FactoryMod.utility.ItemList;
 import com.github.igotyou.FactoryMod.utility.NamedItemStack;
-import com.github.igotyou.FactoryMod.utility.InteractionResponse.InteractionResult;
-import com.github.igotyou.FactoryMod.utility.PrettyLore;
+import com.github.igotyou.FactoryMod.utility.StringUtils;
 
-public class PrintingPress extends BaseFactory {
+public class PrintingPress extends ABaseFactory {
 	
 	private PrintingPressProperties printingPressProperties;
+
+	private static Logger log = Logger.getLogger(PrintingPress.class.getName());
+	
+	public PrintingPressProperties getProperties() {
+		return printingPressProperties;
+	}
+	
 	private OperationMode mode;
+	
 	public OperationMode getMode() {
 		return mode;
 	}
@@ -70,9 +76,6 @@ public class PrintingPress extends BaseFactory {
 		this.containedPaper = containedPaper;
 		this.containedBindings = containedBindings;
 		this.containedSecurityMaterials = containedSecurityMaterials;
-		this.containedPaper = 0;
-		this.containedBindings = 0;
-		this.containedSecurityMaterials = 0;
 		this.processQueue = processQueue;
 		this.processQueueOffset = 0;
 		this.lockedResultCode = lockedResultCode;
@@ -112,8 +115,10 @@ public class PrintingPress extends BaseFactory {
 				int pageCount = 1;
 				if (plates != null) {
 					pageCount = Math.max(1, ((BookMeta) plates.getItemMeta()).getPageCount());
+				} else {
+					log.finer("getProductionTime(): plates == null");
 				}
-				pageCount = Math.min(pageCount, 5);
+				pageCount = Math.min(pageCount, printingPressProperties.getBookPagesCap());
 				return printingPressProperties.getSetPlateTime() * pageCount;
 			case REPAIR:
 				return printingPressProperties.getRepairTime();
@@ -131,9 +136,15 @@ public class PrintingPress extends BaseFactory {
 			NamedItemStack plates = getPlateResult();
 			if (plates != null) {
 				int pageCount = ((BookMeta) plates.getItemMeta()).getPageCount();
-				pageCount = Math.min(pageCount, 5);
-				inputs.addAll(printingPressProperties.getPlateMaterials().getMultiple(pageCount));
+				if (pageCount > 0) {
+					pageCount = Math.min(pageCount, printingPressProperties.getBookPagesCap());
+					inputs.addAll(printingPressProperties.getPlateMaterials().getMultiple(pageCount));
+				}
+			} else {
+				log.finer("getInputs(): plates == null");
 			}
+			break;
+		default:
 			break;
 		}
 		return inputs;
@@ -147,7 +158,11 @@ public class PrintingPress extends BaseFactory {
 			NamedItemStack plates = getPlateResult();
 			if (plates != null) {
 				outputs.add(plates);
+			} else {
+				log.finer("getOutputs(): Plates results are null!");
 			}
+			break;
+		default:
 			break;
 		}
 		return outputs;
@@ -159,6 +174,8 @@ public class PrintingPress extends BaseFactory {
 		switch(mode) {
 		case REPAIR:
 			inputs.addAll(printingPressProperties.getRepairMaterials());
+			break;
+		default:
 			break;
 		}
 		return inputs;
@@ -215,14 +232,19 @@ public class PrintingPress extends BaseFactory {
 		case PRINT_SECURITY:
 			printSecurityUpdate();
 			break;
+		default:
+			break;
 		}
 	}
 	
 	public void printBooksUpdate() {
 		// Output finished results
+
+		PrintResult printResult = getPrintResult();
+		
 		int finished = processQueue[processQueueOffset];
 		if (finished > 0) {
-			NamedItemStack result = getPrintResult().toBook();
+			NamedItemStack result = printResult.toBook();
 			ItemList<NamedItemStack> set = new ItemList<NamedItemStack>();
 			set.add(result);
 			set = set.getMultiple(finished);
@@ -233,11 +255,13 @@ public class PrintingPress extends BaseFactory {
 		ItemList<NamedItemStack> pages = printingPressProperties.getPageMaterials();
 		boolean hasPages = pages.allIn(getInventory());
 		boolean inputStall = false;
+		
+		int pageCount = printResult.pageCount();
+		pageCount = Math.min(pageCount, printingPressProperties.getBookPagesCap());
+		
 		if (hasPages) {
 			// Check bindings
-			int pageCount = getPrintResult().pageCount();
-			pageCount = Math.min(pageCount, 5);
-			int expectedBindings = (int) Math.floor((double) (containedPaper + printingPressProperties.getPagesPerLot()) / (double) pageCount);
+			int expectedBindings = pageCount == 0 ? containedPaper + printingPressProperties.getPagesPerLot() : (int) Math.floor((double) (containedPaper + printingPressProperties.getPagesPerLot()) / (double) pageCount);
 			boolean hasBindings = true;
 			ItemList<NamedItemStack> allBindings = new ItemList<NamedItemStack>();
 			if (expectedBindings > containedBindings) {
@@ -264,8 +288,7 @@ public class PrintingPress extends BaseFactory {
 		}
 		
 		// Put materials in queue
-		int pageCount = getPrintResult().pageCount();
-		int booksInPages = containedPaper / pageCount;
+		int booksInPages = pageCount == 0 ? containedPaper : containedPaper / pageCount;
 		int copiesIn = Math.min(booksInPages, containedBindings);
 		containedPaper -= copiesIn * pageCount;
 		containedBindings -= copiesIn;
@@ -431,6 +454,15 @@ public class PrintingPress extends BaseFactory {
 		return responses;
 	}
 	
+	/** 
+	 * On interaction with the factory chest, return context-appropriate information
+	 * concerning the current mode, relative to the inputs and outputs.
+	 * 
+	 * Adding detailed state on the active recipe now, if factory is on.
+	 *
+	 * @return A {@link List} of {@link InteractionResponse} objects containing
+	 *   details on the current mode.
+	 */
 	public List<InteractionResponse> getChestResponse()
 	{
 		List<InteractionResponse> responses=new ArrayList<InteractionResponse>();
@@ -442,31 +474,134 @@ public class PrintingPress extends BaseFactory {
 		responses.add(new InteractionResponse(InteractionResult.SUCCESS, printingPressProperties.getName()+": "+status+" with "+String.valueOf(health)+"% health."));
 		//RecipeName: X seconds(Y ticks)[ - XX% done.]
 		responses.add(new InteractionResponse(InteractionResult.SUCCESS, mode.getDescription()));
+
+		// Never call the same function more than once, especially when this complex.
+		ItemList<NamedItemStack> getInputs = getInputs();
 		//[Inputs: amount Name, amount Name.]
-		if(!getInputs().isEmpty())
-		{
-			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Input: "+getInputs().toString()+"."));
+		if(getInputs != null && !getInputs.isEmpty()) {
+			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Input: "+getInputs.toString()+"."));
+		} else {
+			log.fine("getChestResponse(): Inputs is null or empty!");
 		}
+
 		//[Outputs: amount Name, amount Name.]
-		if(!getOutputs().isEmpty())
-		{
-			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Output: "+getOutputs().toString()+"."));
+		ItemList<NamedItemStack> getOutputs = getOutputs();
+		if(getOutputs != null && !getOutputs.isEmpty()) {
+			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Output: "+getOutputs.toString()+"."));
+		} else {
+			log.fine("getChestResponse(): Outputs is null or empty!");
 		}
+
 		//[Will repair XX% of the factory]
-		if(!getRepairs().isEmpty()&&maintenanceActive)
-		{
-			int amountAvailable=getRepairs().amountAvailable(getInventory());
-			int amountRepaired=amountAvailable>currentRepair ? (int) Math.ceil(currentRepair) : amountAvailable;
-			int percentRepaired=(int) (( (double) amountRepaired)/printingPressProperties.getMaxRepair()*100);
-			responses.add(new InteractionResponse(InteractionResult.SUCCESS,"Will repair "+String.valueOf(percentRepaired)+"% of the factory with "+getRepairs().getMultiple(amountRepaired).toString()+"."));
+		ItemList<NamedItemStack> getRepairs = getRepairs();
+		if(getRepairs != null && !getRepairs.isEmpty() && maintenanceActive) {
+			int amountAvailable = getRepairs.amountAvailable(getInventory());
+			int amountRepaired = amountAvailable > currentRepair ? (int) Math.ceil(currentRepair) : amountAvailable;
+			int percentRepaired = (int) (( (double) amountRepaired) / printingPressProperties.getMaxRepair() * 100);
+			responses.add(new InteractionResponse(InteractionResult.SUCCESS, "Will repair " +
+					String.valueOf(percentRepaired) + "% of the factory with " + 
+					getRepairs.getMultiple(amountRepaired).toString() + "."));
 		}
+
+
+		//[% done if plates; queue status else]
+		if (active && mode != OperationMode.REPAIR) {
+			int readyCopies = 0;
+			StringBuffer queueContents = new StringBuffer();
+			if (mode == OperationMode.PRINT_BOOKS ||
+				 mode == OperationMode.PRINT_PAMPHLETS ||
+				 mode == OperationMode.PRINT_SECURITY) {
+				queueContents.append("Queue Contents: [");
+				for (int i = 0; i < processQueue.length; i++) {
+					readyCopies += processQueue[i];
+					if (i > 0) {
+						queueContents.append(",");
+					}
+					if (i == processQueueOffset) {
+						queueContents.append("{");
+					}
+					queueContents.append(processQueue[i]);
+					if (i == processQueueOffset) {
+						queueContents.append("}");
+					}
+				}
+				queueContents.append("]");
+			}
+			switch(mode) {
+			case PRINT_BOOKS:
+				responses.add(new InteractionResponse(InteractionResult.SUCCESS, "Printing Books with " +
+						String.valueOf(readyCopies) + " in the queue."));
+				responses.add(new InteractionResponse(InteractionResult.SUCCESS, queueContents.toString()));
+				break;
+			case PRINT_PAMPHLETS:
+				responses.add(new InteractionResponse(InteractionResult.SUCCESS, "Printing Pamphlets with " +
+						String.valueOf(readyCopies) + " in the queue."));
+				responses.add(new InteractionResponse(InteractionResult.SUCCESS, queueContents.toString()));
+				break;
+			case PRINT_SECURITY:
+				responses.add(new InteractionResponse(InteractionResult.SUCCESS, "Printing Security Notes with " +
+						String.valueOf(readyCopies) + " in the queue."));
+				responses.add(new InteractionResponse(InteractionResult.SUCCESS, queueContents.toString()));
+				break;
+			case SET_PLATES:
+				int setTime = printingPressProperties.getSetPlateTime() * getBookInventoryPages();
+				int percentComplete = (int) (( (double) currentProductionTimer) / setTime * 100);
+				responses.add(new InteractionResponse(InteractionResult.SUCCESS, "Set Plates is " + 
+						String.valueOf(percentComplete) + "% complete"));
+				break;
+			default:
+				log.severe("getChestResponse(): Active set, but unknown mode: critical error.");
+				break;
+			}
+		}
+
 		return responses;
 	}
 	
+	/**
+	 * Generates a new PrintResult object based on the current production state of the factory,
+	 *   reflecting the active mode's output. This does not include plates, which are handled
+	 *   separately.
+	 * 
+	 * @return {@link PrintResult} object reflecting the current state production state of the
+	 *   factory.
+	 */
 	private PrintResult getPrintResult() {
 		return new PrintResult();
 	}
 	
+	/**
+	 * Lightweight page count function, for active recipes only. Useful for measuring current 
+	 * progress in a recipe, for instance.
+	 */
+	private int getBookInventoryPages() {
+		for (ItemStack stack : getInventory().getContents()) {
+			if (stack == null) {
+				continue;
+			}
+			if (stack.getType().equals(Material.BOOK_AND_QUILL) ||
+					stack.getType().equals(Material.WRITTEN_BOOK)) {
+				log.finer("getPlateResult(): Found a book in the factory.");
+				ItemMeta meta = stack.getItemMeta();
+				if (meta instanceof BookMeta) {
+					BookMeta bookData = (BookMeta) meta;
+					if (bookData.hasPages()) {
+						return Math.max(1, bookData.getPageCount());
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Generates a NamedItemStack containing a 'plate' -- a signed book with lore that
+	 *   uniquely reflects the book given as input. This plate can then be used to produce
+	 *   copies of the book, security notes, pamphlets, and the like.
+	 *
+	 * @return {@link NamedItemStack} of a Signed Book with lore containing the contents of
+	 *   the given input book, and other important metadata.
+	 */
 	private NamedItemStack getPlateResult() {
 		for (ItemStack stack : getInventory().getContents()) {
 			if (stack == null) {
@@ -474,16 +609,27 @@ public class PrintingPress extends BaseFactory {
 			}
 			if (stack.getType().equals(Material.BOOK_AND_QUILL) ||
 					stack.getType().equals(Material.WRITTEN_BOOK)) {
+				log.finer("getPlateResult(): Found a book in the factory to use as plate source.");
 				ItemMeta meta = stack.getItemMeta();
 				if (meta instanceof BookMeta) {
+					log.finer("getPlateResult(): Book found has Metadata associated.");
 					// Found a book
 					BookMeta bookData = (BookMeta) meta;
-					String title = bookData.getTitle();
-					String author = bookData.getAuthor();
+					String title = bookData.hasTitle() ? bookData.getTitle() : "";
+					String author = bookData.hasAuthor() ? bookData.getAuthor() : "";
 					if (author == null) {
 						author = "";
 					}
-					List<String> pages = new ArrayList<String>(bookData.getPages());
+					if (title == null) {
+						title = "";
+					}
+					List<String> pages = new ArrayList<String>();
+					if (bookData.hasPages()) {
+						pages.addAll(bookData.getPages());
+					} else {
+						pages.add("");
+						log.finer("getPlateResult(): Book found has no pages; adding blank.");
+					}
 					
 					NamedItemStack plates = new NamedItemStack(Material.WRITTEN_BOOK, 1, (short) 0, "plate");
 					BookMeta plateMeta = (BookMeta) plates.getItemMeta();
@@ -496,9 +642,12 @@ public class PrintingPress extends BaseFactory {
 					plateMeta.setLore(lore);
 					plates.setItemMeta(plateMeta);
 					return plates;
+				} else {
+					log.warning("getPlateResult(): Book found, but no associated metadata.");
 				}
 			}
 		}
+		log.warning("getPlateResult(): No book found for plate source.");
 		return null;
 	}
 	
@@ -511,6 +660,12 @@ public class PrintingPress extends BaseFactory {
 		private int watermark;
 		private boolean valid;
 		
+		/**
+		 * Initializes a PrintResult leveraging the contents and state of the 
+		 * {@link PrintingPress}. Attempts to find a valid Print plate in the factory, then
+		 * extracts the information from the Plate necessary to produce books,
+		 * pamphlets, or security notes.
+		 */ 
 		PrintResult() {
 			Pattern printPlateRE = Pattern.compile("^Print plates #([0-9]{4})$");
 			Inventory inventory = getInventory();
@@ -528,27 +683,51 @@ public class PrintingPress extends BaseFactory {
 				
 				if (stack.getType().equals(Material.BOOK_AND_QUILL) ||
 						stack.getType().equals(Material.WRITTEN_BOOK)) {
+					log.finer("PrintResult(): Found a book item.");
 					ItemMeta meta = stack.getItemMeta();
 					List<String> lore = meta.getLore();
 					if (lore != null && !lore.isEmpty()) {
+						log.finer("PrintResult(): Found a lore item attached to the book.");
 						String firstLore = lore.get(0);
 						Matcher match = printPlateRE.matcher(firstLore);
 						if (match.matches()) {
+							log.finer("PrintResult(): Lore matches a print plate.");
 							if (meta instanceof BookMeta) {
+								log.finer("PrintResult(): Book has Associated Book Meta.");
 								BookMeta bookData = (BookMeta) meta;
-								title = bookData.getTitle();
-								author = bookData.getAuthor();
+								if (bookData.hasTitle())
+									title = bookData.getTitle();
+								if (title == null)
+									title = "";
+
+								if (bookData.hasAuthor())
+									author = bookData.getAuthor();
 								if (author == null) {
 									author = "";
 								}
-								watermark = Integer.parseInt(match.group(1)); 
-								pages = new ArrayList<String>(bookData.getPages());
+								watermark = Integer.parseInt(match.group(1));
+								if (bookData.hasPages())
+									pages = new ArrayList<String>(bookData.getPages());
+								else {
+									pages = new ArrayList<String>(0);
+									pages.add(""); // Blank page.
+								}
 								valid = true;
 								break;
+							} else {
+								log.fine("PrintResult(): No Book Meta found!");
 							}
+						} else {
+							log.fine("PrintResult(): Lore indicates the book is not a print plate.");
 						}
+					} else {
+						log.fine("PrintResult(): No lore item found with the book.");
 					}
 				}
+			}
+
+			if (!valid) {
+				log.fine("PrintResult(): No valid plate found in the factory.");
 			}
 		}
 		
@@ -609,10 +788,10 @@ public class PrintingPress extends BaseFactory {
 			lore = lore.replaceAll("[ \r\n]+", " ");
 			
 			// Limit length
-			lore = PrettyLore.limitLengthEllipsis(lore, PAGE_LORE_LENGTH_LIMIT);
+			lore = StringUtils.limitLengthEllipsis(lore, PAGE_LORE_LENGTH_LIMIT);
 			
 			// Split in to lines based on length
-			List<String> lines = PrettyLore.splitLines(lore, PAGE_LORE_LINE_LIMIT);
+			List<String> lines = StringUtils.splitLines(lore, PAGE_LORE_LINE_LIMIT);
 			
 			return lines;
 		}
